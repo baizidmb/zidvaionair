@@ -11,25 +11,25 @@ document.addEventListener('DOMContentLoaded', () => {
             servers: [
                 {
                     name: 'Toffee FIFA 1',
-                    url: 'https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-1/0/master_2000.m3u8?hdntl=Expires=1782422686~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AVXEwvdw_EW5yg24646Tzt0JTgHcKGu1d-bn9GbywpEI3FBOVE8cEtb0uSgOCgprrb7FYTph1R5J3AWwM5aCDED4FRAH',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/fifa-1',
                     detail: 'Toffee FIFA Live Channel 1 (HD)',
                     badge: 'hd'
                 },
                 {
                     name: 'Toffee FIFA 2',
-                    url: 'https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-2/0/master_2000.m3u8?hdntl=Expires=1782422686~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AVXEwvdw_EW5yg24646Tzt0JTgHcKGu1d-bn9GbywpEI3FBOVE8cEtb0uSgOCgprrb7FYTph1R5J3AWwM5aCDED4FRAH',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/fifa-2',
                     detail: 'Toffee FIFA Live Channel 2 (HD)',
                     badge: 'hd'
                 },
                 {
                     name: 'Toffee FIFA 3 (Active)',
-                    url: 'https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-3/0/master_2000.m3u8?hdntl=Expires=1782422686~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AVXEwvdw_EW5yg24646Tzt0JTgHcKGu1d-bn9GbywpEI3FBOVE8cEtb0uSgOCgprrb7FYTph1R5J3AWwM5aCDED4FRAH',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/fifa-3',
                     detail: 'Toffee FIFA Live Channel 3 (HD)',
                     badge: 'hd'
                 },
                 {
                     name: 'Toffee FIFA 4',
-                    url: 'https://prod-cdn01-live.toffeelive.com/live/FIFA-2026-4/0/master_2000.m3u8?hdntl=Expires=1782422686~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AVXEwvdw_EW5yg24646Tzt0JTgHcKGu1d-bn9GbywpEI3FBOVE8cEtb0uSgOCgprrb7FYTph1R5J3AWwM5aCDED4FRAH',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/fifa-4',
                     detail: 'Toffee FIFA Live Channel 4 (HD)',
                     badge: 'hd'
                 }
@@ -40,31 +40,31 @@ document.addEventListener('DOMContentLoaded', () => {
             servers: [
                 {
                     name: 'FOX Sports US',
-                    url: 'https://hundredmilesperhour.uk/fox-usa.m3u8?md5=dbcbe5ba2cda0235516f4e513fdb99a3&exp=1782352666',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/fox-usa',
                     detail: 'FOX US Broadcast Stream (HD)',
                     badge: 'hd'
                 },
                 {
                     name: 'FOX Sports 1 (FS1)',
-                    url: 'https://hundredmilesperhour.uk/fox-sports-1.m3u8?md5=dbcbe5ba2cda0235516f4e513fdb99a3&exp=1782352666',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/fox-sports-1',
                     detail: 'Direct FS1 Feed (HD)',
                     badge: 'hd'
                 },
                 {
                     name: 'FOX Sports 4K',
-                    url: 'https://hundredmilesperhour.uk/fox4k-usa.m3u8?md5=dbcbe5ba2cda0235516f4e513fdb99a3&exp=1782352666',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/fox4k-usa',
                     detail: 'Ultra HD 4K FOX Broadcast Feed',
                     badge: 'fhd'
                 },
                 {
                     name: 'ESPN USA',
-                    url: 'https://hundredmilesperhour.uk/espn-usa.m3u8?md5=dbcbe5ba2cda0235516f4e513fdb99a3&exp=1782352666',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/espn-usa',
                     detail: 'ESPN US Sports Coverage (HD)',
                     badge: 'hd'
                 },
                 {
                     name: 'Telemundo USA',
-                    url: 'https://hundredmilesperhour.uk/telemundo-usa.m3u8?md5=dbcbe5ba2cda0235516f4e513fdb99a3&exp=1782352666',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/telemundo-usa',
                     detail: 'Telemundo Spanish Feed (HD)',
                     badge: 'hd'
                 }
@@ -75,31 +75,31 @@ document.addEventListener('DOMContentLoaded', () => {
             servers: [
                 {
                     name: 'FOX Sports US (Alt)',
-                    url: 'https://inproviszon.st/fox-usa.m3u8?md5=dbcbe5ba2cda0235516f4e513fdb99a3&exp=1782336816',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/fox',
                     detail: 'Alternative FOX US Feed (HD)',
                     badge: 'hd'
                 },
                 {
                     name: 'FOX Sports 1 (Alt)',
-                    url: 'https://inproviszon.st/fox-sports-1.m3u8?md5=dbcbe5ba2cda0235516f4e513fdb99a3&exp=1782336816',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/fs1',
                     detail: 'Alternative FS1 Feed (HD)',
                     badge: 'hd'
                 },
                 {
                     name: 'Peacock 1 Live',
-                    url: 'https://inproviszon.st/peacock-1.m3u8?md5=dbcbe5ba2cda0235516f4e513fdb99a3&exp=1782336816',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/peacock-1',
                     detail: 'Peacock Live Spanish Broadcast (4K)',
                     badge: 'fhd'
                 },
                 {
                     name: 'ESPN USA (Alt)',
-                    url: 'https://inproviszon.st/espn-usa.m3u8?md5=dbcbe5ba2cda0235516f4e513fdb99a3&exp=1782336816',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/espn',
                     detail: 'Alternative ESPN US Feed (HD)',
                     badge: 'hd'
                 },
                 {
                     name: 'Telemundo USA (Alt)',
-                    url: 'https://inproviszon.st/telemundo-usa.m3u8?md5=dbcbe5ba2cda0235516f4e513fdb99a3&exp=1782336816',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/telemundo',
                     detail: 'Alternative Telemundo Spanish (HD)',
                     badge: 'hd'
                 }
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             servers: [
                 {
                     name: 'Proxy Server',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/',
+                    url: 'https://tahmidx.shusanta-project.workers.dev/fox-usa',
                     detail: 'Cloudflare Worker proxy feed',
                     badge: 'hd'
                 }
