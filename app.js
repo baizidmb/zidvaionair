@@ -236,14 +236,59 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`🚀 Dynamically defaulting to ${defaultServer.name} (Index ${startIdx})`);
             window.changeServer(defaultServer.url, startIdx);
         }
+
+        // Start background health checking
+        setTimeout(runHealthCheck, 3000);
+        setInterval(runHealthCheck, 60000);
+    }
+
+    async function checkServerHealth(url) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        try {
+            // Using mode: 'no-cors' allows us to ping domains without CORS configuration
+            // if reachable, it resolves to a status 0 opaque response; if unreachable or times out, it throws.
+            await fetch(url, { method: 'GET', mode: 'no-cors', signal: controller.signal });
+            clearTimeout(timeoutId);
+            return true;
+        } catch (e) {
+            clearTimeout(timeoutId);
+            return false;
+        }
+    }
+
+    async function runHealthCheck() {
+        console.log('🔄 Starting background health check...');
+        for (let i = 0; i < SERVERS.length; i++) {
+            const server = SERVERS[i];
+            const isOnline = await checkServerHealth(server.url);
+            const dots = document.querySelectorAll(`.dot-btn[data-index="${i}"]`);
+            dots.forEach(dot => {
+                const tooltip = dot.querySelector('.dot-tooltip');
+                if (isOnline) {
+                    dot.classList.remove('dead');
+                    if (tooltip) tooltip.textContent = server.name;
+                } else {
+                    dot.classList.add('dead');
+                    if (tooltip) tooltip.textContent = `${server.name} (OFFLINE)`;
+                }
+            });
+        }
+        console.log('✅ Background health check completed.');
     }
 
     // Player State
 
 
 
-    // DOM Elements
-    const video = document.getElementById('video-player');
+    // DOM Elements (Dual-Player Architecture)
+    const videoA = document.getElementById('video-player-a');
+    const videoB = document.getElementById('video-player-b');
+    let activePlayer = videoA;
+    let idlePlayer = videoB;
+    let hlsA = null;
+    let hlsB = null;
+
     const playerPlaceholder = document.getElementById('player-placeholder');
     const playerLoader = document.getElementById('player-loader');
     const playerError = document.getElementById('player-error');
@@ -393,17 +438,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---------------------------------------------------------
     // 2. STREAM PLAYER FUNCTION
     // ---------------------------------------------------------
+    // ---------------------------------------------------------
+    // 2. STREAM PLAYER FUNCTION (DUAL-PLAYER ENGINE)
+    // ---------------------------------------------------------
+    function cleanupPlayer(player) {
+        if (player === videoA) {
+            if (hlsA) {
+                hlsA.destroy();
+                hlsA = null;
+            }
+        } else if (player === videoB) {
+            if (hlsB) {
+                hlsB.destroy();
+                hlsB = null;
+            }
+        }
+        player.removeAttribute('src');
+        player.load();
+    }
+
     function playStream(url, name, description) {
-        // Show loading spinner, hide placeholder and errors
-        playerLoader.classList.remove('hidden');
+        // If placeholder is not hidden, show full loader. Otherwise, load silently in background.
+        const isInitialLoad = !playerPlaceholder.classList.contains('hidden') || !playerError.classList.contains('hidden');
+        if (isInitialLoad) {
+            playerLoader.classList.remove('hidden');
+        }
+        
         playerError.classList.add('hidden');
         playerPlaceholder.classList.add('hidden');
 
         // Start stall timer to auto-skip if initial load hangs for > 4s
         startStallTimer();
-
-        // Apply cross-fade swapping class (0.3s)
-        video.classList.add('video-swapping');
 
         // Update titles and info
         if (currentServerTitle) currentServerTitle.textContent = name;
@@ -414,62 +479,101 @@ document.addEventListener('DOMContentLoaded', () => {
 
         playerSourceUrl.textContent = url;
 
-        // Clean up previous HLS instance
-        if (hls) {
-            hls.destroy();
-            hls = null;
-        }
-
-        // Stop any playing video
-        video.src = '';
+        // Clean up any stale load on the idle player
+        cleanupPlayer(idlePlayer);
 
         let networkRetryCount = 0;
         const maxNetworkRetries = 3;
+        let isReady = false;
+
+        const targetPlayer = idlePlayer;
+
+        function onReady() {
+            if (isReady) return;
+            isReady = true;
+            
+            clearStallTimer();
+
+            // Hide loader and show controls
+            playerLoader.classList.add('hidden');
+            customControls.classList.remove('hidden');
+            playerError.classList.add('hidden');
+            playerPlaceholder.classList.add('hidden');
+
+            // Play the target player
+            const playPromise = targetPlayer.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    unmuteOverlay.classList.add('hidden');
+                }).catch(e => {
+                    console.log('Autoplay blocked. Starting muted.');
+                    targetPlayer.muted = true;
+                    ctrlMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+                    ctrlVolume.value = 0;
+                    unmuteOverlay.classList.remove('hidden');
+                    targetPlayer.play();
+                });
+            }
+
+            // Cross-fade: Bring target player to front/visible, fade current active player
+            targetPlayer.classList.remove('opacity-0');
+            targetPlayer.classList.add('opacity-100');
+            targetPlayer.style.zIndex = '20';
+
+            activePlayer.classList.remove('opacity-100');
+            activePlayer.classList.add('opacity-0');
+            activePlayer.style.zIndex = '10';
+
+            const oldActive = activePlayer;
+            activePlayer = targetPlayer;
+            idlePlayer = oldActive;
+
+            // Pause and cleanup the old active player after transition completes (350ms)
+            setTimeout(() => {
+                if (oldActive !== activePlayer) {
+                    oldActive.pause();
+                    cleanupPlayer(oldActive);
+                }
+            }, 350);
+        }
 
         // Initialize HLS.js
         if (Hls.isSupported() && url.includes('.m3u8')) {
-            hls = new Hls({
+            const tempHls = new Hls({
                 maxMaxBufferLength: 10,
                 enableWorker: true,
                 lowLatencyMode: true
             });
-            hls.loadSource(url);
-            hls.attachMedia(video);
             
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                playerLoader.classList.add('hidden');
-                customControls.classList.remove('hidden');
-                unmuteOverlay.classList.add('hidden');
-                
-                // Clear cross-fade swapping class
-                video.classList.remove('video-swapping');
-                
-                video.play().catch(e => {
-                    console.log('Autoplay blocked. Starting muted.');
-                    video.muted = true;
-                    ctrlMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
-                    ctrlVolume.value = 0;
-                    unmuteOverlay.classList.remove('hidden');
-                    video.play();
-                });
+            if (targetPlayer === videoA) {
+                hlsA = tempHls;
+            } else {
+                hlsB = tempHls;
+            }
+
+            tempHls.loadSource(url);
+            tempHls.attachMedia(targetPlayer);
+            
+            tempHls.on(Hls.Events.MANIFEST_PARSED, () => {
+                onReady();
             });
 
-            hls.on(Hls.Events.ERROR, (event, data) => {
-                console.error('HLS error:', data);
+            tempHls.on(Hls.Events.ERROR, (event, data) => {
+                console.error('HLS error on idle player:', data);
                 if (data.fatal) {
                     switch (data.type) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
                             if (networkRetryCount < maxNetworkRetries) {
                                 networkRetryCount++;
                                 console.log(`Fatal network error, retrying (${networkRetryCount}/${maxNetworkRetries})...`);
-                                hls.startLoad();
+                                tempHls.startLoad();
                             } else {
                                 handleStreamError('HLS Network Error.');
                             }
                             break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
                             console.log('Fatal media error, trying to recover...');
-                            hls.recoverMediaError();
+                            tempHls.recoverMediaError();
                             break;
                         default:
                             handleStreamError('HLS Fatal Error.');
@@ -479,29 +583,24 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } 
         // Native HLS Fallback (e.g. Safari on Mac/iOS, or standard MP4 streams)
-        else if (video.canPlayType('application/vnd.apple.mpegurl') || !url.includes('.m3u8')) {
-            video.src = url;
-            video.addEventListener('loadedmetadata', () => {
-                playerLoader.classList.add('hidden');
-                customControls.classList.remove('hidden');
-                unmuteOverlay.classList.add('hidden');
-                
-                // Clear cross-fade swapping class
-                video.classList.remove('video-swapping');
-                
-                video.play().catch(e => {
-                    console.log('Autoplay blocked. Starting muted.');
-                    video.muted = true;
-                    ctrlMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
-                    ctrlVolume.value = 0;
-                    unmuteOverlay.classList.remove('hidden');
-                    video.play();
-                });
-            });
-            video.addEventListener('error', (e) => {
-                console.error('HTML5 video error:', e);
+        else if (targetPlayer.canPlayType('application/vnd.apple.mpegurl') || !url.includes('.m3u8')) {
+            targetPlayer.src = url;
+            
+            const handleMetadata = () => {
+                onReady();
+                targetPlayer.removeEventListener('loadedmetadata', handleMetadata);
+                targetPlayer.removeEventListener('error', handleError);
+            };
+
+            const handleError = (e) => {
+                console.error('Native video error on idle player:', e);
                 handleStreamError('Native Video Playback Error.');
-            });
+                targetPlayer.removeEventListener('loadedmetadata', handleMetadata);
+                targetPlayer.removeEventListener('error', handleError);
+            };
+
+            targetPlayer.addEventListener('loadedmetadata', handleMetadata);
+            targetPlayer.addEventListener('error', handleError);
         } else {
             handlePlayerError('Your browser does not support HLS streaming natively or via Hls.js.');
         }
@@ -511,8 +610,8 @@ document.addEventListener('DOMContentLoaded', () => {
         playerLoader.classList.add('hidden');
         playerError.classList.remove('hidden');
         errorMessage.textContent = msg;
-        video.src = '';
-        video.classList.remove('video-swapping');
+        cleanupPlayer(activePlayer);
+        cleanupPlayer(idlePlayer);
     }
 
     // ---------------------------------------------------------
@@ -579,73 +678,123 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. CUSTOM ACCESSIBLE PLAYER CONTROLLER LOGIC
     // ---------------------------------------------------------
     function togglePlay() {
-        if (video.paused) {
-            video.play();
+        if (activePlayer.paused) {
+            activePlayer.play().catch(e => console.log('Play request interrupted:', e));
             ctrlPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
         } else {
-            video.pause();
+            activePlayer.pause();
             ctrlPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
         }
     }
 
     ctrlPlayPause.addEventListener('click', togglePlay);
 
-    // Click on video playing area toggles play/pause
-    video.addEventListener('click', () => {
-        if (unmuteOverlay.classList.contains('hidden')) {
-            togglePlay();
-        } else {
-            // Trigger unmute overlay click
-            unmuteOverlay.click();
-        }
-    });
+    // Setup Video Event Listeners for both player elements dynamically
+    function setupVideoListeners(videoEl) {
+        videoEl.addEventListener('play', () => {
+            if (videoEl !== activePlayer) return;
+            ctrlPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            customControls.classList.remove('hidden');
+            showControlsTemporarily();
+            clearStallTimer();
+        });
 
-    // Synced Video Playback state events
-    video.addEventListener('play', () => {
-        ctrlPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
-        customControls.classList.remove('hidden');
-        showControlsTemporarily();
-        clearStallTimer();
-    });
+        videoEl.addEventListener('pause', () => {
+            if (videoEl !== activePlayer) return;
+            ctrlPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
+            clearTimeout(controlsTimeout);
+            customControls.classList.remove('hide-controls');
+            videoWrapper.classList.remove('hide-cursor');
+            clearStallTimer();
+        });
 
-    video.addEventListener('pause', () => {
-        ctrlPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
-        clearTimeout(controlsTimeout);
-        customControls.classList.remove('hide-controls');
-        videoWrapper.classList.remove('hide-cursor');
-        clearStallTimer();
-    });
+        videoEl.addEventListener('waiting', () => {
+            if (videoEl !== activePlayer) return;
+            startStallTimer();
+        });
 
-    // Zero-Lag Failover Engine Event Listeners
-    video.addEventListener('waiting', startStallTimer);
-    video.addEventListener('stalled', startStallTimer);
-    video.addEventListener('playing', clearStallTimer);
+        videoEl.addEventListener('stalled', () => {
+            if (videoEl !== activePlayer) return;
+            startStallTimer();
+        });
 
-    // Volume & Mute logic
-    function toggleMute() {
-        video.muted = !video.muted;
-        if (video.muted) {
-            ctrlMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
-            ctrlVolume.value = 0;
-        } else {
-            ctrlMute.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
-            ctrlVolume.value = video.volume;
-        }
+        videoEl.addEventListener('playing', () => {
+            if (videoEl !== activePlayer) return;
+            clearStallTimer();
+        });
+
+        // Click on video playing area toggles play/pause
+        videoEl.addEventListener('click', () => {
+            if (videoEl !== activePlayer) return;
+            if (unmuteOverlay.classList.contains('hidden')) {
+                togglePlay();
+            } else {
+                unmuteOverlay.click();
+            }
+        });
+
+        // Progress updates & timeline buffering
+        videoEl.addEventListener('timeupdate', () => {
+            if (videoEl !== activePlayer) return;
+            clearStallTimer();
+            if (videoEl.duration && videoEl.duration !== Infinity) {
+                const percent = (videoEl.currentTime / videoEl.duration) * 100;
+                timelineProgress.style.width = `${percent}%`;
+                timeElapsed.textContent = `${formatTime(videoEl.currentTime)} / ${formatTime(videoEl.duration)}`;
+            } else {
+                timelineProgress.style.width = '0%';
+                timeElapsed.textContent = formatTime(videoEl.currentTime);
+            }
+
+            // Buffer bar calculations
+            if (videoEl.buffered.length > 0 && videoEl.duration) {
+                const bufferedEnd = videoEl.buffered.end(videoEl.buffered.length - 1);
+                const percent = (bufferedEnd / videoEl.duration) * 100;
+                timelineBuffer.style.width = `${percent}%`;
+            } else {
+                timelineBuffer.style.width = '0%';
+            }
+        });
     }
 
-    ctrlMute.addEventListener('click', toggleMute);
+    setupVideoListeners(videoA);
+    setupVideoListeners(videoB);
 
-    ctrlVolume.addEventListener('input', (e) => {
-        const val = parseFloat(e.target.value);
-        video.volume = val;
-        video.muted = (val === 0);
-        if (video.muted) {
+    // Volume & Mute logic (applied to both players to prevent cross-fade volume jumps)
+    function setVolume(val) {
+        videoA.volume = val;
+        videoB.volume = val;
+        const isMuted = (val === 0);
+        videoA.muted = isMuted;
+        videoB.muted = isMuted;
+        
+        if (isMuted) {
             ctrlMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
         } else if (val < 0.5) {
             ctrlMute.innerHTML = '<i class="fa-solid fa-volume-low"></i>';
         } else {
             ctrlMute.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
         }
+        ctrlVolume.value = val;
+    }
+
+    function toggleMute() {
+        const newMuted = !activePlayer.muted;
+        videoA.muted = newMuted;
+        videoB.muted = newMuted;
+        if (newMuted) {
+            ctrlMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+            ctrlVolume.value = 0;
+        } else {
+            ctrlMute.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+            ctrlVolume.value = activePlayer.volume;
+        }
+    }
+
+    ctrlMute.addEventListener('click', toggleMute);
+
+    ctrlVolume.addEventListener('input', (e) => {
+        setVolume(parseFloat(e.target.value));
     });
 
     // Format time display
@@ -656,36 +805,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
 
-    // Progress updates & timeline buffering
-    video.addEventListener('timeupdate', () => {
-        clearStallTimer();
-        if (video.duration && video.duration !== Infinity) {
-            const percent = (video.currentTime / video.duration) * 100;
-            timelineProgress.style.width = `${percent}%`;
-            timeElapsed.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
-        } else {
-            timelineProgress.style.width = '0%';
-            timeElapsed.textContent = formatTime(video.currentTime);
-        }
-
-        // Buffer bar calculations
-        if (video.buffered.length > 0 && video.duration) {
-            const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-            const percent = (bufferedEnd / video.duration) * 100;
-            timelineBuffer.style.width = `${percent}%`;
-        } else {
-            timelineBuffer.style.width = '0%';
-        }
-    });
-
     // Seek track clicks
     timelineContainer.addEventListener('click', (e) => {
-        if (video.duration && video.duration !== Infinity) {
+        if (activePlayer.duration && activePlayer.duration !== Infinity) {
             const rect = timelineContainer.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
             const width = rect.width;
-            const newTime = (clickX / width) * video.duration;
-            video.currentTime = newTime;
+            const newTime = (clickX / width) * activePlayer.duration;
+            activePlayer.currentTime = newTime;
         }
     });
 
@@ -695,8 +822,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     ctrlPip.addEventListener('click', async () => {
         try {
-            if (video !== document.pictureInPictureElement) {
-                await video.requestPictureInPicture();
+            if (activePlayer !== document.pictureInPictureElement) {
+                await activePlayer.requestPictureInPicture();
             } else {
                 await document.exitPictureInPicture();
             }
@@ -727,14 +854,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Unmute overlay click handler
     unmuteOverlay.addEventListener('click', () => {
-        video.muted = false;
-        video.volume = 1;
-        ctrlVolume.value = 1;
-        ctrlMute.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+        setVolume(1);
         unmuteOverlay.classList.add('hidden');
     });
 
-    // Auto-hide Control Bar logic
+    // Auto-hide Control Bar logic for desktop mouse movements
     let controlsTimeout = null;
     function showControlsTemporarily() {
         customControls.classList.remove('hide-controls');
@@ -742,7 +866,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         clearTimeout(controlsTimeout);
         
-        if (!video.paused) {
+        if (!activePlayer.paused) {
             controlsTimeout = setTimeout(() => {
                 customControls.classList.add('hide-controls');
                 videoWrapper.classList.add('hide-cursor');
@@ -752,10 +876,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     videoWrapper.addEventListener('mousemove', showControlsTemporarily);
     videoWrapper.addEventListener('mouseleave', () => {
-        if (!video.paused) {
+        if (!activePlayer.paused) {
             customControls.classList.add('hide-controls');
             videoWrapper.classList.add('hide-cursor');
         }
+    });
+
+    // Ghost UI Mobile touch trigger class toggling (for header, dock, controls)
+    let mobileControlsTimeout = null;
+    function showMobileControls() {
+        const playerContainer = document.getElementById('player-container');
+        if (!playerContainer) return;
+        
+        playerContainer.classList.add('show-controls');
+        
+        clearTimeout(mobileControlsTimeout);
+        mobileControlsTimeout = setTimeout(() => {
+            playerContainer.classList.remove('show-controls');
+        }, 4000);
+    }
+    
+    videoWrapper.addEventListener('touchstart', (e) => {
+        if (e.target.closest('#custom-controls') || e.target.closest('#player-unmute-overlay')) {
+            return;
+        }
+        showMobileControls();
+    }, { passive: true });
+    
+    videoWrapper.addEventListener('click', (e) => {
+        if (e.target.closest('#custom-controls') || e.target.closest('#player-unmute-overlay')) {
+            return;
+        }
+        showMobileControls();
     });
 
     // Global Keyboard Shortcuts
@@ -789,30 +941,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'arrowleft':
                 e.preventDefault();
-                if (video.duration && video.duration !== Infinity) {
-                    video.currentTime = Math.max(0, video.currentTime - 5);
+                if (activePlayer.duration && activePlayer.duration !== Infinity) {
+                    activePlayer.currentTime = Math.max(0, activePlayer.currentTime - 5);
                     showControlsTemporarily();
                 }
                 break;
             case 'arrowright':
                 e.preventDefault();
-                if (video.duration && video.duration !== Infinity) {
-                    video.currentTime = Math.min(video.duration, video.currentTime + 5);
+                if (activePlayer.duration && activePlayer.duration !== Infinity) {
+                    activePlayer.currentTime = Math.min(activePlayer.duration, activePlayer.currentTime + 5);
                     showControlsTemporarily();
                 }
                 break;
             case 'arrowup':
                 e.preventDefault();
-                video.volume = Math.min(1, video.volume + 0.05);
-                ctrlVolume.value = video.volume;
-                video.muted = false;
+                setVolume(Math.min(1, activePlayer.volume + 0.05));
                 showControlsTemporarily();
                 break;
             case 'arrowdown':
                 e.preventDefault();
-                video.volume = Math.max(0, video.volume - 0.05);
-                ctrlVolume.value = video.volume;
-                video.muted = (video.volume === 0);
+                setVolume(Math.max(0, activePlayer.volume - 0.05));
                 showControlsTemporarily();
                 break;
         }

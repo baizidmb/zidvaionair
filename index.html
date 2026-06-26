@@ -7,7 +7,7 @@
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Hls.js for direct HLS streaming -->
@@ -17,39 +17,42 @@
     <!-- Custom styling stylesheet link -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gradient-to-br from-[#050505] to-[#0d0f0d] text-white/80 min-h-screen flex flex-col items-center justify-center p-0 md:p-8 relative select-none font-inter">
+<body class="bg-[#020508] bg-gradient-to-br from-[#020508] via-[#050a0f] to-[#010204] text-white/80 min-h-screen flex flex-col items-center justify-center p-0 md:p-8 relative overflow-hidden select-none font-inter">
 
     <!-- Toast container for auto-failover notices -->
     <div id="toast-container"></div>
 
-    <!-- Main Container -->
-    <main class="w-full md:w-[90vw] md:max-w-[1200px] flex flex-col gap-6 p-4 md:p-0 relative mt-14 md:mt-0 z-20">
+    <!-- main player container (Hover trigger for Ghost UI) -->
+    <div id="player-container" class="relative group w-full md:w-[90vw] md:max-w-[1200px] flex flex-col items-center justify-center">
         
-        <!-- Header: The Signature (Glass panel) -->
-        <header class="backdrop-filter blur-[30px] saturate-[200%] bg-white/5 border border-white/10 rounded-2xl py-4 px-6 flex justify-between items-center w-full shadow-lg fixed top-0 left-0 right-0 z-30 md:relative md:top-auto md:left-auto md:right-auto bg-[#050505]/60 md:bg-white/5 rounded-none md:rounded-2xl border-x-0 border-t-0 md:border border-white/10">
+        <!-- Header Signature: The Floating Glass Bar (Ghost UI - fades in on hover/tap) -->
+        <header class="fixed top-6 left-6 right-6 z-50 md:absolute md:top-6 md:left-6 md:right-6 transition-opacity duration-500 opacity-0 pointer-events-none flex justify-between items-center py-3.5 px-6 backdrop-filter blur-[40px] bg-white/5 border border-white/15 rounded-2xl shadow-lg">
             <div class="flex items-center gap-3">
-                <i class="fa-solid fa-trophy text-[#00f2fe] text-sm animate-pulse drop-shadow-[0_0_8px_rgba(0,242,254,0.5)]"></i>
-                <h1 class="font-light text-[11px] md:text-[12px] tracking-[0.25em] text-white/90 uppercase select-none font-inter drop-shadow-[0_0_6px_rgba(0,242,254,0.3)]">ZID VAI ON AIR X WC 2026</h1>
+                <i class="fa-solid fa-trophy text-[#00f2fe] text-xs animate-pulse drop-shadow-[0_0_8px_rgba(0,242,254,0.5)]"></i>
+                <h1 class="font-extralight text-[10px] md:text-[11px] tracking-[0.15em] text-white/90 uppercase drop-shadow-[0_0_6px_rgba(0,242,254,0.3)]">ZID VAI ON AIR X WC 2026</h1>
             </div>
             <div class="flex items-center gap-4">
                 <div id="header-match-status" class="flex items-center gap-1.5 text-[9px] tracking-widest text-white/50 uppercase">
                     <span class="w-1.5 h-1.5 bg-live-red rounded-full animate-pulse" id="header-match-dot"></span>
                     <span id="header-match-text">Loading matches...</span>
                 </div>
-                <div id="clock" class="font-mono text-white/40 text-[10px] bg-white/5 px-2.5 py-1 rounded-full border border-white/5">00:00:00</div>
+                <div id="clock" class="font-mono text-white/40 text-[9px] bg-white/5 px-2 py-0.5 rounded-full border border-white/5">00:00:00</div>
             </div>
         </header>
 
-        <!-- Video Player Wrapper (Fixed-aspect ratio floating glass card, sticky on mobile portrait) -->
-        <div class="w-full relative flex flex-col items-center bg-black fixed top-[50px] left-0 right-0 z-40 md:relative md:top-auto md:left-auto md:right-auto md:w-full md:aspect-auto">
+        <!-- Video Player Wrapper (Fixed-aspect ratio floating card, sticky on mobile portrait) -->
+        <div class="w-full relative flex flex-col items-center fixed top-0 left-0 right-0 aspect-video md:relative md:top-auto md:left-auto md:right-auto md:w-full md:aspect-auto bg-black">
             <!-- Ambient Glow behind the player (pulse frequency 12s) -->
             <div class="absolute -inset-16 -z-10 rounded-full bg-radial from-[#00f2fe]/10 to-transparent blur-[120px] animate-ambient-pulse pointer-events-none hidden md:block"></div>
 
-            <!-- Player Panel container (Glassmorphic border removed to prevent video overlay blur) -->
+            <!-- Player Panel container (Solid border) -->
             <div class="w-full bg-[#000000] border-0 md:border border-white/10 rounded-none md:rounded-2xl overflow-hidden relative shadow-[0_25px_50px_-25px_rgba(0,242,254,0.08)]">
                 <!-- Video Container -->
-                <div id="video-wrapper" class="relative w-full aspect-video bg-[#000000] overflow-hidden group">
-                    <video id="video-player" class="w-full h-full object-contain" playsinline autoplay></video>
+                <div id="video-wrapper" class="relative w-full aspect-video bg-[#000000] overflow-hidden">
+                    
+                    <!-- Seamless Switcher Dual Players (Player A & Player B) -->
+                    <video id="video-player-a" class="w-full h-full object-contain absolute inset-0 transition-opacity duration-300 opacity-0 z-10" playsinline autoplay></video>
+                    <video id="video-player-b" class="w-full h-full object-contain absolute inset-0 transition-opacity duration-300 opacity-0 z-10" playsinline autoplay></video>
                     <span id="player-source-url" style="display:none;">None Loaded</span>
 
                     <!-- Autoplay unmute overlay -->
@@ -82,8 +85,8 @@
                         <p class="text-[10px] text-white/40">Select a broadcast server below to begin</p>
                     </div>
 
-                    <!-- Custom controls overlay (Glass controls) -->
-                    <div id="custom-controls" class="absolute inset-x-4 bottom-4 z-20 p-3 backdrop-filter blur-[20px] saturate-[180%] bg-black/40 border border-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-2.5">
+                    <!-- Custom controls overlay (Ghost UI - Glass controls) -->
+                    <div id="custom-controls" class="absolute inset-x-4 bottom-4 z-20 p-3 backdrop-filter blur-[20px] saturate-[180%] bg-black/40 border border-white/5 rounded-2xl opacity-0 pointer-events-none transition-opacity duration-500 flex flex-col gap-2.5">
                         <!-- Timeline container -->
                         <div id="timeline-container" class="w-full h-1 bg-white/10 rounded-full cursor-pointer relative flex items-center group/time">
                             <div class="absolute inset-y-0 left-0 bg-white/20 rounded-full" id="timeline-buffer" style="width: 0%"></div>
@@ -111,50 +114,33 @@
                 </div>
 
                 <!-- Subtle Info Bar below video player (Desktop only) -->
-                <div class="hidden md:flex justify-between items-center py-3 px-6 bg-white/[0.02] border-t border-white/5 text-[10px] text-white/40">
+                <div class="hidden md:flex justify-between items-center py-2 px-6 bg-white/[0.02] border-t border-white/5 text-[9px] text-white/40">
                     <div class="text-left flex items-center gap-2">
                         <i class="fa-solid fa-satellite-dish text-[#00f2fe]"></i>
                         <span id="current-server-title" class="font-medium text-white/70 uppercase">No Channel Loaded</span>
                         <span id="current-server-desc">Select a Liquid Dot to stream</span>
-                    </div>
-                    <div>
-                        <button id="btn-copy-url" class="text-white/40 hover:text-white/80 transition-colors uppercase tracking-widest flex items-center gap-1 cursor-pointer">
-                            <i class="fa-regular fa-copy"></i> Copy stream link
-                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Mobile portrait spacer to prevent content overlapping with the fixed elements -->
-        <div class="h-[calc(100vw*9/16+50px)] w-full md:hidden"></div>
+        <div class="h-[calc(100vw*9/16)] w-full md:hidden"></div>
 
-        <!-- Server Selector: Liquid Dots Server Dock (Responsive bottom sheet on mobile, glass bar on desktop) -->
-        <div id="mobile-drawer" class="fixed inset-x-0 bottom-0 z-50 bg-[#070908]/95 border-t border-white/10 rounded-t-3xl transform translate-y-full transition-transform duration-300 md:relative md:translate-y-0 md:bg-white/5 md:border md:rounded-full py-4 px-8 shadow-2xl md:shadow-lg w-full flex flex-col md:flex-row justify-center items-center">
-            <!-- Mobile Close/Drag handle -->
-            <div id="mobile-drawer-header" class="flex flex-col items-center pb-3 cursor-pointer md:hidden select-none w-full">
-                <div class="w-10 h-1 bg-white/20 rounded-full mb-1"></div>
-                <div class="flex justify-between items-center w-full px-4 text-[9px] tracking-[0.2em] uppercase text-white/40">
-                    <span>Swipe down to close</span>
-                    <span class="text-[#00f2fe] font-medium" id="mobile-server-label">Servers</span>
-                </div>
-            </div>
-
-            <!-- Server Dock: Horizontal row of Liquid Dots -->
-            <div id="servers-container" class="flex justify-center items-center gap-6 overflow-x-auto scrollbar-hide py-2.5 w-full max-w-[600px] select-none">
-                <!-- Glowing liquid dots dynamically generated in app.js -->
+        <!-- Server Selector Dock: 15 Liquid Dots (Ghost UI - fades in on hover/tap) -->
+        <div id="dots-container" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 md:absolute md:bottom-6 md:z-30 transition-opacity duration-500 opacity-0 pointer-events-none w-[90vw] md:w-auto flex justify-center">
+            <div id="servers-container" class="flex justify-center items-center gap-5.5 py-3 px-6 backdrop-filter blur-[40px] bg-white/5 border border-white/15 rounded-full shadow-lg max-w-[600px] overflow-x-auto scrollbar-hide select-none">
+                <!-- Liquid Dots dynamically generated in app.js -->
             </div>
         </div>
 
-    </main>
+        <!-- Hidden elements for script compatibility -->
+        <button id="btn-copy-url" style="display:none;"></button>
 
-    <!-- Mobile Glass FAB (Toggles the bottom sheet drawer in mobile viewports) -->
-    <button id="fab-dots-toggle" class="fixed bottom-6 right-6 z-40 backdrop-filter blur-[30px] saturate-[200%] bg-white/10 border border-white/15 rounded-full w-12 h-12 flex items-center justify-center text-white/70 shadow-lg cursor-pointer md:hidden active:scale-95 transition-all focus:outline-none" aria-label="Toggle channels selection">
-        <i class="fa-solid fa-server text-xs"></i>
-    </button>
+    </div>
 
-    <!-- Footer Signature (Bottom-Right Minimal Negative Space) -->
-    <footer class="absolute bottom-6 right-6 md:bottom-10 md:right-10 text-[9px] tracking-[0.25em] font-light text-white/20 uppercase select-none pointer-events-none z-30">
+    <!-- Footer Signature: The minimal glass strip (Bottom) -->
+    <footer class="fixed bottom-0 left-0 right-0 z-30 backdrop-filter blur-[20px] bg-white/[0.02] border-t border-white/5 py-2 text-center text-[9px] tracking-[0.25em] font-light text-white/20 uppercase select-none pointer-events-none">
         DEVELOPED BY SHAHIDUL ISLAM BAIZID
     </footer>
 

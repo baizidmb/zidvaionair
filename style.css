@@ -1,11 +1,10 @@
 /* =========================================================
-   COPASTREAM 2026 - MODERN LIQUID GLASS STYLE SYSTEM
+   COPASTREAM 2026 - SEAMLESS BROADCAST DASHBOARD STYLE
    ========================================================= */
 
 @import "tailwindcss";
 
 @theme {
-  --color-void-black: #050505;
   --color-live-red: #ff2d55;
   --font-inter: 'Inter', sans-serif;
 }
@@ -14,14 +13,15 @@
    BASE OVERRIDES
    --------------------------------------------------------- */
 html, body {
-    background-color: #050505;
-    background: linear-gradient(135deg, #050505 0%, #0d0f0d 100%);
+    background-color: #020508;
+    background: linear-gradient(135deg, #020508 0%, #050a0f 50%, #010204 100%);
     color: rgba(255, 255, 255, 0.7);
     font-family: 'Inter', sans-serif;
     letter-spacing: -0.02em;
     height: 100%;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
 }
 
 /* Hide scrollbar utility */
@@ -31,6 +31,16 @@ html, body {
 .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+
+/* ---------------------------------------------------------
+   LIQUID GLASS SURFACE MODULE
+   --------------------------------------------------------- */
+.liquid-glass {
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 /* ---------------------------------------------------------
@@ -52,7 +62,26 @@ html, body {
 }
 
 /* ---------------------------------------------------------
-   ACTIVE DOT INTERACTION SYSTEM (LIQUID DOTS)
+   GHOST UI INTERACTION STATES
+   --------------------------------------------------------- */
+/* Desktop hover activations */
+#player-container:hover header,
+#player-container:hover #dots-container,
+#player-container:hover #custom-controls {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Mobile active tap activations via JS class toggle */
+.show-controls header,
+.show-controls #dots-container,
+.show-controls #custom-controls {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* ---------------------------------------------------------
+   LIQUID DOTS ACTIVE GLOW SYSTEM
    --------------------------------------------------------- */
 .dot-btn {
     width: 6px;
@@ -74,7 +103,7 @@ html, body {
     box-shadow: 0 0 10px rgba(0, 242, 254, 0.8);
 }
 
-@keyframes liquid-glow {
+@keyframes liquid-aura {
     0%, 100% {
         box-shadow: 0 0 8px rgba(0, 242, 254, 0.6), 0 0 16px rgba(0, 242, 254, 0.3);
     }
@@ -87,9 +116,30 @@ html, body {
     width: 8px;
     height: 8px;
     background-color: #00f2fe;
-    transform: scale(1.2);
-    animation: liquid-glow 2s infinite ease-in-out;
+    transform: scale(1.25);
+    animation: liquid-aura 2s infinite ease-in-out;
     opacity: 1;
+}
+
+/* Background check dead dot dims */
+.dot-btn.dead {
+    opacity: 0.15 !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: scale(0.9) !important;
+}
+
+.dot-btn.dead::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -2px;
+    right: -2px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.4);
+    transform: translateY(-50%) rotate(-45deg);
 }
 
 /* Tooltip container */
@@ -99,10 +149,10 @@ html, body {
     left: 50%;
     transform: translateX(-50%) translateY(4px);
     backdrop-filter: blur(15px);
-    background-color: rgba(5, 5, 5, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(2, 5, 8, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.8);
-    padding: 3px 7px;
+    padding: 4px 8px;
     border-radius: 4px;
     font-size: 8px;
     text-transform: uppercase;
@@ -118,18 +168,6 @@ html, body {
 .dot-btn:hover .dot-tooltip {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
-}
-
-/* ---------------------------------------------------------
-   STREAM SWITCHING CROSS-FADE (0.3s transition to black)
-   --------------------------------------------------------- */
-#video-player {
-    transition: opacity 0.3s ease, filter 0.3s ease;
-}
-
-.video-swapping {
-    opacity: 0;
-    filter: blur(10px);
 }
 
 /* ---------------------------------------------------------
@@ -239,12 +277,4 @@ html, body {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
-}
-
-/* ---------------------------------------------------------
-   MOBILE BOTTOM SHEET ACTIVE DRAG STATES
-   --------------------------------------------------------- */
-/* Smooth dragging transitions for the bottom sheet when user interacts */
-.bottom-sheet-dragging {
-    transition: none !important;
 }
