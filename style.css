@@ -645,6 +645,20 @@ video {
     letter-spacing: 0.2px;
 }
 
+.server-btn.live-badge .server-btn-name::after {
+    content: 'LIVE';
+    font-size: 0.6rem;
+    background: var(--accent-red);
+    color: #fff;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 800;
+    margin-left: 6px;
+    letter-spacing: 0.2px;
+    animation: blinkRed 1.5s infinite;
+}
+
+
 /* ---------------------------------------------------------
    INFO & FALLBACK PANEL
    --------------------------------------------------------- */

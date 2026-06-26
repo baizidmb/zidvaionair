@@ -4,136 +4,175 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // 1. Live Server Categories Configuration
-    const SERVER_CATEGORIES = [
-        {
-            category: 'Toffee Live CDN (Bangladesh Feeds)',
-            servers: [
-                {
-                    name: 'Toffee FIFA 1',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/fifa-1',
-                    detail: 'Toffee FIFA Live Channel 1 (HD)',
-                    badge: 'hd'
-                },
-                {
-                    name: 'Toffee FIFA 2',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/fifa-2',
-                    detail: 'Toffee FIFA Live Channel 2 (HD)',
-                    badge: 'hd'
-                },
-                {
-                    name: 'Toffee FIFA 3 (Active)',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/fifa-3',
-                    detail: 'Toffee FIFA Live Channel 3 (HD)',
-                    badge: 'hd'
-                },
-                {
-                    name: 'Toffee FIFA 4',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/fifa-4',
-                    detail: 'Toffee FIFA Live Channel 4 (HD)',
-                    badge: 'hd'
-                }
-            ]
-        },
-        {
-            category: 'Server Group A (HundredMiles CDN)',
-            servers: [
-                {
-                    name: 'FOX Sports US',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/fox-usa',
-                    detail: 'FOX US Broadcast Stream (HD)',
-                    badge: 'hd'
-                },
-                {
-                    name: 'FOX Sports 1 (FS1)',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/fox-sports-1',
-                    detail: 'Direct FS1 Feed (HD)',
-                    badge: 'hd'
-                },
-                {
-                    name: 'FOX Sports 4K',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/fox4k-usa',
-                    detail: 'Ultra HD 4K FOX Broadcast Feed',
-                    badge: 'fhd'
-                },
-                {
-                    name: 'ESPN USA',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/espn-usa',
-                    detail: 'ESPN US Sports Coverage (HD)',
-                    badge: 'hd'
-                },
-                {
-                    name: 'Telemundo USA',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/telemundo-usa',
-                    detail: 'Telemundo Spanish Feed (HD)',
-                    badge: 'hd'
-                }
-            ]
-        },
-        {
-            category: 'Server Group B (Inproviszon CDN)',
-            servers: [
-                {
-                    name: 'FOX Sports US (Alt)',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/fox',
-                    detail: 'Alternative FOX US Feed (HD)',
-                    badge: 'hd'
-                },
-                {
-                    name: 'FOX Sports 1 (Alt)',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/fs1',
-                    detail: 'Alternative FS1 Feed (HD)',
-                    badge: 'hd'
-                },
-                {
-                    name: 'Peacock 1 Live',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/peacock-1',
-                    detail: 'Peacock Live Spanish Broadcast (4K)',
-                    badge: 'fhd'
-                },
-                {
-                    name: 'ESPN USA (Alt)',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/espn',
-                    detail: 'Alternative ESPN US Feed (HD)',
-                    badge: 'hd'
-                },
-                {
-                    name: 'Telemundo USA (Alt)',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/telemundo',
-                    detail: 'Alternative Telemundo Spanish (HD)',
-                    badge: 'hd'
-                }
-            ]
-        },
-        {
-            category: 'Worker Proxy Feeds',
-            servers: [
-                {
-                    name: 'Proxy Server',
-                    url: 'https://tahmidx.shusanta-project.workers.dev/fox-usa',
-                    detail: 'Cloudflare Worker proxy feed',
-                    badge: 'hd'
-                }
-            ]
-        }
-    ];
-
-    // Flatten server categories into a unified indexing list for the player
+    // 1. Dynamic Server Loading and Parsing Logic
     const SERVERS = [];
-    SERVER_CATEGORIES.forEach(cat => {
-        cat.servers.forEach(srv => {
-            SERVERS.push({
-                name: srv.name,
-                url: srv.url,
-                detail: srv.detail,
-                category: cat.category
-            });
-        });
-    });
-
-    // Player State
     let hls = null;
     let currentServerIndex = null;
+
+    function getFallbackChannels() {
+        return [
+            { name: "Norway vs France", link: "https://sm-monirul.top/tof/live/toffee6/index.m3u8", category_name: "Sports Channels" },
+            { name: "Cabo Verde vs South Africa", link: "https://sm-monirul.top/tof/live/toffee5/index.m3u8", category_name: "Sports Channels" },
+            { name: "Egypt vs Iran", link: "https://sm-monirul.top/tof/live/toffee1/index.m3u8", category_name: "Sports Channels" },
+            { name: "New Zealand vs Belgium", link: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", category_name: "Sports Channels" },
+            { name: "Senegal vs Iraq", link: "https://sm-monirul.top/tof/live/toffee3/index.m3u8", category_name: "Sports Channels" },
+            { name: "Uruguay vs Spain", link: "https://sm-monirul.top/tof/live/toffee4/index.m3u8", category_name: "Sports Channels" },
+            
+            { name: "Toffee FIFA 1", link: "https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8", category_name: "Sports Channels" },
+            { name: "Toffee FIFA 2", link: "https://sm-monirul.top/toffee/play/FIFA-2026-2.m3u8", category_name: "Sports Channels" },
+            { name: "Toffee FIFA 3", link: "https://sm-monirul.top/toffee/play/FIFA-2026-3.m3u8", category_name: "Sports Channels" },
+            { name: "Toffee FIFA 4", link: "https://sm-monirul.top/toffee/play/FIFA-2026-4.m3u8", category_name: "Sports Channels" },
+            { name: "Toffee FIFA 5", link: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", category_name: "Sports Channels" },
+            { name: "Toffee FIFA 6", link: "https://sm-monirul.top/toffee/play/FIFA-2026-6.m3u8", category_name: "Sports Channels" },
+            
+            { name: "SONY SPORTS TEN 1 HD", link: "https://sm-monirul.top/toffee/play/sony_sports_1_hd.m3u8", category_name: "LIVE" },
+            { name: "SONY SPORTS TEN 2 HD", link: "https://sm-monirul.top/toffee/play/sony_sports_2_hd.m3u8", category_name: "LIVE" },
+            { name: "SONY SPORTS TEN 5 HD", link: "https://sm-monirul.top/toffee/play/sony_sports_5_hd.m3u8", category_name: "LIVE" },
+            { name: "SONY TEN Cricket", link: "https://sm-monirul.top/toffee/play/ten_cricket.m3u8", category_name: "LIVE" },
+            { name: "TOFFEE Sports VIP", link: "https://sm-monirul.top/toffee/play/sports_highlights.m3u8", category_name: "LIVE" },
+            { name: "Euro Sport HD", link: "https://sm-monirul.top/toffee/play/euro_sports_hd.m3u8", category_name: "LIVE" }
+        ];
+    }
+
+    async function loadDynamicStreams() {
+        let channels = [];
+        try {
+            const res = await fetch('https://raw.githubusercontent.com/sm-monirulislam/Toffee-Auto-Update-Playlist/main/toffee_data.json?t=' + Date.now());
+            if (!res.ok) throw new Error('Network error fetching stream JSON');
+            const data = await res.json();
+            channels = data.response || [];
+        } catch (e) {
+            console.warn('Failed to load dynamic streams from GitHub, loading fallback channels:', e);
+            channels = getFallbackChannels();
+        }
+
+        const matchStreams = [];
+        const genericFifaStreams = [];
+        const sportsNetworkStreams = [];
+
+        channels.forEach(ch => {
+            const name = ch.name || '';
+            const rawUrl = ch.link || ch.url || '';
+            const category = ch.category_name || '';
+            
+            if (!rawUrl) return;
+
+            // Rewrite URL using proxy rules to bypass CORS/cookie restrictions
+            let url = rawUrl;
+            if (rawUrl.includes('bldcmprod-cdn.toffeelive.com/cdn/live/')) {
+                url = rawUrl.replace('https://bldcmprod-cdn.toffeelive.com/cdn/live/', 'https://sm-monirul.top/toffee/play/')
+                            .replace('/playlist.m3u8', '.m3u8');
+            } else if (rawUrl.includes('prod-cdn01-live.toffeelive.com/live/')) {
+                const parts = rawUrl.split('/live/');
+                if (parts.length > 1) {
+                    const id = parts[1].split('/')[0];
+                    url = `https://sm-monirul.top/toffee/play/${id}.m3u8`;
+                }
+            } else if (rawUrl.startsWith('http://sm-monirul.top/')) {
+                url = rawUrl.replace('http://', 'https://');
+            }
+
+            const nameLower = name.toLowerCase();
+
+            // 1. Live Match streams
+            if (nameLower.includes('vs') && !nameLower.includes('highlight') && !nameLower.includes('show')) {
+                matchStreams.push({
+                    name: name,
+                    url: url,
+                    detail: `Live Match Broadcast: ${name}`,
+                    badge: 'live-badge'
+                });
+            }
+            // 2. Generic FIFA channels
+            else if (nameLower.includes('fifa')) {
+                genericFifaStreams.push({
+                    name: name,
+                    url: url,
+                    detail: `FIFA World Cup Live Broadcast`,
+                    badge: 'hd'
+                });
+            }
+            // 3. Premium Sports channels
+            else if (nameLower.includes('sport') || nameLower.includes('ten') || nameLower.includes('cricket') || nameLower.includes('highlights')) {
+                sportsNetworkStreams.push({
+                    name: name,
+                    url: url,
+                    detail: `Live Sports Network Feed`,
+                    badge: nameLower.includes('vip') ? 'fhd' : 'hd'
+                });
+            }
+        });
+
+        // If no active matches are playing, show a default broadcast banner placeholder
+        if (matchStreams.length === 0) {
+            matchStreams.push({
+                name: 'No Live Matches Currently',
+                url: genericFifaStreams.length > 0 ? genericFifaStreams[0].url : 'https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8',
+                detail: 'No match is live right now. Showing default FIFA feed.',
+                badge: 'hd'
+            });
+        }
+
+        const categories = [];
+        if (matchStreams.length > 0) {
+            categories.push({
+                category: 'World Cup Live Match Servers',
+                servers: matchStreams
+            });
+        }
+        if (genericFifaStreams.length > 0) {
+            categories.push({
+                category: 'FIFA World Cup Live Feeds',
+                servers: genericFifaStreams
+            });
+        }
+        if (sportsNetworkStreams.length > 0) {
+            categories.push({
+                category: 'Premium Sports Networks',
+                servers: sportsNetworkStreams
+            });
+        }
+
+        // Re-populate SERVERS in-place
+        SERVERS.length = 0;
+        categories.forEach(cat => {
+            cat.servers.forEach(srv => {
+                SERVERS.push({
+                    name: srv.name,
+                    url: srv.url,
+                    detail: srv.detail,
+                    category: cat.category,
+                    badge: srv.badge
+                });
+            });
+        });
+
+        // Re-render server grid
+        renderServersDynamic(categories);
+
+        // Update server count badge
+        const serverCountBadge = document.getElementById('server-count-badge');
+        if (serverCountBadge) {
+            serverCountBadge.textContent = `${SERVERS.length} Live Servers`;
+        }
+
+        // Select the default server (prioritize active matches if available)
+        let startIdx = 0;
+        const firstMatchIdx = SERVERS.findIndex(srv => srv.category === 'World Cup Live Match Servers' && srv.name !== 'No Live Matches Currently');
+        if (firstMatchIdx !== -1) {
+            startIdx = firstMatchIdx;
+        }
+
+        const defaultServer = SERVERS[startIdx];
+        if (defaultServer) {
+            console.log(`🚀 Dynamically defaulting to ${defaultServer.name} (Index ${startIdx})`);
+            window.changeServer(defaultServer.url, startIdx);
+        }
+    }
+
+    // Player State
+
+
 
     // DOM Elements
     const video = document.getElementById('video-player');
@@ -285,12 +324,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---------------------------------------------------------
     // 3. SERVER SELECTION INTERFACE & DYNAMIC RENDER
     // ---------------------------------------------------------
-    function renderServers() {
+    function renderServersDynamic(categories) {
         if (!serversContainer) return;
         serversContainer.innerHTML = '';
         
         let globalIndex = 0;
-        SERVER_CATEGORIES.forEach(cat => {
+        categories.forEach(cat => {
             // Category Wrapper
             const catDiv = document.createElement('div');
             catDiv.className = 'server-category';
@@ -307,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             cat.servers.forEach(srv => {
                 const btn = document.createElement('button');
-                btn.className = `server-btn ${srv.badge}`;
+                btn.className = `server-btn ${srv.badge || 'hd'}`;
                 btn.dataset.index = globalIndex;
                 btn.innerHTML = `
                     <i class="fa-solid fa-play"></i>
@@ -317,7 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
 
-                // Capture index in a local scope
                 const currentIndex = globalIndex;
                 btn.addEventListener('click', () => {
                     window.changeServer(srv.url, currentIndex);
@@ -351,8 +389,9 @@ document.addEventListener('DOMContentLoaded', () => {
         playStream(url, server.name, server.detail);
     };
 
-    // Initialize the servers list in the DOM
-    renderServers();
+    // Initialize the servers list in the DOM dynamically
+    loadDynamicStreams();
+
 
     // ---------------------------------------------------------
     // 4. CUSTOM ACCESSIBLE PLAYER CONTROLLER LOGIC
@@ -917,7 +956,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const matchDurationMs = 2 * 60 * 60 * 1000;
             const matchEnd = new Date(kickoff.getTime() + matchDurationMs);
             
-            if (now >= kickoff && now < matchEnd) {
+            let status = match.status;
+            if (status === 'live' || (now >= kickoff && now < matchEnd)) {
                 liveMatch = match;
             } else if (now < kickoff) {
                 if (!nextUpcoming || kickoff < new Date(nextUpcoming.kickoffUtc)) {
@@ -928,10 +968,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (liveMatch) {
             const kickoff = new Date(liveMatch.kickoffUtc);
-            const elapsedMin = Math.floor((now - kickoff) / 60000);
-            const liveScore = getLiveScore(liveMatch.matchNumber, elapsedMin);
+            let score1 = liveMatch.score1;
+            let score2 = liveMatch.score2;
             
-            headerMatchText.innerHTML = `<span class="live-pulse-dot"></span> <strong>LIVE:</strong> ${liveMatch.homeTeam} ${liveScore.score1} - ${liveScore.score2} ${liveMatch.awayTeam}`;
+            if (score1 === null || score2 === null) {
+                const elapsedMin = Math.floor((now - kickoff) / 60000);
+                const liveScore = getLiveScore(liveMatch.id, elapsedMin);
+                score1 = liveScore.score1;
+                score2 = liveScore.score2;
+            }
+            
+            headerMatchText.innerHTML = `<span class="live-pulse-dot"></span> <strong>LIVE:</strong> ${liveMatch.homeTeam} ${score1} - ${score2} ${liveMatch.awayTeam}`;
             headerMatchDot.style.display = 'inline-block';
         } else if (nextUpcoming) {
             const kickoff = new Date(nextUpcoming.kickoffUtc);
@@ -965,17 +1012,150 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function parseSalahTime(dateStr, timeStr) {
+        try {
+            let t = timeStr.replace('UTC', '').replace(/\s+/g, '');
+            if (!t.includes('-') && !t.includes('+')) {
+                t += '+00:00';
+            } else {
+                const match = t.match(/([-+])(\d+)(?::(\d+))?/);
+                if (match) {
+                    const sign = match[1];
+                    const hours = match[2].padStart(2, '0');
+                    const mins = (match[3] || '00').padStart(2, '0');
+                    t = t.replace(match[0], `${sign}${hours}:${mins}`);
+                }
+            }
+            return new Date(`${dateStr}T${t}`);
+        } catch (e) {
+            console.error('Error parsing Salah time:', dateStr, timeStr, e);
+            return new Date(dateStr + 'T12:00:00Z');
+        }
+    }
+
+    function normalizeTeamName(name) {
+        if (!name) return '';
+        return name.toLowerCase()
+                   .normalize("NFD")
+                   .replace(/[\u0300-\u036f]/g, "")
+                   .trim();
+    }
+
+    function fuzzyMatchTeam(name1, name2) {
+        if (name1 === name2) return true;
+        if (name1.includes(name2) || name2.includes(name1)) return true;
+        const synonyms = [
+            ['usa', 'united states', 'us'],
+            ['ivory coast', "cote d'ivoire", 'cote divoire'],
+            ['turkiye', 'turkey'],
+            ['south korea', 'korea republic', 'korea rep'],
+            ['cape verde', 'cabo verde']
+        ];
+        for (const synList of synonyms) {
+            const normalizedSyns = synList.map(s => normalizeTeamName(s));
+            if (normalizedSyns.includes(name1) && normalizedSyns.includes(name2)) return true;
+        }
+        return false;
+    }
+
+    function findMatch(team1, team2) {
+        const t1 = normalizeTeamName(team1);
+        const t2 = normalizeTeamName(team2);
+        return allMatches.find(m => {
+            const h = normalizeTeamName(m.homeTeam);
+            const a = normalizeTeamName(m.awayTeam);
+            return (fuzzyMatchTeam(h, t1) && fuzzyMatchTeam(a, t2)) ||
+                   (fuzzyMatchTeam(h, t2) && fuzzyMatchTeam(a, t1));
+        });
+    }
+
+    async function updateRealtimeScores() {
+        // Fetch results (past matches scores)
+        try {
+            const res = await fetch('https://wcup2026.org/api/data.php?action=results');
+            if (res.ok) {
+                const data = await res.json();
+                const matches = data.matches || [];
+                matches.forEach(m => {
+                    const match = findMatch(m.team1, m.team2);
+                    if (match) {
+                        match.status = m.status || 'finished';
+                        if (m.score) {
+                            match.score1 = m.score[0] !== undefined ? m.score[0] : null;
+                            match.score2 = m.score[1] !== undefined ? m.score[1] : null;
+                        }
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn('Failed to update historical results:', e);
+        }
+
+        // Fetch today's live/upcoming/finished matches
+        try {
+            const res = await fetch('https://wcup2026.org/api/data.php?action=today');
+            if (res.ok) {
+                const data = await res.json();
+                const matches = data.matches || [];
+                matches.forEach(m => {
+                    const match = findMatch(m.team1, m.team2);
+                    if (match) {
+                        match.status = m.status || 'upcoming';
+                        if (m.score) {
+                            match.score1 = m.score[0] !== undefined ? m.score[0] : null;
+                            match.score2 = m.score[1] !== undefined ? m.score[1] : null;
+                        }
+                        match.liveMinute = m.live_minute;
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn('Failed to update today\'s matches:', e);
+        }
+    }
+
     async function fetchMatches() {
         try {
-            const response = await fetch('https://www.thestatsapi.com/world-cup/data/fixtures.json');
-            if (!response.ok) throw new Error('Network error');
-            const data = await response.json();
-            allMatches = data.fixtures || [];
+            const res = await fetch('https://raw.githubusercontent.com/salah23222/worldcup2026/main/data/worldcup_fallback.json');
+            if (!res.ok) throw new Error('Failed to load salah fallback fixtures');
+            const data = await res.json();
+            const rawMatches = data.matches || [];
+            
+            allMatches = rawMatches.map((m, idx) => {
+                const kickoff = parseSalahTime(m.date, m.time);
+                return {
+                    id: idx + 1,
+                    round: m.round || '',
+                    group: m.group || '',
+                    homeTeam: m.team1,
+                    awayTeam: m.team2,
+                    kickoffUtc: kickoff.toISOString(),
+                    stadium: m.ground || '',
+                    status: 'upcoming',
+                    score1: null,
+                    score2: null,
+                    liveMinute: null
+                };
+            });
         } catch (e) {
-            console.warn('API error, loading fallback fixtures:', e);
-            allMatches = getLocalFallbackMatches();
+            console.warn('Failed to load fallback fixtures from GitHub, loading local fallbacks:', e);
+            allMatches = getLocalFallbackMatches().map((m, idx) => ({
+                id: m.matchNumber || idx + 1,
+                round: m.stage || '',
+                group: m.group || '',
+                homeTeam: m.homeTeam,
+                awayTeam: m.awayTeam,
+                kickoffUtc: m.kickoffUtc,
+                stadium: m.stadium || '',
+                status: 'upcoming',
+                score1: null,
+                score2: null,
+                liveMinute: null
+            }));
         }
-        
+
+        await updateRealtimeScores();
+
         const datesSet = new Set();
         allMatches.forEach(m => {
             const kickoff = new Date(m.kickoffUtc);
@@ -984,10 +1164,10 @@ document.addEventListener('DOMContentLoaded', () => {
             datesSet.add(localDate);
         });
         uniqueDates = Array.from(datesSet).sort();
-        
+
         const now = new Date();
         const todayStr = getLocalDateString(now);
-        
+
         let targetIndex = uniqueDates.indexOf(todayStr);
         if (targetIndex === -1) {
             targetIndex = uniqueDates.findIndex(d => d >= todayStr);
@@ -996,29 +1176,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         currentDateIndex = Math.max(0, targetIndex);
-        
+
         setupScheduleNav();
         updateScheduleUI();
-        setInterval(updateScheduleUI, 15000);
+        
+        setInterval(async () => {
+            await updateRealtimeScores();
+            updateScheduleUI();
+        }, 15000);
     }
 
     // Set placeholder description dynamically
-    const placeholderDesc = playerPlaceholder.querySelector('p');
-    if (placeholderDesc) {
-        placeholderDesc.textContent = "Select one of the 15 live servers below to start streaming matches instantly.";
-    }
+     const placeholderDesc = playerPlaceholder.querySelector('p');
+     if (placeholderDesc) {
+         placeholderDesc.textContent = "Select one of the live servers below to start streaming matches instantly.";
+     }
+ 
+     // Start fetching match fixtures
+     fetchMatches();
+ 
+     // ---------------------------------------------------------
+     // 7. DEFAULT BROADCAST LOADING
+     // ---------------------------------------------------------
+     // Default stream is loaded dynamically inside loadDynamicStreams()
 
-    // Start fetching match fixtures
-    fetchMatches();
-
-    // ---------------------------------------------------------
-    // 7. DEFAULT BROADCAST LOADING
-    // ---------------------------------------------------------
-    const defaultIndex = SERVERS.findIndex(srv => srv.name === 'FOX Sports US');
-    const startIdx = defaultIndex !== -1 ? defaultIndex : 0;
-    
-    console.log(`🚀 Defaulting to ${SERVERS[startIdx].name} (Index ${startIdx})`);
-    window.changeServer(SERVERS[startIdx].url, startIdx);
 
     // ---------------------------------------------------------
     // 8. CLOCK HEADER INITIATION
