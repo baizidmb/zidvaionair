@@ -3,177 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Zid Vai On Air x WC 2026</title>
+    <title>Zid Vai On Air x WC 2026</title>
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Hls.js for direct HLS streaming -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <!-- Tailwind CSS v4 Browser Runtime -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Custom styling stylesheet link -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <!-- Floating Liquid Blobs & Background Glows -->
-    <div class="liquid-blob blob-1"></div>
-    <div class="liquid-blob blob-2"></div>
-    <div class="liquid-blob blob-3"></div>
-    
+<body class="bg-void-black text-white/80 min-h-screen flex flex-col items-center justify-center p-0 md:p-8 relative select-none">
+
     <!-- Toast container for auto-failover notices -->
     <div id="toast-container"></div>
 
-    <div class="app-container">
-        <!-- HEADER -->
-        <header class="app-header">
-            <div class="header-logo">
-                <i class="fa-solid fa-trophy trophy-icon"></i>
-                <div class="logo-text">
-                    <h1>ZID VAI ON AIR<span> x WC 2026</span></h1>
-                    <p>LIVE STREAMING PORTAL</p>
+    <main class="w-full md:w-[90vw] md:max-w-[1200px] flex flex-col items-center justify-center relative">
+        
+        <!-- Video Player Wrapper (Fixed on mobile portrait, natural relative flow on desktop) -->
+        <div class="w-full relative flex flex-col items-center z-20 fixed top-0 left-0 right-0 aspect-video md:relative md:w-full md:aspect-auto bg-black">
+            <!-- Ambient Glow behind the player (pulse frequency 12s) -->
+            <div class="absolute -inset-16 -z-10 rounded-full bg-radial from-white/10 to-transparent blur-[120px] animate-ambient-pulse pointer-events-none hidden md:block"></div>
+
+            <!-- Video Container -->
+            <div id="video-wrapper" class="relative w-full aspect-video bg-[#000000] overflow-hidden shadow-none md:shadow-[0_20px_60px_-25px_rgba(255,255,255,0.06)] group">
+                <video id="video-player" class="w-full h-full object-contain" playsinline autoplay></video>
+                <span id="player-source-url" style="display:none;">None Loaded</span>
+
+                <!-- Autoplay unmute overlay -->
+                <div id="player-unmute-overlay" class="absolute inset-0 z-30 bg-black/90 flex flex-col items-center justify-center gap-3 cursor-pointer hidden">
+                    <i class="fa-solid fa-volume-high text-white/80 text-lg animate-pulse"></i>
+                    <span class="text-[9px] tracking-[0.2em] uppercase text-white/60">Tap to Unmute</span>
                 </div>
-            </div>
-            <div class="header-match-status" id="header-match-status">
-                <span class="live-dot" id="header-match-dot"></span>
-                <span class="match-info" id="header-match-text">Loading matches...</span>
-            </div>
-            <div class="header-clock" id="clock">00:00:00</div>
-        </header>
 
-        <!-- MAIN LAYOUT (TWO-COLUMN desktop GRID) -->
-        <main class="player-layout">
-            <!-- Left Column: Video Player & Help Info -->
-            <div class="layout-col-left">
-                <div class="player-wrapper">
-                    <!-- Central Player Panel -->
-                    <div class="panel player-panel">
-                    <div class="player-header">
-                        <div class="active-server-info">
-                            <i class="fa-solid fa-satellite-dish active-icon"></i>
-                            <div>
-                                <h3 id="current-server-title">Select a server to start streaming</h3>
-                                <p id="current-server-desc">Click any of the live broadcast channels below</p>
-                            </div>
-                        </div>
-                        <div class="player-actions">
-                            <button id="btn-copy-url" class="action-btn" title="Copy stream URL"><i class="fa-regular fa-copy"></i></button>
-                        </div>
-                    </div>
-
-                    <!-- Video Container -->
-                    <div class="video-container" id="video-wrapper">
-                        <!-- Removed browser controls for custom accessible controls -->
-                        <video id="video-player" playsinline autoplay></video>
-                        
-                        <!-- Hidden helper for copy URL functionality -->
-                        <span id="player-source-url" style="display:none;">None Loaded</span>
-
-                        <!-- Player Unmute Overlay (Autoplay workaround) -->
-                        <div class="player-overlay hidden" id="player-unmute-overlay">
-                            <i class="fa-solid fa-volume-high unmute-play-icon"></i>
-                            <span class="unmute-text">Tap to Unmute</span>
-                        </div>
-
-                        <!-- Player Loading Overlay (Cinematic Shimmer Skeleton) -->
-                        <div class="player-overlay hidden" id="player-loader">
-                            <div class="skeleton-shimmer-container">
-                                <div class="skeleton-shimmer skeleton-logo"></div>
-                                <div class="skeleton-shimmer skeleton-title"></div>
-                                <div class="skeleton-shimmer skeleton-description"></div>
-                            </div>
-                        </div>
-
-                        <!-- Player Error Overlay -->
-                        <div class="player-overlay error-overlay hidden" id="player-error">
-                            <i class="fa-solid fa-circle-exclamation error-icon"></i>
-                            <h4 id="error-title">Stream Blocked or Offline</h4>
-                            <p id="error-message">Failed to load stream. This may be due to CORS policies or an invalid feed URL.</p>
-                            <button id="btn-error-retry" class="btn btn-secondary btn-sm mt-3"><i class="fa-solid fa-rotate-right"></i> Retry Connection</button>
-                        </div>
-
-                        <!-- Player Placeholder Overlay -->
-                        <div class="player-overlay placeholder-overlay" id="player-placeholder">
-                            <i class="fa-solid fa-circle-play placeholder-play-icon"></i>
-                            <h3>Zid Vai On Air Live Player</h3>
-                            <p>Select one of the 15 live servers below to start streaming the Brazil vs. Scotland match instantly.</p>
-                        </div>
-
-                        <!-- Custom Accessible Video Player Controls -->
-                        <div class="custom-player-controls hidden" id="custom-controls">
-                            <!-- Progress Timeline -->
-                            <div class="timeline-container" id="timeline-container">
-                                <div class="timeline-slider">
-                                    <div class="timeline-progress" id="timeline-progress"></div>
-                                    <div class="timeline-buffer" id="timeline-buffer"></div>
-                                </div>
-                            </div>
-
-                            <!-- Button Row -->
-                            <div class="controls-row">
-                                <div class="controls-left">
-                                    <button class="control-btn" id="ctrl-play-pause" aria-label="Play/Pause"><i class="fa-solid fa-play"></i></button>
-                                    
-                                    <div class="volume-control">
-                                        <button class="control-btn" id="ctrl-mute" aria-label="Mute/Unmute"><i class="fa-solid fa-volume-high"></i></button>
-                                        <input type="range" class="volume-slider" id="ctrl-volume" min="0" max="1" step="0.05" value="1" aria-label="Volume">
-                                    </div>
-
-                                    <div class="time-display">
-                                        <span class="time-live-badge" id="player-live-badge"><span class="badge-dot"></span> LIVE</span>
-                                        <span id="time-elapsed">00:00</span>
-                                    </div>
-                                </div>
-
-                                <div class="controls-right">
-                                    <button class="control-btn" id="ctrl-pip" aria-label="Picture in Picture" title="Picture-in-Picture"><i class="fa-solid fa-window-restore"></i></button>
-                                    <button class="control-btn" id="ctrl-fullscreen" aria-label="Fullscreen" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            </div>
-
-            <!-- Right Column: Servers List & Matches Schedule -->
-            <div class="layout-col-right">
-                <!-- Server Switcher Panel -->
-                <div class="panel servers-panel">
-                    <div class="panel-header">
-                        <h2><i class="fa-solid fa-server text-accent"></i> Select Live Match Server</h2>
-                        <span class="badge badge-accent" id="server-count-badge">Loading...</span>
-                    </div>
-                    <div class="panel-body" id="servers-container">
-                        <!-- Dynamic Server Categories and Buttons will be injected here -->
+                <!-- Loader (shimmer skeleton) -->
+                <div id="player-loader" class="absolute inset-0 z-30 bg-black flex flex-col items-center justify-center hidden">
+                    <div class="skeleton-shimmer-container">
+                        <div class="skeleton-shimmer skeleton-logo"></div>
+                        <div class="skeleton-shimmer skeleton-title mt-3"></div>
+                        <div class="skeleton-shimmer skeleton-description mt-1.5"></div>
                     </div>
                 </div>
 
+                <!-- Error overlay -->
+                <div id="player-error" class="absolute inset-0 z-30 bg-black/95 flex flex-col items-center justify-center gap-3 text-center px-6 hidden">
+                    <i class="fa-solid fa-circle-exclamation text-live-red text-xl"></i>
+                    <h4 id="error-title" class="text-[10px] uppercase tracking-[0.2em] text-white/80">Stream Offline or Blocked</h4>
+                    <p id="error-message" class="text-[10px] text-white/40 max-w-sm">Failed to load media. This stream may require custom CORS proxying or is currently inactive.</p>
+                    <button id="btn-error-retry" class="mt-2 text-[9px] tracking-[0.2em] uppercase text-white/60 hover:text-white/90 border border-white/10 px-4 py-1.5 rounded-full hover:bg-white/5 transition-all cursor-pointer">Retry Connection</button>
+                </div>
+
+                <!-- Placeholder overlay -->
+                <div id="player-placeholder" class="absolute inset-0 z-30 bg-radial from-black/80 to-black flex flex-col items-center justify-center gap-2 cursor-pointer text-center px-6">
+                    <i class="fa-solid fa-circle-play text-white/40 text-4xl hover:text-white/80 transition-transform hover:scale-105 duration-300"></i>
+                    <h3 class="text-[10px] uppercase tracking-[0.2em] text-white/80 mt-1">ZID VAI ON AIR</h3>
+                    <p class="text-[10px] text-white/40">Select a broadcast server below to begin</p>
+                </div>
+
+                <!-- Custom controls overlay -->
+                <div id="custom-controls" class="absolute inset-x-0 bottom-0 z-20 p-4 bg-gradient-to-t from-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-2.5">
+                    <!-- Timeline container -->
+                    <div id="timeline-container" class="w-full h-1 bg-white/10 rounded-full cursor-pointer relative flex items-center group/time">
+                        <div class="absolute inset-y-0 left-0 bg-white/20 rounded-full" id="timeline-buffer" style="width: 0%"></div>
+                        <div class="absolute inset-y-0 left-0 bg-white/80 rounded-full group-hover/time:bg-white transition-colors" id="timeline-progress" style="width: 0%"></div>
+                    </div>
+                    <!-- Buttons Row -->
+                    <div class="flex justify-between items-center text-white/70">
+                        <div class="flex items-center gap-4">
+                            <button id="ctrl-play-pause" class="hover:text-white transition-colors focus:outline-none cursor-pointer"><i class="fa-solid fa-play text-xs"></i></button>
+                            <div class="flex items-center gap-2 group/volume">
+                                <button id="ctrl-mute" class="hover:text-white transition-colors focus:outline-none cursor-pointer"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                <input type="range" id="ctrl-volume" min="0" max="1" step="0.05" value="1" class="w-16 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-white focus:outline-none">
+                            </div>
+                            <div class="flex items-center gap-2 text-[10px] tracking-[0.1em] font-light">
+                                <span id="player-live-badge" class="flex items-center gap-1 text-live-red font-semibold"><span class="w-1.5 h-1.5 bg-live-red rounded-full animate-pulse"></span> LIVE</span>
+                                <span id="time-elapsed">00:00</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button id="ctrl-pip" class="hover:text-white transition-colors focus:outline-none cursor-pointer" title="Picture in Picture"><i class="fa-solid fa-window-restore text-xs"></i></button>
+                            <button id="ctrl-fullscreen" class="hover:text-white transition-colors focus:outline-none cursor-pointer" title="Fullscreen"><i class="fa-solid fa-expand text-xs"></i></button>
+                        </div>
+                    </div>
+                </div>
 
             </div>
-        </main>
-
-        <!-- FOOTER -->
-        <footer class="app-footer">
-            <p>&copy; 2026 • <strong>zid vai on air x WC 2026</strong> • Developed by <strong>shahidul islam baizid</strong> • All stream feeds belong to their respective rights holders.</p>
-        </footer>
-    </div>
-
-    <!-- Mobile Landscape Floating Action Button (FAB) -->
-    <button class="landscape-fab" id="fab-channels" aria-label="Toggle Channels List" style="display: none;">
-        <i class="fa-solid fa-server"></i>
-    </button>
-
-    <!-- Mobile Landscape Channels Side Drawer -->
-    <div class="landscape-drawer" id="channel-drawer">
-        <div class="drawer-header">
-            <h3><i class="fa-solid fa-server text-accent"></i> Channels</h3>
-            <button class="drawer-close-btn" id="btn-close-drawer">&times;</button>
         </div>
-        <div class="drawer-body" id="drawer-servers-container">
-            <!-- Populated dynamically via JS -->
+
+        <!-- Mobile portrait spacer to prevent content overlapping with the top-sticky player -->
+        <div class="h-[calc(100vw*9/16)] w-full md:hidden"></div>
+
+        <!-- Mobile Portrait Bottom Sheet / Desktop natural bottom metadata and Server Dock -->
+        <div id="bottom-sheet" class="w-full fixed inset-x-0 bottom-0 bg-[#0a0a0a] border-t border-white/10 rounded-t-2xl z-50 transform translate-y-[calc(100%-54px)] transition-transform duration-300 md:relative md:translate-y-0 md:bg-transparent md:border-none md:rounded-none md:p-0 md:z-auto">
+            <!-- Drawer drag handle (visible on mobile only) -->
+            <div id="bottom-sheet-header" class="flex flex-col items-center py-3 cursor-pointer md:hidden select-none">
+                <div class="w-10 h-1 bg-white/20 rounded-full mb-2"></div>
+                <div class="flex justify-between items-center w-full px-6 text-[10px] tracking-[0.2em] uppercase text-white/40">
+                    <span id="bottom-sheet-title">Swipe up for servers</span>
+                    <span class="flex items-center gap-1.5 text-live-red font-semibold"><span class="w-1.5 h-1.5 bg-live-red rounded-full animate-pulse"></span> LIVE</span>
+                </div>
+            </div>
+
+            <!-- Bottom Sheet / Desktop Info Content -->
+            <div id="bottom-sheet-content" class="px-6 pb-6 pt-2 overflow-y-auto max-h-[70vh] flex flex-col gap-5 md:p-0 md:max-h-none md:overflow-visible md:mt-4">
+                
+                <!-- Metadata Info Bar -->
+                <div class="flex justify-between items-start w-full px-1">
+                    <div class="text-left">
+                        <h3 id="current-server-title" class="text-[12px] font-semibold text-white/80 uppercase tracking-wider">Select a server to start</h3>
+                        <p id="current-server-desc" class="text-[10px] text-white/40 mt-0.5 font-light">Click any broadcast channel below</p>
+                    </div>
+                    <div class="flex items-center">
+                        <button id="btn-copy-url" class="text-[10px] tracking-[0.2em] uppercase text-white/40 hover:text-white/80 transition-colors flex items-center gap-1.5 focus:outline-none cursor-pointer">
+                            <i class="fa-regular fa-copy"></i> Copy Link
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Thin Horizontal Scrollable Server Dock -->
+                <div id="servers-dock-container" class="w-full">
+                    <div id="servers-container" class="flex items-center gap-6 overflow-x-auto scrollbar-hide py-3 px-6 bg-ink-grey rounded-full border border-white/5 w-full select-none">
+                        <!-- Dynamic servers will be injected here as thin text buttons -->
+                    </div>
+                </div>
+
+                <!-- Clock & Match Status Bar -->
+                <div class="flex justify-between items-center border-t border-white/5 pt-3.5 px-1 text-[10px] tracking-[0.1em] text-white/40">
+                    <div id="header-match-status" class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-live-red rounded-full animate-pulse" id="header-match-dot"></span>
+                        <span id="header-match-text" class="uppercase">Loading matches...</span>
+                    </div>
+                    <div id="clock">00:00:00</div>
+                </div>
+
+            </div>
         </div>
-    </div>
+
+    </main>
+
+    <!-- FOOT-PRINT: Extremely small minimal footer at absolute bottom -->
+    <footer class="absolute bottom-2 left-0 right-0 text-center select-none text-[9px] tracking-wider uppercase text-white/20 z-10 pointer-events-none">
+        &copy; 2026 • zid vai on air • shahidul islam baizid
+    </footer>
 
     <!-- Script Entrypoint -->
     <script src="app.js"></script>

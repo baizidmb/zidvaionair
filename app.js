@@ -278,31 +278,91 @@ document.addEventListener('DOMContentLoaded', () => {
     const scheduleContainer = document.getElementById('schedule-container');
     const toastContainer = document.getElementById('toast-container');
 
-    // Mobile Landscape Drawer Elements & Event Listeners
-    const fabChannels = document.getElementById('fab-channels');
-    const channelDrawer = document.getElementById('channel-drawer');
-    const btnCloseDrawer = document.getElementById('btn-close-drawer');
+    // Mobile Bottom Sheet Gesture Logic
+    const bottomSheet = document.getElementById('bottom-sheet');
+    const bottomSheetHeader = document.getElementById('bottom-sheet-header');
+    const bottomSheetTitle = document.getElementById('bottom-sheet-title');
+    
+    let isExpanded = false;
+    let startY = 0;
+    let currentY = 0;
+    let sheetHeight = 0;
+    let isDragging = false;
 
-    if (fabChannels && channelDrawer) {
-        fabChannels.addEventListener('click', (e) => {
-            e.stopPropagation();
-            channelDrawer.classList.toggle('open');
-        });
-    }
+    if (bottomSheet && bottomSheetHeader) {
+        // Touch Drag gestures for mobile portrait
+        bottomSheetHeader.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+            currentY = startY;
+            sheetHeight = bottomSheet.getBoundingClientRect().height;
+            bottomSheet.classList.add('bottom-sheet-dragging');
+            isDragging = false;
+        }, { passive: true });
 
-    if (btnCloseDrawer && channelDrawer) {
-        btnCloseDrawer.addEventListener('click', () => {
-            channelDrawer.classList.remove('open');
-        });
-    }
-
-    document.addEventListener('click', (e) => {
-        if (channelDrawer && channelDrawer.classList.contains('open')) {
-            if (!channelDrawer.contains(e.target) && e.target !== fabChannels && !fabChannels.contains(e.target)) {
-                channelDrawer.classList.remove('open');
+        bottomSheetHeader.addEventListener('touchmove', (e) => {
+            currentY = e.touches[0].clientY;
+            let deltaY = currentY - startY;
+            
+            if (Math.abs(deltaY) > 5) {
+                isDragging = true;
             }
+
+            // Allow dragging up (expanding) or down (collapsing)
+            if (isExpanded) {
+                if (deltaY > 0) {
+                    bottomSheet.style.transform = `translateY(${deltaY}px)`;
+                }
+            } else {
+                if (deltaY < 0) {
+                    let collapsedOffset = sheetHeight - 54;
+                    let targetTranslate = collapsedOffset + deltaY;
+                    if (targetTranslate > 0) {
+                        bottomSheet.style.transform = `translateY(${targetTranslate}px)`;
+                    }
+                }
+            }
+        }, { passive: true });
+
+        bottomSheetHeader.addEventListener('touchend', () => {
+            bottomSheet.classList.remove('bottom-sheet-dragging');
+            bottomSheet.style.transform = '';
+            
+            if (isDragging) {
+                let deltaY = currentY - startY;
+                if (isExpanded) {
+                    if (deltaY > 60) {
+                        isExpanded = false;
+                    }
+                } else {
+                    if (deltaY < -60) {
+                        isExpanded = true;
+                    }
+                }
+                toggleBottomSheet(isExpanded);
+            }
+        }, { passive: true });
+
+        // Toggle on tap/click
+        bottomSheetHeader.addEventListener('click', () => {
+            if (!isDragging) {
+                isExpanded = !isExpanded;
+                toggleBottomSheet(isExpanded);
+            }
+        });
+    }
+
+    function toggleBottomSheet(expand) {
+        if (!bottomSheet) return;
+        if (expand) {
+            bottomSheet.classList.remove('translate-y-[calc(100%-54px)]');
+            bottomSheet.classList.add('translate-y-0');
+            if (bottomSheetTitle) bottomSheetTitle.textContent = 'Swipe down to close';
+        } else {
+            bottomSheet.classList.remove('translate-y-0');
+            bottomSheet.classList.add('translate-y-[calc(100%-54px)]');
+            if (bottomSheetTitle) bottomSheetTitle.textContent = 'Swipe up for servers';
         }
-    });
+    }
 
     // Failover & Auto-switching State
     let failoverCount = 0;
@@ -432,83 +492,51 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!serversContainer) return;
         serversContainer.innerHTML = '';
         
-        const drawerContainer = document.getElementById('drawer-servers-container');
-        if (drawerContainer) {
-            drawerContainer.innerHTML = '';
-        }
-        
         let globalIndex = 0;
         categories.forEach(cat => {
-            // Main list category container
-            const catDiv = document.createElement('div');
-            catDiv.className = 'server-category';
+            // Render category label indicator
+            const catLabel = document.createElement('span');
+            catLabel.className = 'text-[9px] uppercase tracking-[0.2em] text-white/35 select-none shrink-0 font-semibold ml-2';
+            catLabel.textContent = cat.category;
+            serversContainer.appendChild(catLabel);
 
-            const catTitle = document.createElement('h3');
-            catTitle.className = 'server-category-title';
-            catTitle.innerHTML = `<i class="fa-solid fa-layer-group text-accent"></i> ${cat.category}`;
-            catDiv.appendChild(catTitle);
-
-            const catGrid = document.createElement('div');
-            catGrid.className = 'servers-grid';
-
-            // Mobile landscape drawer category container
-            const drawerCatDiv = document.createElement('div');
-            drawerCatDiv.className = 'server-category';
-
-            const drawerCatTitle = document.createElement('h3');
-            drawerCatTitle.className = 'server-category-title';
-            drawerCatTitle.innerHTML = `<i class="fa-solid fa-layer-group text-accent"></i> ${cat.category}`;
-            drawerCatDiv.appendChild(drawerCatTitle);
-
-            const drawerCatGrid = document.createElement('div');
-            drawerCatGrid.className = 'servers-grid';
+            // Separator pipe
+            const sep = document.createElement('span');
+            sep.className = 'text-[10px] text-white/10 select-none shrink-0 font-light mx-1';
+            sep.textContent = '|';
+            serversContainer.appendChild(sep);
 
             cat.servers.forEach(srv => {
-                // Main Category Button
                 const btn = document.createElement('button');
-                btn.className = `server-btn ${srv.badge || 'hd'}`;
+                btn.className = 'server-btn font-light text-[12px] text-white/60 hover:text-white transition-all duration-200 cursor-pointer focus:outline-none select-none shrink-0 flex items-center justify-center';
                 btn.dataset.index = globalIndex;
-                btn.innerHTML = `
-                    <i class="fa-solid fa-play"></i>
-                    <div class="server-btn-info">
-                        <span class="server-btn-name">${srv.name}</span>
-                        <span class="server-btn-detail">${srv.detail}</span>
-                    </div>
-                `;
+                btn.dataset.name = srv.name; // For layout-preserving weight trick
+                
+                // Add name text
+                const textSpan = document.createElement('span');
+                textSpan.textContent = srv.name;
+                btn.appendChild(textSpan);
 
-                // Mobile Landscape Drawer Button
-                const drawerBtn = document.createElement('button');
-                drawerBtn.className = `server-btn ${srv.badge || 'hd'}`;
-                drawerBtn.dataset.index = globalIndex;
-                drawerBtn.innerHTML = `
-                    <i class="fa-solid fa-play"></i>
-                    <div class="server-btn-info">
-                        <span class="server-btn-name">${srv.name}</span>
-                        <span class="server-btn-detail">${srv.detail}</span>
-                    </div>
-                `;
+                // Prepend dot if it is a live match
+                if (srv.badge === 'live-badge' || srv.name.toLowerCase().includes('vs')) {
+                    const dot = document.createElement('span');
+                    dot.className = 'inline-block w-1.5 h-1.5 bg-live-red rounded-full mr-1.5 animate-pulse';
+                    btn.prepend(dot);
+                }
 
                 const currentIndex = globalIndex;
-                
-                const handleSelection = () => {
+                btn.addEventListener('click', () => {
                     window.changeServer(srv.url, currentIndex);
-                };
-                
-                btn.addEventListener('click', handleSelection);
-                drawerBtn.addEventListener('click', handleSelection);
+                });
 
-                catGrid.appendChild(btn);
-                drawerCatGrid.appendChild(drawerBtn);
+                serversContainer.appendChild(btn);
                 globalIndex++;
             });
 
-            catDiv.appendChild(catGrid);
-            serversContainer.appendChild(catDiv);
-
-            if (drawerContainer) {
-                drawerCatDiv.appendChild(drawerCatGrid);
-                drawerContainer.appendChild(drawerCatDiv);
-            }
+            // Add separator spacer between categories
+            const catSpacer = document.createElement('span');
+            catSpacer.className = 'w-6 shrink-0';
+            serversContainer.appendChild(catSpacer);
         });
     }
 
@@ -520,45 +548,24 @@ document.addEventListener('DOMContentLoaded', () => {
             failoverCount = 0;
         }
 
-        // Toggle active states on all dynamically created buttons (both list and drawer)
+        // Toggle active states on all dynamically created buttons
         const allButtons = document.querySelectorAll('.server-btn');
-        allButtons.forEach(btn => btn.classList.remove('active'));
+        allButtons.forEach(btn => {
+            btn.classList.remove('active', 'text-white');
+            btn.classList.add('text-white/60');
+        });
         const activeBtns = document.querySelectorAll(`.server-btn[data-index="${index}"]`);
-        activeBtns.forEach(btn => btn.classList.add('active'));
+        activeBtns.forEach(btn => {
+            btn.classList.remove('text-white/60');
+            btn.classList.add('active', 'text-white');
+        });
 
         // Play the stream
         const server = SERVERS[index];
         playStream(url, server.name, server.detail);
 
-        // Dynamic bloom coloring based on category
-        const playerWrapper = document.querySelector('.player-wrapper');
-        if (playerWrapper && server) {
-            let primaryColor = 'rgba(0, 255, 136, 0.2)';
-            let secondaryColor = 'rgba(0, 217, 255, 0.1)';
-            
-            if (server.category.includes('Match')) {
-                primaryColor = 'rgba(0, 255, 136, 0.2)';
-                secondaryColor = 'rgba(255, 45, 85, 0.1)';
-            } else if (server.category.includes('Sportzfy')) {
-                primaryColor = 'rgba(255, 45, 74, 0.25)';
-                secondaryColor = 'rgba(255, 85, 119, 0.15)';
-            } else if (server.category.includes('FIFA')) {
-                primaryColor = 'rgba(212, 175, 55, 0.2)';
-                secondaryColor = 'rgba(0, 255, 136, 0.1)';
-            } else if (server.category.includes('Sports') || server.category.includes('Networks')) {
-                primaryColor = 'rgba(0, 217, 255, 0.2)';
-                secondaryColor = 'rgba(145, 70, 255, 0.1)';
-            }
-            
-            playerWrapper.style.setProperty('--bloom-color-primary', primaryColor);
-            playerWrapper.style.setProperty('--bloom-color-secondary', secondaryColor);
-        }
-
-        // Close the mobile landscape side drawer on server selection
-        const channelDrawer = document.getElementById('channel-drawer');
-        if (channelDrawer) {
-            channelDrawer.classList.remove('open');
-        }
+        // Collapse mobile bottom sheet on selection
+        toggleBottomSheet(false);
     };
 
     // Initialize the servers list in the DOM dynamically
