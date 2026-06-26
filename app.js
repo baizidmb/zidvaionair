@@ -48,10 +48,24 @@ document.addEventListener('DOMContentLoaded', () => {
             channels = getFallbackChannels();
         }
 
+        // Load Sportzfy streams from local decrypted JSON
+        let sportzfyStreams = [];
+        try {
+            const res = await fetch('./sportzfy_streams.json?t=' + Date.now());
+            if (res.ok) {
+                const data = await res.json();
+                sportzfyStreams = data.streams || [];
+            }
+        } catch (e) {
+            console.warn('Failed to load Sportzfy streams:', e);
+        }
+
         const matchStreams = [];
         const genericFifaStreams = [];
         const sportsNetworkStreams = [];
+        const sportzfyMatchStreams = [];
 
+        // Parse Toffee channels
         channels.forEach(ch => {
             const name = ch.name || '';
             const rawUrl = ch.link || ch.url || '';
@@ -105,6 +119,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // Parse Sportzfy channels (filter out DRM and non-HLS streams)
+        sportzfyStreams.forEach(ch => {
+            if (!ch.stream_url || ch.stream_type !== 'hls' || ch.drm_kid) return;
+            sportzfyMatchStreams.push({
+                name: ch.label || `Sportzfy Server ${ch.id}`,
+                url: ch.stream_url,
+                detail: `Sportzfy Premium Broadcast Feed`,
+                badge: (ch.label && ch.label.toLowerCase().includes('hd')) ? 'fhd' : 'hd'
+            });
+        });
+
         // Ensure BTV National is always present in the sports network streams
         const hasBTV = sportsNetworkStreams.some(srv => srv.name.toLowerCase().includes('btv'));
         if (!hasBTV) {
@@ -115,6 +140,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 badge: 'hd'
             });
         }
+
+        // Add working BTV Chattogram Bozztv alternative stream
+        sportsNetworkStreams.push({
+            name: 'BTV Chattogram',
+            url: 'https://bozztv.com/rongo/rongo-BTVChattagram/index.m3u8',
+            detail: 'BTV Chattogram Live Broadcast (Bozztv CDN)',
+            badge: 'hd'
+        });
         
         // Ensure Somoy TV is always present in the sports network streams
         const hasSomoy = sportsNetworkStreams.some(srv => srv.name.toLowerCase().includes('somoy'));
@@ -142,6 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
             categories.push({
                 category: 'World Cup Live Match Servers',
                 servers: matchStreams
+            });
+        }
+        if (sportzfyMatchStreams.length > 0) {
+            categories.push({
+                category: 'Sportzfy Premium Broadcasts',
+                servers: sportzfyMatchStreams
             });
         }
         if (genericFifaStreams.length > 0) {
@@ -185,6 +224,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const firstMatchIdx = SERVERS.findIndex(srv => srv.category === 'World Cup Live Match Servers' && srv.name !== 'No Live Matches Currently');
         if (firstMatchIdx !== -1) {
             startIdx = firstMatchIdx;
+        } else {
+            const firstSportzfyIdx = SERVERS.findIndex(srv => srv.category === 'Sportzfy Premium Broadcasts');
+            if (firstSportzfyIdx !== -1) {
+                startIdx = firstSportzfyIdx;
+            }
         }
 
         const defaultServer = SERVERS[startIdx];
@@ -495,6 +539,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (server.category.includes('Match')) {
                 primaryColor = 'rgba(0, 255, 136, 0.2)';
                 secondaryColor = 'rgba(255, 45, 85, 0.1)';
+            } else if (server.category.includes('Sportzfy')) {
+                primaryColor = 'rgba(255, 45, 74, 0.25)';
+                secondaryColor = 'rgba(255, 85, 119, 0.15)';
             } else if (server.category.includes('FIFA')) {
                 primaryColor = 'rgba(212, 175, 55, 0.2)';
                 secondaryColor = 'rgba(0, 255, 136, 0.1)';

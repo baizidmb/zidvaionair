@@ -1,0 +1,89 @@
+{
+  "ok": true,
+  "source": "spweb",
+  "parent": "FIFA World Cup",
+  "event": null,
+  "streams": [
+    {
+      "id": "4885",
+      "label": "SP - HD",
+      "stream_type": "hls",
+      "stream_url": "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OuvO9_v1Oak4MYmokrJdsHJokrJdkABFhNcE0zKLw&headers=3OvT47zfFUzf75IJq1aTL768EAv3ERq3qMu840zmHSo3osynd_anIGo3qMBh4RI3r9qvzjasEhukI51JH7I8qjuRIREmFk6nI0zfysfjEU1hqGq_9jv2",
+      "drm_kid": null,
+      "drm_key": null,
+      "sort_order": 0
+    },
+    {
+      "id": "4798",
+      "label": "FAST 1",
+      "stream_type": "hls",
+      "stream_url": "https://pullsgp.yyzb456.top/live/stream-698168_lhd.m3u8",
+      "drm_kid": null,
+      "drm_key": null,
+      "sort_order": 1
+    },
+    {
+      "id": "4883",
+      "label": "FAST 2",
+      "stream_type": "hls",
+      "stream_url": "https://pulltx.jdnzrgm.com/live/hd-en-6MvZ6BDhJ2nQTAy3UJ.m3u8?txSecret=5a733c6d2b5b557345bb398060dad1cb&txTime=6A3EEF59",
+      "drm_kid": null,
+      "drm_key": null,
+      "sort_order": 2
+    },
+    {
+      "id": "4759",
+      "label": "Arabic",
+      "stream_type": "hls",
+      "stream_url": "https://za.teworld.online/mooott1.m3u8",
+      "drm_kid": null,
+      "drm_key": null,
+      "sort_order": 3
+    },
+    {
+      "id": "4665",
+      "label": "CCTV 5",
+      "stream_type": "hls",
+      "stream_url": "https://live.666666.zip/stream/20233432.m3u8",
+      "drm_kid": null,
+      "drm_key": null,
+      "sort_order": 4
+    },
+    {
+      "id": "4758",
+      "label": "SP - 2",
+      "stream_type": "hls",
+      "stream_url": "https://live.666666.zip/migu/1.m3u8",
+      "drm_kid": null,
+      "drm_key": null,
+      "sort_order": 5
+    },
+    {
+      "id": "4828",
+      "label": "SP - 3",
+      "stream_type": "hls",
+      "stream_url": "https://tdlive.yarncdn.live/live/tdtv_blv_taovannghe/playlist.m3u8",
+      "drm_kid": null,
+      "drm_key": null,
+      "sort_order": 6
+    },
+    {
+      "id": "4722",
+      "label": "FUSSBALL (Germany VPN)",
+      "stream_type": "dash",
+      "stream_url": "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_hd/DASH/index.mpd",
+      "drm_kid": "1cb20afcd9d979c833cfd208c7d3eeb2",
+      "drm_key": "fef0c15b4a523370892edd5e4133c269",
+      "sort_order": 7
+    },
+    {
+      "id": "4723",
+      "label": "FUSSBALL 4K (Germany VPN)",
+      "stream_type": "dash",
+      "stream_url": "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd",
+      "drm_kid": "1f09d5788fbbb03a053d03cc731f31a9",
+      "drm_key": "d493d5a70c793362324638f61d1726ac",
+      "sort_order": 8
+    }
+  ]
+}
