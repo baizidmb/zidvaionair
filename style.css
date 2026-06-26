@@ -8,8 +8,8 @@
     
     /* Liquid Glass Constants */
     --glass-bg: rgba(6, 20, 14, 0.45);
-    --glass-border: rgba(0, 255, 136, 0.12);
-    --glass-border-hover: rgba(0, 255, 136, 0.35);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-hover: rgba(255, 255, 255, 0.15);
     --glass-blur: blur(25px) saturate(180%);
     
     /* Colors */
@@ -51,6 +51,7 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
+    letter-spacing: -0.020em;
 }
 
 /* ---------------------------------------------------------
@@ -832,10 +833,17 @@ video {
    --------------------------------------------------------- */
 .custom-player-controls {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: linear-gradient(to top, rgba(1, 6, 4, 0.95) 0%, rgba(1, 6, 4, 0.6) 70%, transparent 100%);
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    background: linear-gradient(135deg, rgba(6, 20, 14, 0.5) 0%, rgba(1, 6, 4, 0.3) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8),
+                inset 0 0 1px 1px rgba(255, 255, 255, 0.12),
+                inset 0 10px 20px -10px rgba(0, 255, 136, 0.1);
     display: flex;
     flex-direction: column;
     padding: 16px 20px;
@@ -1321,12 +1329,311 @@ video {
     animation: spin 1.5s linear infinite;
 }
 
+/* Video cross-fade and blur transition on swap */
+#video-player {
+    transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                filter 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    opacity: 1;
+    filter: blur(0px);
+}
+
+#video-player.video-swapping {
+    opacity: 0.3;
+    filter: blur(15px);
+}
+
+/* Ambient Bloom Backglow Wrapper */
+.player-wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+.player-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -4%;
+    left: -4%;
+    right: -4%;
+    bottom: -4%;
+    z-index: -1;
+    border-radius: var(--border-radius-lg);
+    background: radial-gradient(
+        circle at 50% 50%,
+        var(--bloom-color-primary, rgba(0, 255, 136, 0.15)) 0%,
+        var(--bloom-color-secondary, rgba(0, 217, 255, 0.08)) 50%,
+        transparent 75%
+    );
+    filter: blur(65px);
+    opacity: 0.85;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    transition: background 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    animation: bloomPulse 4s infinite ease-in-out alternate;
+}
+
+@keyframes bloomPulse {
+    0% {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+    100% {
+        opacity: 0.95;
+        transform: scale(1.02);
+    }
+}
+
+/* Linear Shimmer Skeletons */
+.skeleton-shimmer-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 80%;
+    max-width: 320px;
+    align-items: center;
+}
+
+.skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
+}
+
+.skeleton-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.03) 20%,
+        rgba(255, 255, 255, 0.08) 60%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: shimmerSweep 1.6s infinite cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes shimmerSweep {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.skeleton-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.skeleton-title {
+    width: 180px;
+    height: 14px;
+    border-radius: 4px;
+}
+
+.skeleton-description {
+    width: 240px;
+    height: 10px;
+    border-radius: 4px;
+}
+
+/* Server Selection Active state glow & dimming */
+.server-btn {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    opacity: 0.65;
+}
+
+.server-btn:hover {
+    opacity: 0.9;
+}
+
+.server-btn.active {
+    opacity: 1 !important;
+    transform: scale(1.02);
+}
+
+/* Mobile Landscape Channels Drawer */
+.landscape-drawer {
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: 320px;
+    height: 100vh;
+    background: rgba(1, 6, 4, 0.7);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.6);
+    transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.landscape-drawer.open {
+    right: 0;
+}
+
+.drawer-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.drawer-header h3 {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+}
+
+.drawer-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.drawer-close-btn:hover {
+    color: #ffffff;
+}
+
+.drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.drawer-body .server-category {
+    margin-bottom: 20px;
+}
+
+.drawer-body .server-category-title {
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+}
+
+.drawer-body .servers-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.drawer-body .server-btn {
+    padding: 12px 16px;
+    gap: 12px;
+}
+
+.drawer-body .server-btn-name {
+    font-size: 0.9rem;
+}
+
+.drawer-body .server-btn-detail {
+    font-size: 0.7rem;
+}
+
+/* Floating Action Button (FAB) */
+.landscape-fab {
+    display: none;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(6, 20, 14, 0.75);
+    border: 1px solid var(--accent);
+    color: #ffffff;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 255, 136, 0.3);
+    backdrop-filter: blur(10px);
+    z-index: 9998;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.landscape-fab:hover {
+    transform: scale(1.08);
+}
+
 /* Responsive adjustments */
 @media (max-width: 991px) {
     .layout-col-left {
         position: sticky;
         top: 12px;
         z-index: 100;
+    }
+}
+
+@media (max-width: 991px) and (orientation: landscape) {
+    .app-header {
+        display: none !important;
+    }
+    
+    .layout-col-right {
+        display: none !important;
+    }
+    
+    .app-container {
+        padding: 0 !important;
+        max-width: 100vw !important;
+        height: 100vh !important;
+        gap: 0 !important;
+    }
+    
+    .player-layout {
+        display: block !important;
+        width: 100vw !important;
+        height: 100vh !important;
+    }
+    
+    .layout-col-left {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 1000 !important;
+        top: 0 !important;
+    }
+    
+    .player-panel {
+        border-radius: 0 !important;
+        height: 100vh !important;
+        border: none !important;
+    }
+    
+    .player-header {
+        display: none !important;
+    }
+    
+    .video-container {
+        height: 100vh !important;
+        aspect-ratio: auto !important;
+    }
+    
+    .custom-player-controls {
+        bottom: 24px !important;
+        left: 24px !important;
+        right: 24px !important;
+    }
+    
+    .app-footer {
+        display: none !important;
+    }
+    
+    .landscape-fab {
+        display: flex !important;
     }
 }
 

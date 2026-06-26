@@ -44,8 +44,9 @@
         <main class="player-layout">
             <!-- Left Column: Video Player & Help Info -->
             <div class="layout-col-left">
-                <!-- Central Player Panel -->
-                <div class="panel player-panel">
+                <div class="player-wrapper">
+                    <!-- Central Player Panel -->
+                    <div class="panel player-panel">
                     <div class="player-header">
                         <div class="active-server-info">
                             <i class="fa-solid fa-satellite-dish active-icon"></i>
@@ -73,10 +74,13 @@
                             <span class="unmute-text">Tap to Unmute</span>
                         </div>
 
-                        <!-- Player Loading Overlay -->
+                        <!-- Player Loading Overlay (Cinematic Shimmer Skeleton) -->
                         <div class="player-overlay hidden" id="player-loader">
-                            <div class="spinner"></div>
-                            <p>Connecting to broadcast stream...</p>
+                            <div class="skeleton-shimmer-container">
+                                <div class="skeleton-shimmer skeleton-logo"></div>
+                                <div class="skeleton-shimmer skeleton-title"></div>
+                                <div class="skeleton-shimmer skeleton-description"></div>
+                            </div>
                         </div>
 
                         <!-- Player Error Overlay -->
@@ -128,7 +132,7 @@
                         </div>
                     </div>
                 </div>
-
+            </div>
 
             </div>
 
@@ -153,6 +157,22 @@
         <footer class="app-footer">
             <p>&copy; 2026 • <strong>zid vai on air x WC 2026</strong> • Developed by <strong>shahidul islam baizid</strong> • All stream feeds belong to their respective rights holders.</p>
         </footer>
+    </div>
+
+    <!-- Mobile Landscape Floating Action Button (FAB) -->
+    <button class="landscape-fab" id="fab-channels" aria-label="Toggle Channels List" style="display: none;">
+        <i class="fa-solid fa-server"></i>
+    </button>
+
+    <!-- Mobile Landscape Channels Side Drawer -->
+    <div class="landscape-drawer" id="channel-drawer">
+        <div class="drawer-header">
+            <h3><i class="fa-solid fa-server text-accent"></i> Channels</h3>
+            <button class="drawer-close-btn" id="btn-close-drawer">&times;</button>
+        </div>
+        <div class="drawer-body" id="drawer-servers-container">
+            <!-- Populated dynamically via JS -->
+        </div>
     </div>
 
     <!-- Script Entrypoint -->

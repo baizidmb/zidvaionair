@@ -234,6 +234,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const scheduleContainer = document.getElementById('schedule-container');
     const toastContainer = document.getElementById('toast-container');
 
+    // Mobile Landscape Drawer Elements & Event Listeners
+    const fabChannels = document.getElementById('fab-channels');
+    const channelDrawer = document.getElementById('channel-drawer');
+    const btnCloseDrawer = document.getElementById('btn-close-drawer');
+
+    if (fabChannels && channelDrawer) {
+        fabChannels.addEventListener('click', (e) => {
+            e.stopPropagation();
+            channelDrawer.classList.toggle('open');
+        });
+    }
+
+    if (btnCloseDrawer && channelDrawer) {
+        btnCloseDrawer.addEventListener('click', () => {
+            channelDrawer.classList.remove('open');
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (channelDrawer && channelDrawer.classList.contains('open')) {
+            if (!channelDrawer.contains(e.target) && e.target !== fabChannels && !fabChannels.contains(e.target)) {
+                channelDrawer.classList.remove('open');
+            }
+        }
+    });
+
     // Failover & Auto-switching State
     let failoverCount = 0;
 
@@ -245,6 +271,9 @@ document.addEventListener('DOMContentLoaded', () => {
         playerLoader.classList.remove('hidden');
         playerError.classList.add('hidden');
         playerPlaceholder.classList.add('hidden');
+
+        // Apply cross-fade swapping class
+        video.classList.add('video-swapping');
 
         // Update titles and info
         currentServerTitle.textContent = name;
@@ -277,6 +306,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 playerLoader.classList.add('hidden');
                 customControls.classList.remove('hidden');
                 unmuteOverlay.classList.add('hidden');
+                
+                // Clear cross-fade swapping class
+                video.classList.remove('video-swapping');
                 
                 video.play().catch(e => {
                     console.log('Autoplay blocked. Starting muted.');
@@ -320,6 +352,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 customControls.classList.remove('hidden');
                 unmuteOverlay.classList.add('hidden');
                 
+                // Clear cross-fade swapping class
+                video.classList.remove('video-swapping');
+                
                 video.play().catch(e => {
                     console.log('Autoplay blocked. Starting muted.');
                     video.muted = true;
@@ -343,6 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playerError.classList.remove('hidden');
         errorMessage.textContent = msg;
         video.src = '';
+        video.classList.remove('video-swapping');
     }
 
     // ---------------------------------------------------------
@@ -352,23 +388,39 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!serversContainer) return;
         serversContainer.innerHTML = '';
         
+        const drawerContainer = document.getElementById('drawer-servers-container');
+        if (drawerContainer) {
+            drawerContainer.innerHTML = '';
+        }
+        
         let globalIndex = 0;
         categories.forEach(cat => {
-            // Category Wrapper
+            // Main list category container
             const catDiv = document.createElement('div');
             catDiv.className = 'server-category';
 
-            // Category Title
             const catTitle = document.createElement('h3');
             catTitle.className = 'server-category-title';
             catTitle.innerHTML = `<i class="fa-solid fa-layer-group text-accent"></i> ${cat.category}`;
             catDiv.appendChild(catTitle);
 
-            // Category Grid
             const catGrid = document.createElement('div');
             catGrid.className = 'servers-grid';
 
+            // Mobile landscape drawer category container
+            const drawerCatDiv = document.createElement('div');
+            drawerCatDiv.className = 'server-category';
+
+            const drawerCatTitle = document.createElement('h3');
+            drawerCatTitle.className = 'server-category-title';
+            drawerCatTitle.innerHTML = `<i class="fa-solid fa-layer-group text-accent"></i> ${cat.category}`;
+            drawerCatDiv.appendChild(drawerCatTitle);
+
+            const drawerCatGrid = document.createElement('div');
+            drawerCatGrid.className = 'servers-grid';
+
             cat.servers.forEach(srv => {
+                // Main Category Button
                 const btn = document.createElement('button');
                 btn.className = `server-btn ${srv.badge || 'hd'}`;
                 btn.dataset.index = globalIndex;
@@ -380,17 +432,39 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
 
+                // Mobile Landscape Drawer Button
+                const drawerBtn = document.createElement('button');
+                drawerBtn.className = `server-btn ${srv.badge || 'hd'}`;
+                drawerBtn.dataset.index = globalIndex;
+                drawerBtn.innerHTML = `
+                    <i class="fa-solid fa-play"></i>
+                    <div class="server-btn-info">
+                        <span class="server-btn-name">${srv.name}</span>
+                        <span class="server-btn-detail">${srv.detail}</span>
+                    </div>
+                `;
+
                 const currentIndex = globalIndex;
-                btn.addEventListener('click', () => {
+                
+                const handleSelection = () => {
                     window.changeServer(srv.url, currentIndex);
-                });
+                };
+                
+                btn.addEventListener('click', handleSelection);
+                drawerBtn.addEventListener('click', handleSelection);
 
                 catGrid.appendChild(btn);
+                drawerCatGrid.appendChild(drawerBtn);
                 globalIndex++;
             });
 
             catDiv.appendChild(catGrid);
             serversContainer.appendChild(catDiv);
+
+            if (drawerContainer) {
+                drawerCatDiv.appendChild(drawerCatGrid);
+                drawerContainer.appendChild(drawerCatDiv);
+            }
         });
     }
 
@@ -402,15 +476,42 @@ document.addEventListener('DOMContentLoaded', () => {
             failoverCount = 0;
         }
 
-        // Toggle active states on all dynamically created buttons
+        // Toggle active states on all dynamically created buttons (both list and drawer)
         const allButtons = document.querySelectorAll('.server-btn');
         allButtons.forEach(btn => btn.classList.remove('active'));
-        const activeBtn = document.querySelector(`.server-btn[data-index="${index}"]`);
-        if (activeBtn) activeBtn.classList.add('active');
+        const activeBtns = document.querySelectorAll(`.server-btn[data-index="${index}"]`);
+        activeBtns.forEach(btn => btn.classList.add('active'));
 
         // Play the stream
         const server = SERVERS[index];
         playStream(url, server.name, server.detail);
+
+        // Dynamic bloom coloring based on category
+        const playerWrapper = document.querySelector('.player-wrapper');
+        if (playerWrapper && server) {
+            let primaryColor = 'rgba(0, 255, 136, 0.2)';
+            let secondaryColor = 'rgba(0, 217, 255, 0.1)';
+            
+            if (server.category.includes('Match')) {
+                primaryColor = 'rgba(0, 255, 136, 0.2)';
+                secondaryColor = 'rgba(255, 45, 85, 0.1)';
+            } else if (server.category.includes('FIFA')) {
+                primaryColor = 'rgba(212, 175, 55, 0.2)';
+                secondaryColor = 'rgba(0, 255, 136, 0.1)';
+            } else if (server.category.includes('Sports') || server.category.includes('Networks')) {
+                primaryColor = 'rgba(0, 217, 255, 0.2)';
+                secondaryColor = 'rgba(145, 70, 255, 0.1)';
+            }
+            
+            playerWrapper.style.setProperty('--bloom-color-primary', primaryColor);
+            playerWrapper.style.setProperty('--bloom-color-secondary', secondaryColor);
+        }
+
+        // Close the mobile landscape side drawer on server selection
+        const channelDrawer = document.getElementById('channel-drawer');
+        if (channelDrawer) {
+            channelDrawer.classList.remove('open');
+        }
     };
 
     // Initialize the servers list in the DOM dynamically
