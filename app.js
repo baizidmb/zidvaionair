@@ -252,38 +252,41 @@ document.addEventListener('DOMContentLoaded', () => {
         serversContainer.innerHTML = '';
         
         serversList.forEach((srv, index) => {
-            const row = document.createElement('div');
+            const card = document.createElement('div');
             const isActive = currentServerIndex !== null && SERVERS[currentServerIndex]?.url === srv.url;
-            row.className = `server-row ${isActive ? 'active' : ''} ${srv.status === 'offline' ? 'dead' : ''}`;
-            row.dataset.index = index;
+            card.className = `server-card ${isActive ? 'active' : ''} ${srv.status === 'offline' ? 'dead' : ''}`;
+            card.dataset.index = index;
             
-            let ledClass = 'led-green';
+            let statusDotClass = 'status-green';
             let statusText = srv.latency ? `${Math.round(srv.latency)}ms` : 'online';
             if (srv.status === 'amber') {
-                ledClass = 'led-amber';
+                statusDotClass = 'status-amber';
             } else if (srv.status === 'offline') {
-                ledClass = 'led-red';
+                statusDotClass = 'status-red';
                 statusText = 'OFFLINE';
             }
             
             const qualityBadge = srv.badge ? srv.badge.toUpperCase() : 'HD';
 
-            row.innerHTML = `
-                <div class="col-span-6 font-bold tracking-wider text-xs truncate server-name" title="${srv.name}">${srv.name}</div>
-                <div class="col-span-3 text-center text-[10px]"><span class="bg-[#1b1e26] border border-[#2d323f] px-1.5 py-0.5">${qualityBadge}</span></div>
-                <div class="col-span-3 flex items-center justify-end gap-1.5 text-[10px] font-mono text-white/60">
+            card.innerHTML = `
+                <div class="server-thumb">${qualityBadge}</div>
+                <div class="flex-grow flex flex-col overflow-hidden text-left">
+                    <span class="server-card-name font-bold text-xs truncate text-white" title="${srv.name}">${srv.name}</span>
+                    <span class="text-[10px] text-white/40 truncate">${srv.detail || 'Live Broadcast Feed'}</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
                     <span>${statusText}</span>
-                    <span class="led-indicator ${ledClass}"></span>
+                    <span class="status-dot ${statusDotClass}"></span>
                 </div>
             `;
             
             if (srv.status !== 'offline') {
-                row.addEventListener('click', () => {
+                card.addEventListener('click', () => {
                     window.changeServer(srv.url, index);
                 });
             }
             
-            serversContainer.appendChild(row);
+            serversContainer.appendChild(card);
         });
 
         const serverCountBadge = document.getElementById('server-count-badge');
@@ -529,7 +532,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         player.removeAttribute('src');
-        player.load();    function playStream(index) {
+        player.load();
+    }
+
+    function playStream(index) {
         const server = SERVERS[index];
         if (!server) return;
 
