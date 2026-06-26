@@ -1,280 +1,199 @@
 /* =========================================================
-   COPASTREAM 2026 - SEAMLESS BROADCAST DASHBOARD STYLE
+   COPASTREAM 2026 - INDUSTRIAL BROADCAST SUITE STYLE
    ========================================================= */
 
 @import "tailwindcss";
 
 @theme {
   --color-live-red: #ff2d55;
-  --font-inter: 'Inter', sans-serif;
+  --font-rajdhani: 'Rajdhani', sans-serif;
 }
 
 /* ---------------------------------------------------------
-   BASE OVERRIDES
+   BASE OVERRIDES (INDUSTRIAL INDUSTRIAL THEME)
    --------------------------------------------------------- */
 html, body {
-    background-color: #020508;
-    background: linear-gradient(135deg, #020508 0%, #050a0f 50%, #010204 100%);
-    color: rgba(255, 255, 255, 0.7);
-    font-family: 'Inter', sans-serif;
-    letter-spacing: -0.02em;
+    background-color: #0a0b0d;
+    background: radial-gradient(circle at center, #161922 0%, #0a0b0d 100%);
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 0.05em;
     height: 100%;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
 }
 
-/* Hide scrollbar utility */
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
+/* Sharp box model utility */
+* {
+    border-radius: 0 !important;
 }
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+
+/* Scanlines overlay effect */
+.scanlines {
+    background: linear-gradient(
+        rgba(0, 0, 0, 0) 50%,
+        rgba(0, 0, 0, 0.3) 50%
+    );
+    background-size: 100% 4px;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.08;
+}
+
+/* Custom industrial scrollbar */
+.scrollbar-style::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollbar-style::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+.scrollbar-style::-webkit-scrollbar-thumb {
+    background: #2d323f;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.scrollbar-style::-webkit-scrollbar-thumb:hover {
+    background: #00e5ff;
 }
 
 /* ---------------------------------------------------------
-   LIQUID GLASS SURFACE MODULE
+   NEON ACCENT SYSTEM & ANIMATIONS
    --------------------------------------------------------- */
-.liquid-glass {
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-/* ---------------------------------------------------------
-   AMBIENT GLOW ENGINE
-   --------------------------------------------------------- */
-@keyframes ambient-pulse {
+@keyframes neon-pulse-blue {
     0%, 100% {
-        opacity: 0.08;
-        transform: scale(1);
+        box-shadow: 0 0 5px rgba(0, 229, 255, 0.3);
     }
     50% {
-        opacity: 0.20;
-        transform: scale(1.08);
+        box-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
     }
 }
 
-.animate-ambient-pulse {
-    animation: ambient-pulse 12s infinite ease-in-out;
+@keyframes neon-pulse-green {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 12px rgba(57, 255, 20, 0.6);
+    }
 }
 
-/* ---------------------------------------------------------
-   GHOST UI INTERACTION STATES
-   --------------------------------------------------------- */
-/* Desktop hover activations */
-#player-container:hover header,
-#player-container:hover #dots-container,
-#player-container:hover #custom-controls {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* Mobile active tap activations via JS class toggle */
-.show-controls header,
-.show-controls #dots-container,
-.show-controls #custom-controls {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-}
-
-/* ---------------------------------------------------------
-   LIQUID DOTS ACTIVE GLOW SYSTEM
-   --------------------------------------------------------- */
-.dot-btn {
+/* LED light indicators */
+.led-indicator {
     width: 6px;
     height: 6px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.25);
-    border: none;
+    border-radius: 50% !important; /* Force LED to be circle */
+    display: inline-block;
+}
+.led-green {
+    background-color: #39ff14;
+    box-shadow: 0 0 6px #39ff14;
+}
+.led-amber {
+    background-color: #ff9f0a;
+    box-shadow: 0 0 6px #ff9f0a;
+}
+.led-red {
+    background-color: #ff2d55;
+    box-shadow: 0 0 6px #ff2d55;
+}
+
+/* ---------------------------------------------------------
+   SERVER CONSOLE ROW COMPONENT
+   --------------------------------------------------------- */
+.server-row {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #2d323f;
+    padding: 8px 12px;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 4px;
+    align-items: center;
     cursor: pointer;
-    padding: 0;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    position: relative;
-    outline: none;
-    flex-shrink: 0;
+    transition: all 0.2s ease-in-out;
 }
 
-.dot-btn:hover {
-    background-color: #00f2fe;
-    transform: scale(1.4);
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.8);
+.server-row:hover {
+    border-color: #00e5ff;
+    background: rgba(0, 229, 255, 0.05);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
 }
 
-@keyframes liquid-aura {
-    0%, 100% {
-        box-shadow: 0 0 8px rgba(0, 242, 254, 0.6), 0 0 16px rgba(0, 242, 254, 0.3);
-    }
-    50% {
-        box-shadow: 0 0 14px rgba(0, 242, 254, 0.95), 0 0 28px rgba(0, 242, 254, 0.5);
-    }
+.server-row.active {
+    border-color: #39ff14;
+    background: rgba(57, 255, 20, 0.08);
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.15);
 }
 
-.dot-btn.active {
-    width: 8px;
-    height: 8px;
-    background-color: #00f2fe;
-    transform: scale(1.25);
-    animation: liquid-aura 2s infinite ease-in-out;
-    opacity: 1;
+.server-row.dead {
+    opacity: 0.35;
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 45, 85, 0.15);
+    cursor: not-allowed;
 }
 
-/* Background check dead dot dims */
-.dot-btn.dead {
-    opacity: 0.15 !important;
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    pointer-events: none !important;
-    cursor: not-allowed !important;
-    box-shadow: none !important;
-    transform: scale(0.9) !important;
+.server-row.dead:hover {
+    box-shadow: none;
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 45, 85, 0.15);
 }
 
-.dot-btn.dead::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -2px;
-    right: -2px;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.4);
-    transform: translateY(-50%) rotate(-45deg);
-}
-
-/* Tooltip container */
-.dot-tooltip {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(4px);
-    backdrop-filter: blur(15px);
-    background-color: rgba(2, 5, 8, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.8);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    white-space: nowrap;
-    z-index: 50;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-}
-
-.dot-btn:hover .dot-tooltip {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+.server-row.dead .server-name {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.3);
 }
 
 /* ---------------------------------------------------------
-   PLAYER SKELETON SHIMMER SCREEN
+   LOADER & SPINNER
    --------------------------------------------------------- */
-@keyframes shimmer-sweep {
-    0% {
-        transform: translateX(-100%);
-    }
-    100% {
-        transform: translateX(100%);
-    }
-}
-
-.skeleton-shimmer-container {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    width: 80%;
-    max-width: 360px;
-    align-items: center;
-}
-
-.skeleton-shimmer {
-    position: relative;
-    background: rgba(255, 255, 255, 0.04);
-    overflow: hidden;
-    border-radius: 4px;
-}
-
-.skeleton-shimmer::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.08),
-        transparent
-    );
-    animation: shimmer-sweep 1.8s infinite ease-in-out;
-}
-
-.skeleton-logo {
-    height: 18px;
-    width: 100px;
-}
-
-.skeleton-title {
-    height: 12px;
-    width: 220px;
-}
-
-.skeleton-description {
-    height: 10px;
-    width: 160px;
-}
-
-/* ---------------------------------------------------------
-   HUD CONTROL AUTO-HIDE
-   --------------------------------------------------------- */
-.hide-controls {
-    opacity: 0 !important;
-    pointer-events: none !important;
-    cursor: none !important;
-}
-
-.hide-cursor {
-    cursor: none !important;
-}
-
-/* ---------------------------------------------------------
-   TOAST NOTIFICATION MODAL
-   --------------------------------------------------------- */
-.toast-notification {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    backdrop-filter: blur(20px);
-    background: rgba(10, 10, 10, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.80);
-    padding: 10px 18px;
-    border-radius: 9999px;
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-    z-index: 100;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.toast-notification.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.toast-icon {
-    animation: spin 1.5s linear infinite;
-    color: #ff2d55;
+.spinner-industrial {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(0, 229, 255, 0.1);
+    border-top: 3px solid #00e5ff;
+    border-right: 3px solid #00e5ff;
+    animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* ---------------------------------------------------------
+   TICKER SLIDE ANIMATION
+   --------------------------------------------------------- */
+.ticker-wrapper {
+    animation: ticker-slide 30s linear infinite;
+}
+
+@keyframes ticker-slide {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+.ticker-wrapper:hover {
+    animation-play-state: paused;
+}
+
+/* ---------------------------------------------------------
+   DECK VOLUME ADJUSTMENT SLIDER
+   --------------------------------------------------------- */
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    background: #00e5ff;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    background: #00e5ff;
+    cursor: pointer;
 }

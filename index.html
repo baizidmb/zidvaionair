@@ -3,146 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zid Vai On Air x WC 2026</title>
-    <!-- Premium Fonts -->
+    <title>Zid Vai On Air x WC 2026 - Broadcast Suite</title>
+    <!-- Premium Tech Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Hls.js for direct HLS streaming -->
+    <!-- Hls.js for HLS streaming -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <!-- Tailwind CSS v4 Browser Runtime -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Custom styling stylesheet link -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#020508] bg-gradient-to-br from-[#020508] via-[#050a0f] to-[#010204] text-white/80 min-h-screen flex flex-col items-center justify-center p-0 md:p-8 relative overflow-hidden select-none font-inter">
+<body class="bg-[#0a0b0d] text-white/90 min-h-screen font-rajdhani flex flex-col p-4 md:p-6 overflow-x-hidden relative select-none uppercase">
+
+    <!-- Scanline scan-effects grid -->
+    <div class="scanlines pointer-events-none absolute inset-0 z-50"></div>
 
     <!-- Toast container for auto-failover notices -->
     <div id="toast-container"></div>
 
-    <!-- main player container (Hover trigger for Ghost UI) -->
-    <div id="player-container" class="relative group w-full md:w-[90vw] md:max-w-[1200px] flex flex-col items-center justify-center">
+    <!-- Master Layout Wrapper -->
+    <div class="w-full max-w-[1600px] mx-auto flex flex-col flex-grow gap-4 relative z-10">
         
-        <!-- Header Signature: The Floating Glass Bar (Ghost UI - fades in on hover/tap) -->
-        <header class="fixed top-6 left-6 right-6 z-50 md:absolute md:top-6 md:left-6 md:right-6 transition-opacity duration-500 opacity-0 pointer-events-none flex justify-between items-center py-3.5 px-6 backdrop-filter blur-[40px] bg-white/5 border border-white/15 rounded-2xl shadow-lg">
+        <!-- Header: The Industrial Brand Ticker -->
+        <header class="bg-[#12151c] border-2 border-[#2d323f] flex flex-col md:flex-row justify-between items-center py-2.5 px-4 gap-3 relative shadow-md">
+            <!-- Branding -->
             <div class="flex items-center gap-3">
-                <i class="fa-solid fa-trophy text-[#00f2fe] text-xs animate-pulse drop-shadow-[0_0_8px_rgba(0,242,254,0.5)]"></i>
-                <h1 class="font-extralight text-[10px] md:text-[11px] tracking-[0.15em] text-white/90 uppercase drop-shadow-[0_0_6px_rgba(0,242,254,0.3)]">ZID VAI ON AIR X WC 2026</h1>
+                <span class="w-2.5 h-2.5 bg-[#39ff14] shadow-[0_0_8px_#39ff14] animate-pulse"></span>
+                <span class="font-bold text-sm tracking-widest text-[#00e5ff] drop-shadow-[0_0_5px_rgba(0,229,255,0.4)]">ZID VAI ON AIR X WC 2026</span>
+                <span class="text-[9px] bg-[#ff9f0a]/10 border border-[#ff9f0a]/30 text-[#ff9f0a] px-2 py-0.5 tracking-wider font-semibold">BROADCAST DECK v2.4</span>
             </div>
-            <div class="flex items-center gap-4">
-                <div id="header-match-status" class="flex items-center gap-1.5 text-[9px] tracking-widest text-white/50 uppercase">
-                    <span class="w-1.5 h-1.5 bg-live-red rounded-full animate-pulse" id="header-match-dot"></span>
-                    <span id="header-match-text">Loading matches...</span>
+
+            <!-- Ticker (Running System Information) -->
+            <div class="flex-grow max-w-md md:max-w-xl mx-4 overflow-hidden bg-black/40 border border-[#2d323f] py-1 px-3 relative hidden sm:block">
+                <div class="ticker-wrapper flex gap-8 whitespace-nowrap text-[9px] tracking-wider text-white/50">
+                    <span class="ticker-item"><span class="text-[#00e5ff] font-bold">[SYS STATUS]:</span> DUAL-ENGINE STANDBY</span>
+                    <span class="ticker-item"><span class="text-[#39ff14] font-bold">[ACTIVE CH]:</span> <span id="header-match-text">RESOLVING FIXTURES...</span></span>
+                    <span class="ticker-item"><span class="text-[#ff9f0a] font-bold">[HEALTH STATUS]:</span> AUTO-POLLING INTERVAL 30S</span>
                 </div>
-                <div id="clock" class="font-mono text-white/40 text-[9px] bg-white/5 px-2 py-0.5 rounded-full border border-white/5">00:00:00</div>
+            </div>
+
+            <!-- Clock -->
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-[#ff2d55] rounded-full animate-ping"></span>
+                    <span class="text-[9px] tracking-widest text-white/40 font-bold">STREAM ON AIR</span>
+                </div>
+                <div id="clock" class="font-mono text-[#00e5ff] text-xs bg-black/50 border border-[#2d323f] px-3 py-1 font-bold">00:00:00</div>
             </div>
         </header>
 
-        <!-- Video Player Wrapper (Fixed-aspect ratio floating card, sticky on mobile portrait) -->
-        <div class="w-full relative flex flex-col items-center fixed top-0 left-0 right-0 aspect-video md:relative md:top-auto md:left-auto md:right-auto md:w-full md:aspect-auto bg-black">
-            <!-- Ambient Glow behind the player (pulse frequency 12s) -->
-            <div class="absolute -inset-16 -z-10 rounded-full bg-radial from-[#00f2fe]/10 to-transparent blur-[120px] animate-ambient-pulse pointer-events-none hidden md:block"></div>
-
-            <!-- Player Panel container (Solid border) -->
-            <div class="w-full bg-[#000000] border-0 md:border border-white/10 rounded-none md:rounded-2xl overflow-hidden relative shadow-[0_25px_50px_-25px_rgba(0,242,254,0.08)]">
-                <!-- Video Container -->
-                <div id="video-wrapper" class="relative w-full aspect-video bg-[#000000] overflow-hidden">
-                    
-                    <!-- Seamless Switcher Dual Players (Player A & Player B) -->
-                    <video id="video-player-a" class="w-full h-full object-contain absolute inset-0 transition-opacity duration-300 opacity-0 z-10" playsinline autoplay></video>
-                    <video id="video-player-b" class="w-full h-full object-contain absolute inset-0 transition-opacity duration-300 opacity-0 z-10" playsinline autoplay></video>
-                    <span id="player-source-url" style="display:none;">None Loaded</span>
-
-                    <!-- Autoplay unmute overlay -->
-                    <div id="player-unmute-overlay" class="absolute inset-0 z-30 bg-black/90 flex flex-col items-center justify-center gap-3 cursor-pointer hidden">
-                        <i class="fa-solid fa-volume-high text-white/80 text-lg animate-pulse"></i>
-                        <span class="text-[9px] tracking-[0.2em] uppercase text-white/60">Tap to Unmute</span>
-                    </div>
-
-                    <!-- Loader (shimmer skeleton) -->
-                    <div id="player-loader" class="absolute inset-0 z-30 bg-black flex flex-col items-center justify-center hidden">
-                        <div class="skeleton-shimmer-container">
-                            <div class="skeleton-shimmer skeleton-logo"></div>
-                            <div class="skeleton-shimmer skeleton-title mt-3"></div>
-                            <div class="skeleton-shimmer skeleton-description mt-1.5"></div>
+        <!-- Main Workspace Deck Grid -->
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow items-stretch">
+            
+            <!-- Left & Center: Player Column (70% Equivalent) -->
+            <div class="lg:col-span-8 flex flex-col gap-4">
+                
+                <!-- Video Control Room Frame -->
+                <div class="bg-[#12151c] border-2 border-[#2d323f] p-4 flex flex-col gap-3 relative shadow-md">
+                    <!-- Top Status Strip -->
+                    <div class="flex justify-between items-center text-[10px] border-b border-[#2d323f] pb-2 text-white/40 tracking-wider">
+                        <div class="flex items-center gap-4">
+                            <span>DECK SELECTOR: <span class="text-white font-bold" id="active-deck-label">PRIMARY ENGINE A</span></span>
+                            <span>BACKUP STATUS: <span class="text-[#39ff14] font-bold" id="backup-engine-status">PRE-BUFFERED</span></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span>DECODER: <span class="text-[#00e5ff] font-bold">HLS.JS LIVE</span></span>
+                            <span class="w-2 h-2 bg-[#39ff14] rounded-full inline-block" id="decoder-led"></span>
                         </div>
                     </div>
 
-                    <!-- Error overlay -->
-                    <div id="player-error" class="absolute inset-0 z-30 bg-black/95 flex flex-col items-center justify-center gap-3 text-center px-6 hidden">
-                        <i class="fa-solid fa-circle-exclamation text-live-red text-xl"></i>
-                        <h4 id="error-title" class="text-[10px] uppercase tracking-[0.2em] text-white/80">Stream Offline or Blocked</h4>
-                        <p id="error-message" class="text-[10px] text-white/40 max-w-sm">Failed to load media. This stream may require custom CORS proxying or is currently inactive.</p>
-                        <button id="btn-error-retry" class="mt-2 text-[9px] tracking-[0.2em] uppercase text-white/60 hover:text-white/90 border border-white/10 px-4 py-1.5 rounded-full hover:bg-white/5 transition-all cursor-pointer">Retry Connection</button>
-                    </div>
+                    <!-- Dual Player Screen Wrapper -->
+                    <div id="video-wrapper" class="relative w-full aspect-video bg-[#020508] border-2 border-[#1b1e26] overflow-hidden">
+                        <!-- Dual Engines -->
+                        <video id="video-player-a" class="w-full h-full object-contain absolute inset-0 transition-opacity duration-300 opacity-0 z-10" playsinline autoplay></video>
+                        <video id="video-player-b" class="w-full h-full object-contain absolute inset-0 transition-opacity duration-300 opacity-0 z-10" playsinline autoplay></video>
+                        <span id="player-source-url" style="display:none;">None Loaded</span>
 
-                    <!-- Placeholder overlay -->
-                    <div id="player-placeholder" class="absolute inset-0 z-30 bg-radial from-black/80 to-black flex flex-col items-center justify-center gap-2 cursor-pointer text-center px-6">
-                        <i class="fa-solid fa-circle-play text-white/40 text-4xl hover:text-white/80 transition-transform hover:scale-105 duration-300"></i>
-                        <h3 class="text-[10px] uppercase tracking-[0.2em] text-white/80 mt-1">ZID VAI ON AIR</h3>
-                        <p class="text-[10px] text-white/40">Select a broadcast server below to begin</p>
-                    </div>
-
-                    <!-- Custom controls overlay (Ghost UI - Glass controls) -->
-                    <div id="custom-controls" class="absolute inset-x-4 bottom-4 z-20 p-3 backdrop-filter blur-[20px] saturate-[180%] bg-black/40 border border-white/5 rounded-2xl opacity-0 pointer-events-none transition-opacity duration-500 flex flex-col gap-2.5">
-                        <!-- Timeline container -->
-                        <div id="timeline-container" class="w-full h-1 bg-white/10 rounded-full cursor-pointer relative flex items-center group/time">
-                            <div class="absolute inset-y-0 left-0 bg-white/20 rounded-full" id="timeline-buffer" style="width: 0%"></div>
-                            <div class="absolute inset-y-0 left-0 bg-[#00f2fe] rounded-full group-hover/time:bg-white transition-colors" id="timeline-progress" style="width: 0%"></div>
+                        <!-- Autoplay unmute warning overlay -->
+                        <div id="player-unmute-overlay" class="absolute inset-0 z-30 bg-black/95 flex flex-col items-center justify-center gap-3 cursor-pointer hidden">
+                            <i class="fa-solid fa-volume-high text-[#ff9f0a] text-xl animate-bounce"></i>
+                            <span class="text-[10px] tracking-[0.2em] font-bold text-white/80">TAP WORKSPACE TO UNMUTE MASTER AUDIO</span>
                         </div>
-                        <!-- Buttons Row -->
-                        <div class="flex justify-between items-center text-white/70">
+
+                        <!-- Buffer Loader -->
+                        <div id="player-loader" class="absolute inset-0 z-30 bg-black/90 flex flex-col items-center justify-center gap-3 hidden">
+                            <div class="spinner-industrial"></div>
+                            <span class="text-[10px] tracking-[0.15em] text-[#00e5ff] font-bold animate-pulse">ESTABLISHING CONCURRENT FEED...</span>
+                        </div>
+
+                        <!-- System Error Overlay -->
+                        <div id="player-error" class="absolute inset-0 z-30 bg-[#0c0505] flex flex-col items-center justify-center gap-3 text-center px-6 border-2 border-[#ff2d55]/40 hidden">
+                            <i class="fa-solid fa-triangle-exclamation text-[#ff2d55] text-2xl animate-pulse"></i>
+                            <h4 id="error-title" class="text-xs font-bold tracking-[0.2em] text-[#ff2d55]">CRITICAL FEED DISRUPTION</h4>
+                            <p id="error-message" class="text-[10px] text-white/50 max-w-sm font-light">SOURCE PARSING FAILED. RETRYING FEED ROUTING PROCESS...</p>
+                            <button id="btn-error-retry" class="mt-2 text-[9px] tracking-widest font-bold text-[#ff2d55] hover:text-white border-2 border-[#ff2d55] px-4 py-1.5 hover:bg-[#ff2d55]/15 transition-all cursor-pointer">FORCE FEED REBOOT</button>
+                        </div>
+
+                        <!-- Connection Placeholder -->
+                        <div id="player-placeholder" class="absolute inset-0 z-30 bg-[#0d0f12] flex flex-col items-center justify-center gap-3 cursor-pointer text-center px-6">
+                            <i class="fa-solid fa-circle-play text-white/30 text-5xl hover:text-[#00e5ff] transition-all hover:scale-105 duration-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.2)]"></i>
+                            <h3 class="text-xs font-bold tracking-[0.25em] text-white/80">MASTER CONSOLE READY</h3>
+                            <p class="text-[10px] text-white/40 max-w-xs font-light">SELECT AN ACTIVE TERMINAL SERVER ROW FROM THE DASHBOARD CONSOLE TO STREAM MATCH FEED</p>
+                        </div>
+                    </div>
+
+                    <!-- Dedicated Industrial Controls Panel -->
+                    <div id="custom-controls" class="bg-[#1b1e26] border border-[#2d323f] p-3 flex flex-col gap-2 relative">
+                        <!-- Live Progress Timeline bar -->
+                        <div id="timeline-container" class="w-full h-1.5 bg-black/60 cursor-pointer relative flex items-center">
+                            <div class="absolute inset-y-0 left-0 bg-white/10" id="timeline-buffer" style="width: 0%"></div>
+                            <div class="absolute inset-y-0 left-0 bg-[#00e5ff]" id="timeline-progress" style="width: 0%"></div>
+                        </div>
+
+                        <!-- Buttons Strip -->
+                        <div class="flex justify-between items-center">
                             <div class="flex items-center gap-4">
-                                <button id="ctrl-play-pause" class="hover:text-white transition-colors focus:outline-none cursor-pointer"><i class="fa-solid fa-play text-xs"></i></button>
-                                <div class="flex items-center gap-2 group/volume">
-                                    <button id="ctrl-mute" class="hover:text-white transition-colors focus:outline-none cursor-pointer"><i class="fa-solid fa-volume-high text-xs"></i></button>
-                                    <input type="range" id="ctrl-volume" min="0" max="1" step="0.05" value="1" class="w-16 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-[#00f2fe] focus:outline-none">
+                                <button id="ctrl-play-pause" class="bg-black/40 border border-[#2d323f] text-[#00e5ff] hover:bg-[#00e5ff]/10 hover:text-white transition-all px-3 py-1.5 text-[10px] font-bold cursor-pointer flex items-center gap-1.5">
+                                    <i class="fa-solid fa-play"></i> PLAY/PAUSE
+                                </button>
+                                <div class="flex items-center gap-2">
+                                    <button id="ctrl-mute" class="text-white/60 hover:text-white transition-colors cursor-pointer"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                    <input type="range" id="ctrl-volume" min="0" max="1" step="0.05" value="1" class="w-16 h-1 bg-black/60 appearance-none cursor-pointer accent-[#00e5ff]">
                                 </div>
-                                <div class="flex items-center gap-2 text-[10px] tracking-[0.1em] font-light">
-                                    <span id="player-live-badge" class="flex items-center gap-1 text-live-red font-semibold"><span class="w-1.5 h-1.5 bg-live-red rounded-full animate-pulse"></span> LIVE</span>
-                                    <span id="time-elapsed">00:00</span>
+                                <div class="flex items-center gap-3 border-l border-[#2d323f] pl-4 text-[10px] tracking-wider">
+                                    <span id="player-live-badge" class="flex items-center gap-1 text-[#ff2d55] font-semibold"><span class="w-2 h-2 bg-[#ff2d55] rounded-full animate-ping"></span> LIVE</span>
+                                    <span id="time-elapsed" class="font-mono text-white/50">00:00</span>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <button id="ctrl-pip" class="hover:text-white transition-colors focus:outline-none cursor-pointer" title="Picture in Picture"><i class="fa-solid fa-window-restore text-xs"></i></button>
-                                <button id="ctrl-fullscreen" class="hover:text-white transition-colors focus:outline-none cursor-pointer" title="Fullscreen"><i class="fa-solid fa-expand text-xs"></i></button>
+                            <div class="flex items-center gap-2">
+                                <button id="ctrl-pip" class="bg-black/40 border border-[#2d323f] text-white/60 hover:text-white transition-all px-2.5 py-1 text-[10px] cursor-pointer" title="Picture in Picture"><i class="fa-solid fa-window-restore"></i> PIP</button>
+                                <button id="ctrl-fullscreen" class="bg-black/40 border border-[#2d323f] text-white/60 hover:text-white transition-all px-2.5 py-1 text-[10px] cursor-pointer" title="Fullscreen"><i class="fa-solid fa-expand"></i> FULLSCREEN</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Subtle Info Bar below video player (Desktop only) -->
-                <div class="hidden md:flex justify-between items-center py-2 px-6 bg-white/[0.02] border-t border-white/5 text-[9px] text-white/40">
-                    <div class="text-left flex items-center gap-2">
-                        <i class="fa-solid fa-satellite-dish text-[#00f2fe]"></i>
-                        <span id="current-server-title" class="font-medium text-white/70 uppercase">No Channel Loaded</span>
-                        <span id="current-server-desc">Select a Liquid Dot to stream</span>
+                <!-- Match Details & Information Metadata Panel -->
+                <div class="bg-[#12151c] border-2 border-[#2d323f] p-4 flex flex-col gap-3 relative shadow-md">
+                    <div class="text-[10px] font-bold border-b border-[#2d323f] pb-2 text-[#ff9f0a] tracking-wider">MATCH METADATA & TELEMETRY</div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-black/30 border border-[#2d323f] p-3 flex flex-col gap-1">
+                            <span class="text-[8px] text-white/40 font-bold tracking-widest uppercase">MATCH EVENT</span>
+                            <span id="current-server-title" class="text-xs font-bold text-white/90">NO MATCH SELECTED</span>
+                            <span id="current-server-desc" class="text-[9px] text-white/50">SELECT CHANNELS ROW TO STREAM</span>
+                        </div>
+                        <div class="bg-black/30 border border-[#2d323f] p-3 flex flex-col gap-1">
+                            <span class="text-[8px] text-white/40 font-bold tracking-widest uppercase">AUDIENCE SENTIMENT</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[#39ff14] text-xs font-bold drop-shadow-[0_0_4px_rgba(57,255,20,0.3)]" id="sentiment-percent">78% POSITIVE</span>
+                                <div class="flex-grow h-1.5 bg-black/60 relative">
+                                    <div class="absolute inset-y-0 left-0 bg-[#39ff14]" id="sentiment-bar" style="width: 78%"></div>
+                                </div>
+                            </div>
+                            <span class="text-[8px] text-white/30 tracking-wider">REAL-TIME TELEGRAM/TWITTER AGGREGATOR</span>
+                        </div>
+                        <div class="bg-black/30 border border-[#2d323f] p-3 flex flex-col gap-1">
+                            <span class="text-[8px] text-white/40 font-bold tracking-widest uppercase">SYSTEM ROUTING</span>
+                            <span class="text-[9px] text-[#00e5ff] font-bold" id="telemetry-latency">LATENCY TESTING IN PROGRESS...</span>
+                            <span class="text-[9px] text-white/40" id="telemetry-preloaded">PRELOAD QUEUE: SECONDARY</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Mobile portrait spacer to prevent content overlapping with the fixed elements -->
-        <div class="h-[calc(100vw*9/16)] w-full md:hidden"></div>
+            <!-- Right: Server Dashboard Grid (30% Equivalent) -->
+            <div class="lg:col-span-4 flex flex-col gap-4">
+                
+                <!-- Server Console Control Deck -->
+                <div class="bg-[#12151c] border-2 border-[#2d323f] p-4 flex flex-col gap-3 relative shadow-md h-full">
+                    <!-- Title Bar -->
+                    <div class="flex justify-between items-center border-b border-[#2d323f] pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-[#00e5ff] shadow-[0_0_6px_#00e5ff]"></span>
+                            <h2 class="text-xs font-bold tracking-wider text-white/90">SERVER DASHBOARD CONSOLE</h2>
+                        </div>
+                        <span id="server-count-badge" class="text-[8px] font-bold bg-[#00e5ff]/10 border border-[#00e5ff]/30 text-[#00e5ff] px-2 py-0.5 tracking-wider">0 SERVERS</span>
+                    </div>
 
-        <!-- Server Selector Dock: 15 Liquid Dots (Ghost UI - fades in on hover/tap) -->
-        <div id="dots-container" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 md:absolute md:bottom-6 md:z-30 transition-opacity duration-500 opacity-0 pointer-events-none w-[90vw] md:w-auto flex justify-center">
-            <div id="servers-container" class="flex justify-center items-center gap-5.5 py-3 px-6 backdrop-filter blur-[40px] bg-white/5 border border-white/15 rounded-full shadow-lg max-w-[600px] overflow-x-auto scrollbar-hide select-none">
-                <!-- Liquid Dots dynamically generated in app.js -->
+                    <!-- Quick Telemetry Specs -->
+                    <div class="grid grid-cols-2 gap-2 text-[9px] bg-black/30 border border-[#2d323f] p-2 text-white/50 tracking-wider">
+                        <div>ENGINE POLLER: <span class="text-[#39ff14] font-bold">ONLINE</span></div>
+                        <div class="text-right">AUTOSWITCH: <span class="text-[#39ff14] font-bold">ARMED (>4S)</span></div>
+                    </div>
+
+                    <!-- Server Console List Headers -->
+                    <div class="grid grid-cols-12 gap-1 px-3 text-[8px] font-bold text-white/40 tracking-wider">
+                        <div class="col-span-6">SERVER FEED NAME</div>
+                        <div class="col-span-3 text-center">QUALITY</div>
+                        <div class="col-span-3 text-right">STATUS/PING</div>
+                    </div>
+
+                    <!-- Dynamic Server Stack Container -->
+                    <div id="servers-container" class="flex flex-col gap-1.5 overflow-y-auto max-h-[500px] lg:max-h-none flex-grow scrollbar-style pr-1">
+                        <!-- Rows injected dynamically by app.js -->
+                    </div>
+                </div>
             </div>
-        </div>
+        </main>
 
-        <!-- Hidden elements for script compatibility -->
-        <button id="btn-copy-url" style="display:none;"></button>
-
+        <!-- Industrial-Grade Grid Footer -->
+        <footer class="bg-[#12151c] border-2 border-[#2d323f] py-4 px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] tracking-widest text-white/30 shadow-md">
+            <div>
+                © 2026 COPASTREAM TERMINAL. ALL FEEDS INTENDED FOR PRIVATE MONITORING.
+            </div>
+            <div class="flex items-center gap-6 font-bold">
+                <a href="#" class="hover:text-[#00e5ff] transition-colors border-r border-[#2d323f] pr-6">SYSTEM SPEC</a>
+                <a href="#" class="hover:text-[#00e5ff] transition-colors border-r border-[#2d323f] pr-6">REBOOT ENGINE</a>
+                <a href="#" class="hover:text-[#00e5ff] transition-colors">CORS PROXY TIPS</a>
+            </div>
+            <div class="text-right md:text-right font-medium">
+                DEVELOPED BY <span class="text-white/60 font-bold">SHAHIDUL ISLAM BAIZID</span>
+            </div>
+        </footer>
+        
     </div>
-
-    <!-- Footer Signature: The minimal glass strip (Bottom) -->
-    <footer class="fixed bottom-0 left-0 right-0 z-30 backdrop-filter blur-[20px] bg-white/[0.02] border-t border-white/5 py-2 text-center text-[9px] tracking-[0.25em] font-light text-white/20 uppercase select-none pointer-events-none">
-        DEVELOPED BY SHAHIDUL ISLAM BAIZID
-    </footer>
 
     <!-- Script Entrypoint -->
     <script src="app.js"></script>

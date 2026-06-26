@@ -198,6 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Re-populate SERVERS in-place
         SERVERS.length = 0;
+        // Re-populate SERVERS in-place
+        SERVERS.length = 0;
         categories.forEach(cat => {
             cat.servers.forEach(srv => {
                 SERVERS.push({
@@ -205,18 +207,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     url: srv.url,
                     detail: srv.detail,
                     category: cat.category,
-                    badge: srv.badge
+                    badge: srv.badge,
+                    status: 'online',
+                    latency: 0,
+                    isDead: false
                 });
             });
         });
 
         // Re-render server grid
-        renderServersDynamic(categories);
+        renderServersGrid(SERVERS);
 
         // Update server count badge
         const serverCountBadge = document.getElementById('server-count-badge');
         if (serverCountBadge) {
-            serverCountBadge.textContent = `${SERVERS.length} Live Servers`;
+            serverCountBadge.textContent = `${SERVERS.length} SERVERS`;
         }
 
         // Select the default server (prioritize active matches if available)
@@ -239,42 +244,112 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Start background health checking
         setTimeout(runHealthCheck, 3000);
-        setInterval(runHealthCheck, 60000);
+        setInterval(runHealthCheck, 30000);
+    }
+
+    function renderServersGrid(serversList) {
+        if (!serversContainer) return;
+        serversContainer.innerHTML = '';
+        
+        serversList.forEach((srv, index) => {
+            const row = document.createElement('div');
+            const isActive = currentServerIndex !== null && SERVERS[currentServerIndex]?.url === srv.url;
+            row.className = `server-row ${isActive ? 'active' : ''} ${srv.status === 'offline' ? 'dead' : ''}`;
+            row.dataset.index = index;
+            
+            let ledClass = 'led-green';
+            let statusText = srv.latency ? `${Math.round(srv.latency)}ms` : 'online';
+            if (srv.status === 'amber') {
+                ledClass = 'led-amber';
+            } else if (srv.status === 'offline') {
+                ledClass = 'led-red';
+                statusText = 'OFFLINE';
+            }
+            
+            const qualityBadge = srv.badge ? srv.badge.toUpperCase() : 'HD';
+
+            row.innerHTML = `
+                <div class="col-span-6 font-bold tracking-wider text-xs truncate server-name" title="${srv.name}">${srv.name}</div>
+                <div class="col-span-3 text-center text-[10px]"><span class="bg-[#1b1e26] border border-[#2d323f] px-1.5 py-0.5">${qualityBadge}</span></div>
+                <div class="col-span-3 flex items-center justify-end gap-1.5 text-[10px] font-mono text-white/60">
+                    <span>${statusText}</span>
+                    <span class="led-indicator ${ledClass}"></span>
+                </div>
+            `;
+            
+            if (srv.status !== 'offline') {
+                row.addEventListener('click', () => {
+                    window.changeServer(srv.url, index);
+                });
+            }
+            
+            serversContainer.appendChild(row);
+        });
+
+        const serverCountBadge = document.getElementById('server-count-badge');
+        if (serverCountBadge) {
+            serverCountBadge.textContent = `${serversList.length} SERVERS`;
+        }
     }
 
     async function checkServerHealth(url) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const start = performance.now();
         try {
-            // Using mode: 'no-cors' allows us to ping domains without CORS configuration
-            // if reachable, it resolves to a status 0 opaque response; if unreachable or times out, it throws.
             await fetch(url, { method: 'GET', mode: 'no-cors', signal: controller.signal });
+            const latency = performance.now() - start;
             clearTimeout(timeoutId);
-            return true;
+            return { online: true, latency: latency };
         } catch (e) {
             clearTimeout(timeoutId);
-            return false;
+            return { online: false, latency: 9999 };
         }
     }
 
     async function runHealthCheck() {
-        console.log('🔄 Starting background health check...');
-        for (let i = 0; i < SERVERS.length; i++) {
-            const server = SERVERS[i];
-            const isOnline = await checkServerHealth(server.url);
-            const dots = document.querySelectorAll(`.dot-btn[data-index="${i}"]`);
-            dots.forEach(dot => {
-                const tooltip = dot.querySelector('.dot-tooltip');
-                if (isOnline) {
-                    dot.classList.remove('dead');
-                    if (tooltip) tooltip.textContent = server.name;
-                } else {
-                    dot.classList.add('dead');
-                    if (tooltip) tooltip.textContent = `${server.name} (OFFLINE)`;
-                }
-            });
+        console.log('🔄 Telemetry Sweep: Performing background ping check on all server terminals...');
+        
+        // Save current active server URL to maintain selection highlight after sorting
+        const currentActiveUrl = currentServerIndex !== null ? SERVERS[currentServerIndex]?.url : null;
+
+        const healthPromises = SERVERS.map(async (server) => {
+            const result = await checkServerHealth(server.url);
+            if (result.online) {
+                server.latency = result.latency;
+                server.status = result.latency < 1000 ? 'online' : 'amber';
+                server.isDead = false;
+            } else {
+                server.latency = 9999;
+                server.status = 'offline';
+                server.isDead = true;
+            }
+        });
+
+        await Promise.all(healthPromises);
+
+        // Sort: Active/Amber at top, Offline at bottom. Keep relative order.
+        const activeGroup = SERVERS.filter(s => s.status !== 'offline');
+        const offlineGroup = SERVERS.filter(s => s.status === 'offline');
+        
+        const sortedServers = [...activeGroup, ...offlineGroup];
+        
+        // Update SERVERS in-place
+        SERVERS.length = 0;
+        sortedServers.forEach(s => SERVERS.push(s));
+
+        // Restore active index pointer
+        if (currentActiveUrl) {
+            const newActiveIndex = SERVERS.findIndex(s => s.url === currentActiveUrl);
+            if (newActiveIndex !== -1) {
+                currentServerIndex = newActiveIndex;
+            }
         }
-        console.log('✅ Background health check completed.');
+
+        // Re-render dashboard console
+        renderServersGrid(SERVERS);
+        updateTelemetry();
+        console.log('✅ Telemetry Sweep completed. Server stack updated.');
     }
 
     // Player State
@@ -454,10 +529,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         player.removeAttribute('src');
-        player.load();
-    }
+        player.load();    function playStream(index) {
+        const server = SERVERS[index];
+        if (!server) return;
 
-    function playStream(url, name, description) {
+        const url = server.url;
+
         // If placeholder is not hidden, show full loader. Otherwise, load silently in background.
         const isInitialLoad = !playerPlaceholder.classList.contains('hidden') || !playerError.classList.contains('hidden');
         if (isInitialLoad) {
@@ -471,22 +548,18 @@ document.addEventListener('DOMContentLoaded', () => {
         startStallTimer();
 
         // Update titles and info
-        if (currentServerTitle) currentServerTitle.textContent = name;
-        if (currentServerDesc) currentServerDesc.textContent = description || 'Live Stream';
-        
-        const mobileServerLabel = document.getElementById('mobile-server-label');
-        if (mobileServerLabel) mobileServerLabel.textContent = name;
-
+        if (currentServerTitle) currentServerTitle.textContent = server.name;
+        if (currentServerDesc) currentServerDesc.textContent = server.detail || 'Live Stream Feed';
         playerSourceUrl.textContent = url;
 
-        // Clean up any stale load on the idle player
-        cleanupPlayer(idlePlayer);
+        // Clean up any stale load on the active player
+        cleanupPlayer(activePlayer);
 
         let networkRetryCount = 0;
         const maxNetworkRetries = 3;
         let isReady = false;
 
-        const targetPlayer = idlePlayer;
+        const targetPlayer = activePlayer;
 
         function onReady() {
             if (isReady) return;
@@ -515,26 +588,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Cross-fade: Bring target player to front/visible, fade current active player
+            // Bring active player to front
             targetPlayer.classList.remove('opacity-0');
             targetPlayer.classList.add('opacity-100');
             targetPlayer.style.zIndex = '20';
 
-            activePlayer.classList.remove('opacity-100');
-            activePlayer.classList.add('opacity-0');
-            activePlayer.style.zIndex = '10';
+            // Ensure other player is hidden
+            const backupPlayer = targetPlayer === videoA ? videoB : videoA;
+            backupPlayer.classList.remove('opacity-100');
+            backupPlayer.classList.add('opacity-0');
+            backupPlayer.style.zIndex = '10';
 
-            const oldActive = activePlayer;
-            activePlayer = targetPlayer;
-            idlePlayer = oldActive;
+            updateTelemetry();
 
-            // Pause and cleanup the old active player after transition completes (350ms)
-            setTimeout(() => {
-                if (oldActive !== activePlayer) {
-                    oldActive.pause();
-                    cleanupPlayer(oldActive);
-                }
-            }, 350);
+            // Trigger background preloading of backup stream
+            preloadBackupStream();
         }
 
         // Initialize HLS.js
@@ -559,20 +627,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             tempHls.on(Hls.Events.ERROR, (event, data) => {
-                console.error('HLS error on idle player:', data);
+                console.error('HLS error on active player:', data);
                 if (data.fatal) {
                     switch (data.type) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
                             if (networkRetryCount < maxNetworkRetries) {
                                 networkRetryCount++;
-                                console.log(`Fatal network error, retrying (${networkRetryCount}/${maxNetworkRetries})...`);
+                                console.log(`Fatal network error on active player, retrying (${networkRetryCount}/${maxNetworkRetries})...`);
                                 tempHls.startLoad();
                             } else {
                                 handleStreamError('HLS Network Error.');
                             }
                             break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
-                            console.log('Fatal media error, trying to recover...');
+                            console.log('Fatal media error on active player, trying to recover...');
                             tempHls.recoverMediaError();
                             break;
                         default:
@@ -582,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         } 
-        // Native HLS Fallback (e.g. Safari on Mac/iOS, or standard MP4 streams)
+        // Native HLS Fallback
         else if (targetPlayer.canPlayType('application/vnd.apple.mpegurl') || !url.includes('.m3u8')) {
             targetPlayer.src = url;
             
@@ -593,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const handleError = (e) => {
-                console.error('Native video error on idle player:', e);
+                console.error('Native video error on active player:', e);
                 handleStreamError('Native Video Playback Error.');
                 targetPlayer.removeEventListener('loadedmetadata', handleMetadata);
                 targetPlayer.removeEventListener('error', handleError);
@@ -606,6 +674,105 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function preloadBackupStream() {
+        const backupIndex = getBackupIndex(currentServerIndex);
+        if (backupIndex === null) {
+            console.log('[Preload] No backup stream available.');
+            return;
+        }
+
+        const backupServer = SERVERS[backupIndex];
+        const backupUrl = backupServer.url;
+        console.log(`[Preload] Loading secondary backup stream in background: ${backupServer.name} (${backupUrl})`);
+
+        // Clean up any stale loading on the idle player
+        cleanupPlayer(idlePlayer);
+
+        // Preload settings: muted, preloading manifest
+        idlePlayer.muted = true;
+        idlePlayer.style.opacity = '0';
+        idlePlayer.style.zIndex = '10';
+
+        if (Hls.isSupported() && backupUrl.includes('.m3u8')) {
+            const tempHls = new Hls({
+                maxMaxBufferLength: 5, // only pre-buffer 5 seconds to conserve bandwidth
+                enableWorker: true,
+                lowLatencyMode: true,
+                autoStartLoad: true
+            });
+
+            if (idlePlayer === videoA) {
+                hlsA = tempHls;
+            } else {
+                hlsB = tempHls;
+            }
+
+            tempHls.loadSource(backupUrl);
+            tempHls.attachMedia(idlePlayer);
+            
+            tempHls.on(Hls.Events.MANIFEST_PARSED, () => {
+                console.log(`[Preload] Backup stream ${backupServer.name} pre-buffered and standby.`);
+            });
+            tempHls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    console.warn('[Preload] Secondary backup stream failed during background load:', data);
+                }
+            });
+        } else if (idlePlayer.canPlayType('application/vnd.apple.mpegurl') || !backupUrl.includes('.m3u8')) {
+            idlePlayer.src = backupUrl;
+            idlePlayer.load();
+        }
+    }
+
+    function getBackupIndex(currentIndex) {
+        if (SERVERS.length <= 1) return null;
+        for (let i = 1; i < SERVERS.length; i++) {
+            const nextIdx = (currentIndex + i) % SERVERS.length;
+            if (SERVERS[nextIdx] && SERVERS[nextIdx].status !== 'offline') {
+                return nextIdx;
+            }
+        }
+        return null;
+    }
+
+    function updateTelemetry() {
+        const sentimentVal = Math.round(70 + Math.random() * 20);
+        const sentimentPercent = document.getElementById('sentiment-percent');
+        const sentimentBar = document.getElementById('sentiment-bar');
+        if (sentimentPercent && sentimentBar) {
+            sentimentPercent.textContent = `${sentimentVal}% POSITIVE`;
+            sentimentBar.style.width = `${sentimentVal}%`;
+        }
+
+        const activeDeckLabel = document.getElementById('active-deck-label');
+        if (activeDeckLabel) {
+            activeDeckLabel.textContent = activePlayer === videoA ? 'PRIMARY ENGINE A' : 'PRIMARY ENGINE B';
+        }
+
+        const telemetryLatency = document.getElementById('telemetry-latency');
+        if (telemetryLatency && currentServerIndex !== null) {
+            const srv = SERVERS[currentServerIndex];
+            const lat = srv?.latency ? `${Math.round(srv.latency)}ms` : 'direct';
+            telemetryLatency.textContent = `PRIMARY LATENCY: ${lat} / STABLE`;
+        }
+
+        const telemetryPreloaded = document.getElementById('telemetry-preloaded');
+        const backupEngineStatus = document.getElementById('backup-engine-status');
+        if (telemetryPreloaded && backupEngineStatus) {
+            const backupIndex = getBackupIndex(currentServerIndex);
+            if (backupIndex !== null && SERVERS[backupIndex]) {
+                const bSrv = SERVERS[backupIndex];
+                telemetryPreloaded.textContent = `PRELOAD QUEUE: ${bSrv.name}`;
+                backupEngineStatus.textContent = 'STANDBY READY';
+                backupEngineStatus.className = 'text-[#39ff14] font-bold';
+            } else {
+                telemetryPreloaded.textContent = 'PRELOAD QUEUE: EMPTY';
+                backupEngineStatus.textContent = 'UNAVAILABLE';
+                backupEngineStatus.className = 'text-[#ff2d55] font-bold';
+            }
+        }
+    }
+
     function handlePlayerError(msg) {
         playerLoader.classList.add('hidden');
         playerError.classList.remove('hidden');
@@ -614,58 +781,19 @@ document.addEventListener('DOMContentLoaded', () => {
         cleanupPlayer(idlePlayer);
     }
 
-    // ---------------------------------------------------------
-    // 3. SERVER SELECTION INTERFACE & DYNAMIC RENDER
-    // ---------------------------------------------------------
-    function renderServersDynamic(categories) {
-        if (!serversContainer) return;
-        serversContainer.innerHTML = '';
-        
-        let globalIndex = 0;
-        categories.forEach(cat => {
-            cat.servers.forEach(srv => {
-                const btn = document.createElement('button');
-                btn.className = 'dot-btn';
-                btn.dataset.index = globalIndex;
-                btn.setAttribute('aria-label', srv.name);
-
-                // Add Tooltip for stream name
-                const tooltip = document.createElement('span');
-                tooltip.className = 'dot-tooltip';
-                tooltip.textContent = srv.name;
-                btn.appendChild(tooltip);
-
-                const currentIndex = globalIndex;
-                btn.addEventListener('click', () => {
-                    window.changeServer(srv.url, currentIndex);
-                });
-
-                serversContainer.appendChild(btn);
-                globalIndex++;
-            });
-        });
-    }
-
     window.changeServer = function(url, index, isAutoSwitch = false) {
         currentServerIndex = index;
 
-        // Reset failover counter on manual selection
         if (!isAutoSwitch) {
             failoverCount = 0;
         }
 
-        // Toggle active states on dots
-        const allDots = document.querySelectorAll('.dot-btn');
-        allDots.forEach(dot => dot.classList.remove('active'));
-        
-        const activeDots = document.querySelectorAll(`.dot-btn[data-index="${index}"]`);
-        activeDots.forEach(dot => dot.classList.add('active'));
+        // Re-render server grid
+        renderServersGrid(SERVERS);
 
         // Play the stream
-        const server = SERVERS[index];
-        playStream(url, server.name, server.detail);
+        playStream(index);
 
-        // Collapse mobile bottom sheet drawer on stream selection
         toggleMobileDrawer(false);
         drawerExpanded = false;
     };
@@ -1023,18 +1151,53 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleStreamError(errorMsg) {
         failoverCount++;
         
-        if (failoverCount < SERVERS.length) {
-            const nextIndex = (currentServerIndex + 1) % SERVERS.length;
-            const nextServer = SERVERS[nextIndex];
+        const backupIndex = getBackupIndex(currentServerIndex);
+        if (backupIndex !== null && failoverCount < SERVERS.length) {
+            const backupServer = SERVERS[backupIndex];
             
-            console.log(`[Failover] Server index ${currentServerIndex} failed. Swapping to next server ${nextIndex} (${nextServer.name})...`);
-            showToast(`Connection failed. Auto-switching to ${nextServer.name}...`);
+            console.warn(`[Failover] Primary feed disruption. Hot-switching to preloaded backup server: ${backupServer.name}...`);
+            showToast(`FEED DISRUPTION. AUTO-SWITCHING TO ${backupServer.name}...`);
             
+            // Execute the zero-lag cross-fade swap
+            // 1. Match volume/mute state on the idle player
+            idlePlayer.volume = activePlayer.volume;
+            idlePlayer.muted = activePlayer.muted;
+
+            // 2. Play the idle player
+            idlePlayer.play().catch(e => console.log('Failover play block:', e));
+
+            // 3. Swap opacity and z-index (cross-fade transition)
+            idlePlayer.classList.remove('opacity-0');
+            idlePlayer.classList.add('opacity-100');
+            idlePlayer.style.zIndex = '20';
+
+            activePlayer.classList.remove('opacity-100');
+            activePlayer.classList.add('opacity-0');
+            activePlayer.style.zIndex = '10';
+
+            // 4. Swap variables
+            const tempPlayer = activePlayer;
+            activePlayer = idlePlayer;
+            idlePlayer = tempPlayer;
+
+            // 5. Update index pointer
+            currentServerIndex = backupIndex;
+
+            // 6. Highlight new active row in dashboard
+            renderServersGrid(SERVERS);
+
+            // 7. Cleanup the previous active player (now idle) after transition (350ms)
             setTimeout(() => {
-                window.changeServer(nextServer.url, nextIndex, true);
-            }, 1200);
+                tempPlayer.pause();
+                cleanupPlayer(tempPlayer);
+                
+                // 8. Preload the NEXT backup stream on the newly freed idle player
+                preloadBackupStream();
+            }, 350);
+
+            updateTelemetry();
         } else {
-            handlePlayerError('All available streaming servers are currently offline or blocked by CORS policies. Please consult CORS tips or use fallback search links below.');
+            handlePlayerError('ALL INCOMING BROADCAST FEEDS DISRUPTED. PLEASE MONITOR CONSOLE FOR REBOOT CORRECTION.');
             failoverCount = 0; // Reset loop
         }
     }
