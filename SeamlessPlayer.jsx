@@ -11,11 +11,36 @@ const DEFAULT_SERVERS = [
   { name: 'Server 5 (Somoy TV)', url: 'https://sm-monirul.top/toffee/play/somoy_tv.m3u8', detail: 'Somoy TV News Feed', badge: '720p' },
 ];
 
+const MOCK_CHAT_USERNAMES = ['GamerPro2026', 'CopaViewer', 'FifaFanatic', 'MonirulFan', 'ZidLiveStream', 'GoalGetter', 'FootyBuff', 'MessiGOAT', 'Cr7Legacy', 'SambaMagic'];
+const MOCK_CHAT_MESSAGES = [
+  "LET'S GOOOO! WHAT A MATCH!",
+  "STREAM IS RUNNING AT 1080P, SO CLEAN!",
+  "THE DUAL ENGINE IS INSANE, SWAPPED INSTANTLY FOR ME!",
+  "ZID LIVE IS MY GO-TO PORTAL ALWAYS",
+  "IS BTV NATIONAL ONLINE?",
+  "SOMOY TV FEED IS STABLE TOO",
+  "AMAZING QUALITY ON SERVER 1!",
+  "GOAL!! WHAT A FINISH!",
+  "UNBELIEVABLE SAVE!",
+  "PROXY ROUTING TRULY SAVED THE FEED",
+  "ZERO LAG DETECTED SO FAR",
+  "ANYONE ELSE WATCHING FROM MOBILE?"
+];
+const MOCK_CHAT_COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#ec4899', '#06b6d4'];
+
+const MOCK_SCHEDULE = [
+  { id: 1, homeTeam: 'Brazil', awayTeam: 'Scotland', homeInit: 'BR', awayInit: 'SC', score1: 3, score2: 1, status: 'live', timeLabel: 'Live Now' },
+  { id: 2, homeTeam: 'Morocco', awayTeam: 'Haiti', homeInit: 'MA', awayInit: 'HT', score1: 0, score2: 0, status: 'live', timeLabel: 'Live Now' },
+  { id: 3, homeTeam: 'Ecuador', awayTeam: 'Germany', homeInit: 'EC', awayInit: 'DE', score1: null, score2: null, status: 'upcoming', timeLabel: '20:00 UTC' },
+  { id: 4, homeTeam: 'Japan', awayTeam: 'Sweden', homeInit: 'JP', awayInit: 'SE', score1: null, score2: null, status: 'upcoming', timeLabel: '23:00 UTC' },
+  { id: 5, homeTeam: 'Norway', awayTeam: 'France', homeInit: 'NO', awayInit: 'FR', score1: null, score2: null, status: 'upcoming', timeLabel: 'Tomorrow' },
+];
+
 export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
   const [servers, setServers] = useState(initialServers);
-  const [currentIdx, setCurrentIdx] = useState(0);
+  const [currentIdx, setCurrentIdx] = useState(-1); // -1 means no server selected yet (placeholder active)
   const [activePlayer, setActivePlayer] = useState('A'); // 'A' or 'B'
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -23,7 +48,10 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
   const [progress, setProgress] = useState(0);
   const [buffer, setBuffer] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
-  const [sentimentVal, setSentimentVal] = useState(78);
+  const [activeTab, setActiveTab] = useState('feeds'); // 'feeds' or 'chat'
+  const [chatMessages, setChatMessages] = useState([]);
+  const [systemTime, setSystemTime] = useState('00:00:00');
+  const [showControls, setShowControls] = useState(true);
 
   const videoRefA = useRef(null);
   const videoRefB = useRef(null);
@@ -32,6 +60,19 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
   const stallTimerRef = useRef(null);
   const fadeTimeoutRef = useRef(null);
   const failoverCountRef = useRef(0);
+  const chatContainerRef = useRef(null);
+  const controlsTimeoutRef = useRef(null);
+
+  // System time clock hook
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setSystemTime(now.toLocaleTimeString('en-US', { hour12: false }));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Background health check & sorting
   useEffect(() => {
@@ -52,8 +93,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
 
     async function runHealthCheck() {
       console.log('🔄 Telemetry Sweep: Performing background ping check...');
-      
-      const currentActiveUrl = servers[currentIdx]?.url;
+      const currentActiveUrl = currentIdx >= 0 ? servers[currentIdx]?.url : null;
 
       const checkedServers = await Promise.all(
         servers.map(async (server) => {
@@ -83,7 +123,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
       }
     }
 
-    // Run health check initially and then every 30 seconds
+    // Run health check initially after a delay, and then every 30 seconds
     const timeout = setTimeout(runHealthCheck, 3000);
     const interval = setInterval(runHealthCheck, 30000);
     return () => {
@@ -91,6 +131,48 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
       clearInterval(interval);
     };
   }, [servers, currentIdx]);
+
+  // Live Chat Simulator Engine
+  useEffect(() => {
+    // Generate initial messages
+    const initialMsgs = [];
+    for (let i = 0; i < 6; i++) {
+      initialMsgs.push({
+        id: Math.random().toString(36).substr(2, 9),
+        user: MOCK_CHAT_USERNAMES[Math.floor(Math.random() * MOCK_CHAT_USERNAMES.length)],
+        text: MOCK_CHAT_MESSAGES[Math.floor(Math.random() * MOCK_CHAT_MESSAGES.length)],
+        color: MOCK_CHAT_COLORS[Math.floor(Math.random() * MOCK_CHAT_COLORS.length)]
+      });
+    }
+    setChatMessages(initialMsgs);
+
+    const interval = setInterval(() => {
+      setChatMessages((prev) => {
+        const next = [
+          ...prev,
+          {
+            id: Math.random().toString(36).substr(2, 9),
+            user: MOCK_CHAT_USERNAMES[Math.floor(Math.random() * MOCK_CHAT_USERNAMES.length)],
+            text: MOCK_CHAT_MESSAGES[Math.floor(Math.random() * MOCK_CHAT_MESSAGES.length)],
+            color: MOCK_CHAT_COLORS[Math.floor(Math.random() * MOCK_CHAT_COLORS.length)]
+          }
+        ];
+        if (next.length > 50) {
+          next.shift();
+        }
+        return next;
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-scroll chat to bottom
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages, activeTab]);
 
   // Stall detector
   const startStallTimer = () => {
@@ -110,8 +192,9 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
 
   const getBackupIndex = (currIdx) => {
     if (servers.length <= 1) return null;
+    const startIndex = currIdx === -1 ? 0 : currIdx;
     for (let i = 1; i < servers.length; i++) {
-      const nextIdx = (currIdx + i) % servers.length;
+      const nextIdx = (startIndex + i) % servers.length;
       if (servers[nextIdx] && servers[nextIdx].status !== 'offline') {
         return nextIdx;
       }
@@ -147,9 +230,6 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
       setActivePlayer(isTargetA ? 'A' : 'B');
       setCurrentIdx(backupIndex);
 
-      // Randomize sentiment values for industrial realism
-      setSentimentVal(Math.round(70 + Math.random() * 20));
-
       // Cleanup old player after cross-fade delay
       if (fadeTimeoutRef.current) clearTimeout(fadeTimeoutRef.current);
       fadeTimeoutRef.current = setTimeout(() => {
@@ -160,7 +240,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
         preloadBackup(backupIndex);
       }, 350);
     } else {
-      setErrorMessage('ALL BROADCAST TERMINAL FEEDS OFFLINE.');
+      setErrorMessage('ALL BROADCAST FEEDS ARE CURRENTLY OFFLINE. ROUTING ENGINE SUSPENDED.');
       setIsLoading(false);
       failoverCountRef.current = 0;
     }
@@ -168,6 +248,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
 
   // Primary stream loader
   useEffect(() => {
+    if (currentIdx === -1) return;
     const url = servers[currentIdx]?.url;
     if (!url) return;
 
@@ -408,188 +489,365 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
     }
   };
 
-  const currentServer = servers[currentIdx];
+  const handleTriggerControls = () => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+    controlsTimeoutRef.current = setTimeout(() => {
+      if (isPlaying) {
+        setShowControls(false);
+      }
+    }, 3000);
+  };
+
+  const currentServer = currentIdx >= 0 ? servers[currentIdx] : null;
   const backupIdx = getBackupIndex(currentIdx);
   const backupServer = backupIdx !== null ? servers[backupIdx] : null;
 
   return (
-    <div className={styles.container}>
+    <div className={styles.bodyWrapper}>
+      {/* Ambient background glows */}
+      <div className={styles.ambientGlow1} />
+      <div className={styles.ambientGlow2} />
+
+      {/* Main Header */}
       <header className={styles.header}>
-        <div className={styles.branding}>
-          <span className={styles.ledIndicator} style={{ backgroundColor: '#39ff14', boxShadow: '0 0 6px #39ff14' }} />
-          <h1>ZID VAI ON AIR X WC 2026</h1>
-          <span className={styles.badge}>BROADCAST DECK v2.4</span>
+        <div className={styles.headerLeft}>
+          <a href="#" className={styles.logoGroup}>
+            <span className={styles.liveIndicatorDot} />
+            <span className={styles.logoText}>ZID<span className={styles.logoAccent}>LIVE</span></span>
+          </a>
+          <nav className={styles.navLinks}>
+            <a href="#" className={`${styles.navLink} ${styles.navLinkActive}`}>LIVE MATCHES</a>
+            <a href="#" className={styles.navLink}>FIXTURES</a>
+            <a href="#" className={styles.navLink}>CHANNELS</a>
+          </nav>
         </div>
-        <div className={styles.matchStatus}>
-          <span className={styles.pulseDot} />
-          <span>{currentServer ? `FEED: ${currentServer.name}` : 'ESTABLISHING...'}</span>
+
+        <div className={styles.headerRight}>
+          <div className={styles.headerStats}>
+            <span className={styles.statsIcon}><i className="fa-solid fa-users"></i></span>
+            <span className={styles.statsCount}>24.5K</span> online
+          </div>
+          <div className={styles.clockDisplay}>{systemTime}</div>
+          <div className={styles.userProfile}>Z</div>
         </div>
       </header>
 
+      {/* Main Suite Layout Container */}
       <div className={styles.mainGrid}>
-        {/* Left Column: Player & Info */}
+        
+        {/* Left Column: Player, Metadata, and Telemetry */}
         <div className={styles.playerColumn}>
-          <div className={styles.controlRoomFrame}>
-            <div className={styles.topStatusStrip}>
-              <div>DECK SELECTOR: <strong>PRIMARY ENGINE {activePlayer}</strong></div>
-              <div>BACKUP STATUS: <strong style={{ color: '#39ff14' }}>{backupServer ? 'STANDBY READY' : 'N/A'}</strong></div>
-            </div>
+          
+          {/* Aspect-Video Player Box */}
+          <div 
+            id="react-video-wrapper" 
+            className={styles.videoPlayerBox}
+            onMouseMove={handleTriggerControls}
+            onMouseLeave={() => isPlaying && setShowControls(false)}
+          >
+            {/* Dual Player Engines */}
+            <video
+              ref={videoRefA}
+              className={styles.videoElement}
+              style={{ opacity: activePlayer === 'A' ? 1 : 0, zIndex: activePlayer === 'A' ? 20 : 10 }}
+              onPlay={handlePlay}
+              onPause={handlePause}
+              onTimeUpdate={handleTimeUpdate}
+              onWaiting={startStallTimer}
+              onPlaying={clearStallTimer}
+              playsInline
+              autoPlay
+            />
+            <video
+              ref={videoRefB}
+              className={styles.videoElement}
+              style={{ opacity: activePlayer === 'B' ? 1 : 0, zIndex: activePlayer === 'B' ? 20 : 10 }}
+              onPlay={handlePlay}
+              onPause={handlePause}
+              onTimeUpdate={handleTimeUpdate}
+              onWaiting={startStallTimer}
+              onPlaying={clearStallTimer}
+              playsInline
+              autoPlay
+            />
 
-            <div id="react-video-wrapper" className={styles.videoWrapper}>
-              <video
-                ref={videoRefA}
-                className={`${styles.videoPlayer}`}
-                style={{ opacity: activePlayer === 'A' ? 1 : 0, zIndex: activePlayer === 'A' ? 20 : 10 }}
-                onPlay={handlePlay}
-                onPause={handlePause}
-                onTimeUpdate={handleTimeUpdate}
-                onWaiting={startStallTimer}
-                onPlaying={clearStallTimer}
-                playsInline
-                autoPlay
-              />
-              <video
-                ref={videoRefB}
-                className={`${styles.videoPlayer}`}
-                style={{ opacity: activePlayer === 'B' ? 1 : 0, zIndex: activePlayer === 'B' ? 20 : 10 }}
-                onPlay={handlePlay}
-                onPause={handlePause}
-                onTimeUpdate={handleTimeUpdate}
-                onWaiting={startStallTimer}
-                onPlaying={clearStallTimer}
-                playsInline
-                autoPlay
-              />
-
-              {isLoading && (
-                <div className={styles.overlay}>
-                  <div className={styles.spinner} />
-                  <p>ESTABLISHING CONCURRENT FEED...</p>
-                </div>
-              )}
-
-              {errorMessage && (
-                <div className={styles.errorOverlay}>
-                  <span>⚠️</span>
-                  <p>{errorMessage}</p>
-                  <button onClick={() => setCurrentIdx(currentIdx)} className={styles.rebootBtn}>FORCE FEED REBOOT</button>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.controlsPanel}>
-              <div className={styles.timeline} onClick={handleSeek}>
-                <div className={styles.bufferBar} style={{ width: `${buffer}%` }} />
-                <div className={styles.progressBar} style={{ width: `${progress}%` }} />
+            {/* Unmute Overlay */}
+            {isMuted && isPlaying && (
+              <div className={styles.unmuteOverlay} onClick={toggleMute}>
+                <i className={`fa-solid fa-volume-high ${styles.unmuteIcon}`}></i>
+                <span className={styles.unmuteText}>TAP PLAYER TO UNMUTE AUDIO</span>
               </div>
-              <div className={styles.buttonsStrip}>
-                <div className={styles.leftButtons}>
-                  <button onClick={togglePlay} className={styles.actionBtn}>
-                    {isPlaying ? '⏸ PAUSE' : '▶ PLAY'}
-                  </button>
-                  <button onClick={toggleMute} className={styles.iconBtn}>
-                    {isMuted ? '🔇' : '🔊'}
-                  </button>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value={isMuted ? 0 : volume}
-                    onChange={handleVolumeChange}
-                    className={styles.volumeSlider}
-                  />
-                  <span className={styles.timeText}>{playbackTime}</span>
+            )}
+
+            {/* Buffer Loader */}
+            {isLoading && (
+              <div className={styles.loaderOverlay}>
+                <div className={styles.spinner} />
+                <span className={styles.loaderText}>BUFFERING STREAM...</span>
+              </div>
+            )}
+
+            {/* Error Overlay */}
+            {errorMessage && (
+              <div className={styles.errorOverlay}>
+                <i className={`fa-solid fa-circle-exclamation ${styles.errorIcon}`}></i>
+                <h4 className={styles.errorTitle}>Broadcast Disrupted</h4>
+                <p className={styles.errorText}>{errorMessage}</p>
+                <button onClick={() => setCurrentIdx(currentIdx === -1 ? 0 : currentIdx)} className={styles.retryBtn}>Retry Feed</button>
+              </div>
+            )}
+
+            {/* Placeholder Screen */}
+            {currentIdx === -1 && (
+              <div className={styles.placeholderOverlay}>
+                <div className={styles.placeholderPlayBtn} onClick={() => setCurrentIdx(0)}>
+                  <i className="fa-solid fa-play"></i>
                 </div>
-                <div className={styles.rightButtons}>
-                  <button onClick={handleFullscreen} className={styles.iconBtn}>📺 FULLSCREEN</button>
+                <h3 className={styles.placeholderTitle}>SELECT MATCH FEED</h3>
+                <p className={styles.placeholderText}>Pick one of the live broadcast servers in the sidebar console to begin streaming the Copa matches.</p>
+              </div>
+            )}
+
+            {/* Custom Video Controls overlay */}
+            <div className={`${styles.customControls} ${(!showControls && isPlaying) ? styles.controlsHidden : ''}`}>
+              <div className={styles.timelineContainer} onClick={handleSeek}>
+                <div className={styles.timelineBuffer} style={{ width: `${buffer}%` }} />
+                <div className={styles.timelineProgress} style={{ width: `${progress}%` }} />
+              </div>
+              <div className={styles.controlsRow}>
+                <div className={styles.controlsLeft}>
+                  <button onClick={togglePlay} className={styles.controlBtn}>
+                    {isPlaying ? <i className="fa-solid fa-pause"></i> : <i className="fa-solid fa-play"></i>}
+                  </button>
+                  <div className={styles.volumeGroup}>
+                    <button onClick={toggleMute} className={styles.controlBtn}>
+                      {isMuted ? <i className="fa-solid fa-volume-xmark"></i> : <i className="fa-solid fa-volume-high"></i>}
+                    </button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={isMuted ? 0 : volume}
+                      onChange={handleVolumeChange}
+                      className={styles.volumeSlider}
+                    />
+                  </div>
+                  <div className={styles.timeBadgeGroup}>
+                    <span className={styles.liveBadge}>
+                      <span className={styles.livePulseDot} /> LIVE
+                    </span>
+                    <span className={styles.elapsedTime}>{playbackTime}</span>
+                  </div>
+                </div>
+                <div className={styles.controlsRight}>
+                  <button onClick={handleFullscreen} className={styles.controlBtn}>
+                    <i className="fa-solid fa-expand"></i>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Metadata Card */}
-          <div className={styles.metadataCard}>
-            <div className={styles.metadataHeader}>MATCH METADATA & TELEMETRY</div>
-            <div className={styles.metadataGrid}>
-              <div className={styles.metaCell}>
-                <span className={styles.cellLabel}>MATCH EVENT</span>
-                <strong className={styles.cellValue}>{currentServer ? currentServer.name : 'NO MATCH SELECTED'}</strong>
-                <span className={styles.cellSub}>{currentServer ? currentServer.detail : 'SELECT CONSOLE ROW'}</span>
-              </div>
-              <div className={styles.metaCell}>
-                <span className={styles.cellLabel}>AUDIENCE SENTIMENT</span>
-                <div className={styles.sentimentRow}>
-                  <span className={styles.sentimentPercent} style={{ color: '#39ff14' }}>{sentimentVal}% POSITIVE</span>
-                  <div className={styles.sentimentTrack}>
-                    <div className={styles.sentimentBar} style={{ width: `${sentimentVal}%` }} />
-                  </div>
+          {/* Details & diagnostics panel */}
+          <div className={styles.detailsCard}>
+            <div className={styles.detailsHeader}>
+              <div className={styles.detailsChannelInfo}>
+                <div className={styles.channelIconBox}>
+                  <i className="fa-solid fa-satellite-dish"></i>
+                </div>
+                <div>
+                  <h1 className={styles.streamTitle}>{currentServer ? currentServer.name : 'NO BROADCAST LOADED'}</h1>
+                  <p className={styles.streamDesc}>{currentServer ? currentServer.detail : 'Please select an active broadcast feed in the right sidebar.'}</p>
                 </div>
               </div>
-              <div className={styles.metaCell}>
-                <span className={styles.cellLabel}>SYSTEM ROUTING</span>
-                <strong className={styles.cellValue} style={{ color: '#00e5ff' }}>
-                  {currentServer?.latency ? `LATENCY: ${Math.round(currentServer.latency)}ms` : 'LATENCY: DIRECT / STABLE'}
-                </strong>
-                <span className={styles.cellSub}>
-                  {backupServer ? `PRELOAD: ${backupServer.name}` : 'PRELOAD: EMPTY'}
-                </span>
+              <div className={styles.detailsActions}>
+                <button className={styles.followBtn}><i className="fa-solid fa-heart"></i> Follow</button>
+                <button className={styles.shareBtn}><i className="fa-solid fa-share"></i> Share</button>
               </div>
             </div>
+
+            {/* Diagnostic collapsible dropdown */}
+            <details className={styles.diagnosticsAccordion}>
+              <summary className={styles.diagnosticsSummary}>
+                <span>STREAM DIAGNOSTICS & TELEMETRY</span>
+                <i className={`fa-solid fa-chevron-down ${styles.accordionChevron}`}></i>
+              </summary>
+              <div className={styles.diagnosticsContent}>
+                <div className={styles.diagCell}>
+                  <span className={styles.diagLabel}>DECK CONTROLLER</span>
+                  <span className={styles.diagValue}>{currentIdx >= 0 ? `PRIMARY ENGINE ${activePlayer}` : 'STANDBY'}</span>
+                </div>
+                <div className={styles.diagCell}>
+                  <span className={styles.diagLabel}>STANDBY ENGINE</span>
+                  <span className={`${styles.diagValue} ${styles.textGreen}`}>{backupServer ? 'PRE-BUFFERED' : 'NONE'}</span>
+                </div>
+                <div className={styles.diagCell}>
+                  <span className={styles.diagLabel}>FEED SPEC</span>
+                  <span className={styles.diagValue}>
+                    {currentServer?.latency ? `LATENCY: ${Math.round(currentServer.latency)}ms` : 'LATENCY TESTING...'}
+                  </span>
+                </div>
+                <div className={styles.diagCell}>
+                  <span className={styles.diagLabel}>PRELOAD QUEUE</span>
+                  <span className={`${styles.diagValue} ${styles.textCyan}`}>{backupServer ? backupServer.name : 'NONE PRELOADED'}</span>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
 
-        {/* Right Column: Server Dashboard */}
-        <div className={styles.serverColumn}>
-          <div className={styles.serverDashboardConsole}>
-            <div className={styles.consoleTitleBar}>
-              <span className={styles.ledIndicator} style={{ backgroundColor: '#00e5ff', boxShadow: '0 0 6px #00e5ff' }} />
-              <h2>SERVER CONTROL CONSOLE</h2>
-            </div>
-            
-            <div className={styles.consoleHeaders}>
-              <span className={styles.colName}>SERVER FEED NAME</span>
-              <span className={styles.colQuality}>QUALITY</span>
-              <span className={styles.colStatus}>STATUS/PING</span>
+        {/* Right Column: Tabbed Sidebar */}
+        <div className={styles.sidebarColumn}>
+          <div className={styles.sidebarConsole}>
+            {/* Tabs */}
+            <div className={styles.tabHeaders}>
+              <button 
+                className={`${styles.tabBtn} ${activeTab === 'feeds' ? styles.tabBtnActive : ''}`}
+                onClick={() => setActiveTab('feeds')}
+              >
+                Live Feeds
+              </button>
+              <button 
+                className={`${styles.tabBtn} ${activeTab === 'chat' ? styles.tabBtnActive : ''}`}
+                onClick={() => setActiveTab('chat')}
+              >
+                Live Chat
+              </button>
             </div>
 
-            <div className={styles.serverStack}>
-              {servers.map((srv, idx) => {
-                const isActive = currentIdx === idx;
-                const isDead = srv.status === 'offline';
-                
-                let ledStyle = { backgroundColor: '#39ff14', boxShadow: '0 0 6px #39ff14' };
-                let pingText = srv.latency ? `${Math.round(srv.latency)}ms` : 'online';
-                if (srv.status === 'amber') {
-                  ledStyle = { backgroundColor: '#ff9f0a', boxShadow: '0 0 6px #ff9f0a' };
-                } else if (srv.status === 'offline') {
-                  ledStyle = { backgroundColor: '#ff2d55', boxShadow: '0 0 6px #ff2d55' };
-                  pingText = 'OFFLINE';
-                }
+            {/* Tab Panels */}
+            <div className={styles.tabContentPanel}>
+              
+              {/* Feeds Panel */}
+              {activeTab === 'feeds' && (
+                <div className={styles.feedsPanel}>
+                  {servers.map((srv, idx) => {
+                    const isActive = currentIdx === idx;
+                    const isDead = srv.status === 'offline';
+                    let statusColor = styles.statusGreen;
+                    if (srv.status === 'amber') statusColor = styles.statusAmber;
+                    else if (srv.status === 'offline') statusColor = styles.statusRed;
 
-                return (
-                  <div
-                    key={srv.url}
-                    className={`${styles.serverRow} ${isActive ? styles.activeRow : ''} ${isDead ? styles.deadRow : ''}`}
-                    onClick={() => !isDead && setCurrentIdx(idx)}
-                  >
-                    <span className={styles.rowName}>{srv.name}</span>
-                    <span className={styles.rowQuality}>{srv.badge ? srv.badge.toUpperCase() : 'HD'}</span>
-                    <span className={styles.rowStatus}>
-                      {pingText}
-                      <span className={styles.rowLed} style={ledStyle} />
-                    </span>
+                    return (
+                      <div
+                        key={srv.url}
+                        className={`${styles.serverCard} ${isActive ? styles.serverCardActive : ''} ${isDead ? styles.serverCardDead : ''}`}
+                        onClick={() => !isDead && setCurrentIdx(idx)}
+                      >
+                        <div className={styles.serverThumb}>
+                          {srv.badge || 'HD'}
+                        </div>
+                        <div className={styles.serverCardDetails}>
+                          <span className={styles.serverCardName}>{srv.name}</span>
+                          <span className={styles.serverCardDesc}>{srv.detail}</span>
+                        </div>
+                        <div className={styles.serverCardStatus}>
+                          <span className={styles.latencyValue}>
+                            {srv.latency && srv.latency < 9999 ? `${Math.round(srv.latency)}ms` : 'offline'}
+                          </span>
+                          <span className={`${styles.statusDot} ${statusColor}`} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Chat Panel */}
+              {activeTab === 'chat' && (
+                <div className={styles.chatPanel}>
+                  <div ref={chatContainerRef} className={styles.chatMessagesContainer}>
+                    {chatMessages.map((msg) => (
+                      <div key={msg.id} className={styles.chatBubble}>
+                        <span className={styles.chatUsername} style={{ color: msg.color }}>{msg.user}:</span>
+                        <span className={styles.chatMessageText}>{msg.text}</span>
+                      </div>
+                    ))}
                   </div>
-                );
-              })}
+                  <div className={styles.chatInputBar}>
+                    <input 
+                      type="text" 
+                      placeholder="Send a message..." 
+                      className={styles.chatInputField} 
+                      disabled 
+                    />
+                    <button className={styles.chatSendBtn} disabled>
+                      <i className="fa-solid fa-paper-plane"></i>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
+      {/* Live Matches & Upcoming Schedule Section */}
+      <section className={styles.scheduleSection}>
+        <h2 className={styles.sectionTitle}>
+          <i className="fa-solid fa-calendar-days"></i> Live matches & schedule
+        </h2>
+        <div className={styles.scheduleGrid}>
+          {MOCK_SCHEDULE.map((match) => {
+            const isLive = match.status === 'live';
+            return (
+              <div 
+                key={match.id} 
+                className={`${styles.scheduleCard} ${isLive ? styles.scheduleCardLive : ''}`}
+              >
+                <div className={styles.scheduleCardTeams}>
+                  <div className={styles.teamRow}>
+                    <div className={styles.teamInfo}>
+                      <span className={styles.teamInitialsBadge}>{match.homeInit}</span>
+                      <span className={styles.teamName} title={match.homeTeam}>{match.homeTeam}</span>
+                    </div>
+                    {match.score1 !== null ? (
+                      <span className={styles.teamScore}>{match.score1}</span>
+                    ) : (
+                      <span className={styles.teamScorePlaceholder}>-</span>
+                    )}
+                  </div>
+                  <div className={styles.teamRow}>
+                    <div className={styles.teamInfo}>
+                      <span className={styles.teamInitialsBadge}>{match.awayInit}</span>
+                      <span className={styles.teamName} title={match.awayTeam}>{match.awayTeam}</span>
+                    </div>
+                    {match.score2 !== null ? (
+                      <span className={styles.teamScore}>{match.score2}</span>
+                    ) : (
+                      <span className={styles.teamScorePlaceholder}>-</span>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.scheduleCardFooter}>
+                  <span className={`${styles.statusBadge} ${isLive ? styles.statusBadgeLive : styles.statusBadgeUpcoming}`}>
+                    {match.status.toUpperCase()}
+                  </span>
+                  {isLive ? (
+                    <button 
+                      onClick={() => setCurrentIdx(0)} 
+                      className={styles.tuneInBtn}
+                    >
+                      Tune In
+                    </button>
+                  ) : (
+                    <span className={styles.upcomingTime}>{match.timeLabel}</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Footer */}
       <footer className={styles.footer}>
-        <div>© 2026 COPASTREAM TERMINAL. ALL FEEDS INTENDED FOR PRIVATE MONITORING.</div>
-        <div>DEVELOPED BY <strong>SHAHIDUL ISLAM BAIZID</strong></div>
+        <div>© 2026 COPASTREAM. ALL FEEDS PRIVATELY ENCODED.</div>
+        <div>
+          DEVELOPED BY <span className={styles.footerAuthor}>SHAHIDUL ISLAM BAIZID</span>
+        </div>
       </footer>
     </div>
   );

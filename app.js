@@ -1339,12 +1339,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        const scoreHtml = score !== null ? `<span class="team-score">${score}</span>` : '';
+        const scoreHtml = score !== null ? `<span class="team-score">${score}</span>` : '<span class="team-score text-white/20">-</span>';
         
         return `
             <div class="team-row">
-                ${logoHtml}
-                <span class="team-name-text" title="${teamName}">${teamName}</span>
+                <div class="team-info">
+                    ${logoHtml}
+                    <span class="team-name-text" title="${teamName}">${teamName}</span>
+                </div>
                 ${scoreHtml}
             </div>
         `;
@@ -1359,18 +1361,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const parts = selectedDateStr.split('-');
         const dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
         const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        
-        const todayStr = getLocalDateString(now);
-        const dateBadge = document.getElementById('schedule-date-badge');
-        const dateLabel = document.getElementById('sched-current-date-label');
-        
-        if (selectedDateStr === todayStr) {
-            if (dateBadge) dateBadge.textContent = 'TODAY';
-            if (dateLabel) dateLabel.textContent = `Today (${formattedDate.split(',')[0]} ${formattedDate.split(',')[1]})`;
-        } else {
-            if (dateBadge) dateBadge.textContent = parts[1] + '/' + parts[2];
-            if (dateLabel) dateLabel.textContent = formattedDate;
-        }
         
         const selectedMatches = allMatches.filter(m => m.localDate === selectedDateStr);
         let renderedHtml = '';
@@ -1425,24 +1415,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 score2 = finalScore.score2;
             }
             
-            const activeClass = status === 'live' ? 'active-live' : '';
-            
+            const isLive = status === 'live';
+            const tuneInBtn = isLive ? `
+                <button class="bg-[#7c3aed] hover:bg-[#7c3aed]/90 text-white font-bold px-3 py-1 rounded-lg text-[10px] cursor-pointer" onclick="window.changeServer(SERVERS[0].url, 0)">
+                    Tune In
+                </button>
+            ` : `<span class="text-white/30 text-[10px] font-semibold">${timeLabel}</span>`;
+
             renderedHtml += `
-                <div class="schedule-item ${activeClass}">
-                    <div class="match-teams">
+                <div class="schedule-card ${isLive ? 'live-match-card' : ''}">
+                    <div class="flex flex-col gap-2">
                         ${renderTeamRow(match.homeTeam, score1)}
                         ${renderTeamRow(match.awayTeam, score2)}
                     </div>
-                    <div class="match-time-info">
-                        <span class="match-hour">${timeLabel}</span>
+                    <div class="schedule-card-footer">
                         <span class="match-status-badge ${badgeClass}">${statusText}</span>
+                        ${tuneInBtn}
                     </div>
                 </div>
             `;
         });
         
         if (scheduleContainer) {
-            scheduleContainer.innerHTML = renderedHtml || '<p style="text-align:center;color:var(--text-muted);padding:10px;">No matches scheduled</p>';
+            scheduleContainer.innerHTML = renderedHtml || '<p style="text-align:center;color:rgba(255,255,255,0.4);padding:10px;">No matches scheduled</p>';
         }
         
         updateHeaderBanner(now);
@@ -1703,13 +1698,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ---------------------------------------------------------
+    // 9. SIDEBAR TABS & LIVE CHAT SIMULATION
+    // ---------------------------------------------------------
+    const tabBtnServers = document.getElementById('tab-btn-servers');
+    const tabBtnChat = document.getElementById('tab-btn-chat');
+    const panelServers = document.getElementById('sidebar-servers-panel');
+    const panelChat = document.getElementById('sidebar-chat-panel');
+
+    if (tabBtnServers && tabBtnChat && panelServers && panelChat) {
+        tabBtnServers.addEventListener('click', () => {
+            tabBtnServers.classList.add('active');
+            tabBtnChat.classList.remove('active');
+            panelServers.classList.remove('hidden');
+            panelChat.classList.add('hidden');
+        });
+
+        tabBtnChat.addEventListener('click', () => {
+            tabBtnChat.classList.add('active');
+            tabBtnServers.classList.remove('active');
+            panelChat.classList.remove('hidden');
+            panelServers.classList.add('hidden');
+            
+            // Auto scroll to bottom when opening chat
+            const chatContainer = document.getElementById('chat-messages-container');
+            if (chatContainer) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        });
+    }
+
+    function initLiveChatSimulation() {
+        const chatContainer = document.getElementById('chat-messages-container');
+        if (!chatContainer) return;
+
+        const USERNAMES = ['GamerPro2026', 'CopaViewer', 'FifaFanatic', 'MonirulFan', 'ZidLiveStream', 'GoalGetter', 'FootyBuff', 'MessiGOAT', 'Cr7Legacy', 'SambaMagic'];
+        const MESSAGES = [
+            "LET'S GOOOO! WHAT A MATCH!",
+            "STREAM IS RUNNING AT 1080P, SO CLEAN!",
+            "THE DUAL ENGINE IS INSANE, SWAPPED INSTANTLY FOR ME!",
+            "ZID LIVE IS MY GO-TO PORTAL ALWAYS",
+            "IS BTV NATIONAL ONLINE?",
+            "SOMOY TV FEED IS STABLE TOO",
+            "AMAZING QUALITY ON SERVER 1!",
+            "GOAL!! WHAT A FINISH!",
+            "UNBELIEVABLE SAVE!",
+            "PROXY ROUTING TRULY SAVED THE FEED",
+            "ZERO LAG DETECTED SO FAR",
+            "ANYONE ELSE WATCHING FROM MOBILE?"
+        ];
+        const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#ec4899', '#06b6d4'];
+
+        function generateMessage() {
+            const user = USERNAMES[Math.floor(Math.random() * USERNAMES.length)];
+            const msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
+            const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+
+            const div = document.createElement('div');
+            div.className = 'chat-bubble';
+            div.innerHTML = `
+                <span class="chat-username" style="color: ${color}">${user}:</span>
+                <span class="text-white/80">${msg}</span>
+            `;
+            chatContainer.appendChild(div);
+
+            // Auto scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            if (chatContainer.children.length > 50) {
+                chatContainer.children[0].remove();
+            }
+        }
+
+        // Generate initial messages
+        for (let i = 0; i < 5; i++) {
+            generateMessage();
+        }
+
+        // Add periodic messages
+        setInterval(generateMessage, 3000 + Math.random() * 2000);
+    }
+
+    initLiveChatSimulation();
+
+    // ---------------------------------------------------------
     // 8. CLOCK HEADER INITIATION
     // ---------------------------------------------------------
     function updateClock() {
-        clock.textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
+        if (clock) {
+            clock.textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
+        }
     }
-    setInterval(updateClock, 1000);
     updateClock();
+    setInterval(updateClock, 1000);
 
     console.log('✅ Zid Vai On Air x WC 2026 — Active');
 });
