@@ -278,10 +278,117 @@ document.addEventListener('DOMContentLoaded', () => {
     const scheduleContainer = document.getElementById('schedule-container');
     const toastContainer = document.getElementById('toast-container');
 
-    // No bottom-sheet controls needed in Active Dot layout
+    // Mobile Drawer (Bottom-sheet) DOM Elements & Event Handlers
+    const mobileDrawer = document.getElementById('mobile-drawer');
+    const mobileDrawerHeader = document.getElementById('mobile-drawer-header');
+    const fabDotsToggle = document.getElementById('fab-dots-toggle');
+
+    let drawerExpanded = false;
+    let drawerStartY = 0;
+    let drawerCurrentY = 0;
+    let drawerHeight = 0;
+    let drawerDragging = false;
+
+    if (mobileDrawer && fabDotsToggle) {
+        fabDotsToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            drawerExpanded = !drawerExpanded;
+            toggleMobileDrawer(drawerExpanded);
+        });
+    }
+
+    if (mobileDrawer && mobileDrawerHeader) {
+        // Toggle drawer on header click
+        mobileDrawerHeader.addEventListener('click', () => {
+            if (!drawerDragging) {
+                drawerExpanded = !drawerExpanded;
+                toggleMobileDrawer(drawerExpanded);
+            }
+        });
+
+        // Swipe up/down gesture touch handlers
+        mobileDrawerHeader.addEventListener('touchstart', (e) => {
+            drawerStartY = e.touches[0].clientY;
+            drawerCurrentY = drawerStartY;
+            drawerHeight = mobileDrawer.getBoundingClientRect().height;
+            mobileDrawer.classList.add('bottom-sheet-dragging');
+            drawerDragging = false;
+        }, { passive: true });
+
+        mobileDrawerHeader.addEventListener('touchmove', (e) => {
+            drawerCurrentY = e.touches[0].clientY;
+            let deltaY = drawerCurrentY - drawerStartY;
+            if (Math.abs(deltaY) > 5) {
+                drawerDragging = true;
+            }
+
+            if (drawerExpanded) {
+                if (deltaY > 0) {
+                    mobileDrawer.style.transform = `translateY(${deltaY}px)`;
+                }
+            } else {
+                if (deltaY < 0) {
+                    let targetTranslate = drawerHeight + deltaY;
+                    if (targetTranslate > 0) {
+                        mobileDrawer.style.transform = `translateY(${targetTranslate}px)`;
+                    }
+                }
+            }
+        }, { passive: true });
+
+        mobileDrawerHeader.addEventListener('touchend', () => {
+            mobileDrawer.classList.remove('bottom-sheet-dragging');
+            mobileDrawer.style.transform = '';
+            
+            if (drawerDragging) {
+                let deltaY = drawerCurrentY - drawerStartY;
+                if (drawerExpanded) {
+                    if (deltaY > 60) {
+                        drawerExpanded = false;
+                    }
+                } else {
+                    if (deltaY < -60) {
+                        drawerExpanded = true;
+                    }
+                }
+                toggleMobileDrawer(drawerExpanded);
+            }
+        }, { passive: true });
+    }
+
+    function toggleMobileDrawer(expand) {
+        if (!mobileDrawer) return;
+        if (expand) {
+            mobileDrawer.classList.remove('translate-y-full');
+            mobileDrawer.classList.add('translate-y-0');
+            const headerSpan = mobileDrawerHeader.querySelector('span');
+            if (headerSpan) headerSpan.textContent = 'Swipe down to close';
+        } else {
+            mobileDrawer.classList.remove('translate-y-0');
+            mobileDrawer.classList.add('translate-y-full');
+            const headerSpan = mobileDrawerHeader.querySelector('span');
+            if (headerSpan) headerSpan.textContent = 'Swipe up for servers';
+        }
+    }
 
     // Failover & Auto-switching State
     let failoverCount = 0;
+    let stallTimer = null;
+
+    function startStallTimer() {
+        clearStallTimer();
+        stallTimer = setTimeout(() => {
+            console.warn('[Stall Monitor] Stream stalled/waiting for more than 4 seconds, auto-skipping...');
+            handleStreamError('Stream stalled.');
+        }, 4000);
+    }
+
+    function clearStallTimer() {
+        if (stallTimer) {
+            clearTimeout(stallTimer);
+            stallTimer = null;
+        }
+    }
 
     // ---------------------------------------------------------
     // 2. STREAM PLAYER FUNCTION
@@ -292,12 +399,19 @@ document.addEventListener('DOMContentLoaded', () => {
         playerError.classList.add('hidden');
         playerPlaceholder.classList.add('hidden');
 
-        // Apply cross-fade swapping class
+        // Start stall timer to auto-skip if initial load hangs for > 4s
+        startStallTimer();
+
+        // Apply cross-fade swapping class (0.3s)
         video.classList.add('video-swapping');
 
         // Update titles and info
-        currentServerTitle.textContent = name;
-        currentServerDesc.textContent = description || 'Live Stream';
+        if (currentServerTitle) currentServerTitle.textContent = name;
+        if (currentServerDesc) currentServerDesc.textContent = description || 'Live Stream';
+        
+        const mobileServerLabel = document.getElementById('mobile-server-label');
+        if (mobileServerLabel) mobileServerLabel.textContent = name;
+
         playerSourceUrl.textContent = url;
 
         // Clean up previous HLS instance
@@ -451,6 +565,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Play the stream
         const server = SERVERS[index];
         playStream(url, server.name, server.detail);
+
+        // Collapse mobile bottom sheet drawer on stream selection
+        toggleMobileDrawer(false);
+        drawerExpanded = false;
     };
 
     // Initialize the servers list in the DOM dynamically
@@ -487,6 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctrlPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
         customControls.classList.remove('hidden');
         showControlsTemporarily();
+        clearStallTimer();
     });
 
     video.addEventListener('pause', () => {
@@ -494,7 +613,13 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(controlsTimeout);
         customControls.classList.remove('hide-controls');
         videoWrapper.classList.remove('hide-cursor');
+        clearStallTimer();
     });
+
+    // Zero-Lag Failover Engine Event Listeners
+    video.addEventListener('waiting', startStallTimer);
+    video.addEventListener('stalled', startStallTimer);
+    video.addEventListener('playing', clearStallTimer);
 
     // Volume & Mute logic
     function toggleMute() {
@@ -533,6 +658,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Progress updates & timeline buffering
     video.addEventListener('timeupdate', () => {
+        clearStallTimer();
         if (video.duration && video.duration !== Infinity) {
             const percent = (video.currentTime / video.duration) * 100;
             timelineProgress.style.width = `${percent}%`;

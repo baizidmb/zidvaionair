@@ -7,7 +7,7 @@
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Hls.js for direct HLS streaming -->
@@ -17,113 +17,144 @@
     <!-- Custom styling stylesheet link -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-void-black text-white/80 min-h-screen flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden select-none">
-
-    <!-- Header Signature (Top-Left) -->
-    <header class="absolute top-6 left-6 md:top-10 md:left-10 flex flex-col gap-2 z-30 select-none pointer-events-none">
-        <h1 class="font-extralight text-[10px] md:text-[11px] tracking-[0.3em] text-white/50 uppercase font-inter">ZID VAI ON AIR X WC 2026</h1>
-        <div class="h-[1px] w-36 md:w-48 bg-gradient-to-r from-white/40 to-transparent"></div>
-    </header>
+<body class="bg-gradient-to-br from-[#050505] to-[#0d0f0d] text-white/80 min-h-screen flex flex-col items-center justify-center p-0 md:p-8 relative select-none font-inter">
 
     <!-- Toast container for auto-failover notices -->
     <div id="toast-container"></div>
 
-    <!-- Main Container (Digital Gallery Centered Mode) -->
-    <main class="w-full md:w-[90vw] md:max-w-[1200px] flex flex-col items-center justify-center relative mt-16 md:mt-0 z-20">
+    <!-- Main Container -->
+    <main class="w-full md:w-[90vw] md:max-w-[1200px] flex flex-col gap-6 p-4 md:p-0 relative mt-14 md:mt-0 z-20">
         
-        <!-- Video Player Wrapper (Fixed-aspect ratio floating card) -->
-        <div class="w-full relative flex flex-col items-center bg-black">
-            <!-- Ambient Glow behind the player (pulse frequency 12s) -->
-            <div class="absolute -inset-16 -z-10 rounded-full bg-radial from-white/10 to-transparent blur-[120px] animate-ambient-pulse pointer-events-none hidden md:block"></div>
-
-            <!-- Video Container -->
-            <div id="video-wrapper" class="relative w-full aspect-video bg-[#000000] overflow-hidden shadow-[0_20px_50px_-25px_rgba(255,255,255,0.06)] group">
-                <video id="video-player" class="w-full h-full object-contain" playsinline autoplay></video>
-                <span id="player-source-url" style="display:none;">None Loaded</span>
-
-                <!-- Autoplay unmute overlay -->
-                <div id="player-unmute-overlay" class="absolute inset-0 z-30 bg-black/90 flex flex-col items-center justify-center gap-3 cursor-pointer hidden">
-                    <i class="fa-solid fa-volume-high text-white/80 text-lg animate-pulse"></i>
-                    <span class="text-[9px] tracking-[0.2em] uppercase text-white/60">Tap to Unmute</span>
-                </div>
-
-                <!-- Loader (shimmer skeleton) -->
-                <div id="player-loader" class="absolute inset-0 z-30 bg-black flex flex-col items-center justify-center hidden">
-                    <div class="skeleton-shimmer-container">
-                        <div class="skeleton-shimmer skeleton-logo"></div>
-                        <div class="skeleton-shimmer skeleton-title mt-3"></div>
-                        <div class="skeleton-shimmer skeleton-description mt-1.5"></div>
-                    </div>
-                </div>
-
-                <!-- Error overlay -->
-                <div id="player-error" class="absolute inset-0 z-30 bg-black/95 flex flex-col items-center justify-center gap-3 text-center px-6 hidden">
-                    <i class="fa-solid fa-circle-exclamation text-live-red text-xl"></i>
-                    <h4 id="error-title" class="text-[10px] uppercase tracking-[0.2em] text-white/80">Stream Offline or Blocked</h4>
-                    <p id="error-message" class="text-[10px] text-white/40 max-w-sm">Failed to load media. This stream may require custom CORS proxying or is currently inactive.</p>
-                    <button id="btn-error-retry" class="mt-2 text-[9px] tracking-[0.2em] uppercase text-white/60 hover:text-white/90 border border-white/10 px-4 py-1.5 rounded-full hover:bg-white/5 transition-all cursor-pointer">Retry Connection</button>
-                </div>
-
-                <!-- Placeholder overlay -->
-                <div id="player-placeholder" class="absolute inset-0 z-30 bg-radial from-black/80 to-black flex flex-col items-center justify-center gap-2 cursor-pointer text-center px-6">
-                    <i class="fa-solid fa-circle-play text-white/40 text-4xl hover:text-white/80 transition-transform hover:scale-105 duration-300"></i>
-                    <h3 class="text-[10px] uppercase tracking-[0.2em] text-white/80 mt-1">ZID VAI ON AIR</h3>
-                    <p class="text-[10px] text-white/40">Select a broadcast server below to begin</p>
-                </div>
-
-                <!-- Custom controls overlay (minimal hover controls) -->
-                <div id="custom-controls" class="absolute inset-x-0 bottom-0 z-20 p-4 bg-gradient-to-t from-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-2.5">
-                    <!-- Timeline container -->
-                    <div id="timeline-container" class="w-full h-1 bg-white/10 rounded-full cursor-pointer relative flex items-center group/time">
-                        <div class="absolute inset-y-0 left-0 bg-white/20 rounded-full" id="timeline-buffer" style="width: 0%"></div>
-                        <div class="absolute inset-y-0 left-0 bg-white/80 rounded-full group-hover/time:bg-white transition-colors" id="timeline-progress" style="width: 0%"></div>
-                    </div>
-                    <!-- Buttons Row -->
-                    <div class="flex justify-between items-center text-white/70">
-                        <div class="flex items-center gap-4">
-                            <button id="ctrl-play-pause" class="hover:text-white transition-colors focus:outline-none cursor-pointer"><i class="fa-solid fa-play text-xs"></i></button>
-                            <div class="flex items-center gap-2 group/volume">
-                                <button id="ctrl-mute" class="hover:text-white transition-colors focus:outline-none cursor-pointer"><i class="fa-solid fa-volume-high text-xs"></i></button>
-                                <input type="range" id="ctrl-volume" min="0" max="1" step="0.05" value="1" class="w-16 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-white focus:outline-none">
-                            </div>
-                            <div class="flex items-center gap-2 text-[10px] tracking-[0.1em] font-light">
-                                <span id="player-live-badge" class="flex items-center gap-1 text-live-red font-semibold"><span class="w-1.5 h-1.5 bg-live-red rounded-full animate-pulse"></span> LIVE</span>
-                                <span id="time-elapsed">00:00</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button id="ctrl-pip" class="hover:text-white transition-colors focus:outline-none cursor-pointer" title="Picture in Picture"><i class="fa-solid fa-window-restore text-xs"></i></button>
-                            <button id="ctrl-fullscreen" class="hover:text-white transition-colors focus:outline-none cursor-pointer" title="Fullscreen"><i class="fa-solid fa-expand text-xs"></i></button>
-                        </div>
-                    </div>
-                </div>
-
+        <!-- Header: The Signature (Glass panel) -->
+        <header class="backdrop-filter blur-[30px] saturate-[200%] bg-white/5 border border-white/10 rounded-2xl py-4 px-6 flex justify-between items-center w-full shadow-lg fixed top-0 left-0 right-0 z-30 md:relative md:top-auto md:left-auto md:right-auto bg-[#050505]/60 md:bg-white/5 rounded-none md:rounded-2xl border-x-0 border-t-0 md:border border-white/10">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-trophy text-[#00f2fe] text-sm animate-pulse drop-shadow-[0_0_8px_rgba(0,242,254,0.5)]"></i>
+                <h1 class="font-light text-[11px] md:text-[12px] tracking-[0.25em] text-white/90 uppercase select-none font-inter drop-shadow-[0_0_6px_rgba(0,242,254,0.3)]">ZID VAI ON AIR X WC 2026</h1>
             </div>
-        </div>
-
-        <!-- Server Selector: Active Dot System Bar -->
-        <div id="dots-container" class="flex flex-col items-center gap-4 w-full py-4 mt-2">
-            <!-- Centered dot list -->
-            <div id="servers-container" class="flex justify-center items-center gap-5.5 py-2 w-full max-w-[600px] overflow-x-auto scrollbar-hide select-none">
-                <!-- Glowing dots dynamically generated by JS -->
-            </div>
-            
-            <div class="flex items-center gap-4 justify-between w-full max-w-[600px] px-2 text-[9px] tracking-[0.15em] uppercase text-white/30 font-light select-none pointer-events-none">
-                <div id="header-match-status" class="flex items-center gap-1.5 text-left">
-                    <span class="w-1 h-1 bg-live-red rounded-full animate-pulse" id="header-match-dot"></span>
+            <div class="flex items-center gap-4">
+                <div id="header-match-status" class="flex items-center gap-1.5 text-[9px] tracking-widest text-white/50 uppercase">
+                    <span class="w-1.5 h-1.5 bg-live-red rounded-full animate-pulse" id="header-match-dot"></span>
                     <span id="header-match-text">Loading matches...</span>
                 </div>
-                <div id="clock" class="text-right">00:00:00</div>
+                <div id="clock" class="font-mono text-white/40 text-[10px] bg-white/5 px-2.5 py-1 rounded-full border border-white/5">00:00:00</div>
+            </div>
+        </header>
+
+        <!-- Video Player Wrapper (Fixed-aspect ratio floating glass card, sticky on mobile portrait) -->
+        <div class="w-full relative flex flex-col items-center bg-black fixed top-[50px] left-0 right-0 z-40 md:relative md:top-auto md:left-auto md:right-auto md:w-full md:aspect-auto">
+            <!-- Ambient Glow behind the player (pulse frequency 12s) -->
+            <div class="absolute -inset-16 -z-10 rounded-full bg-radial from-[#00f2fe]/10 to-transparent blur-[120px] animate-ambient-pulse pointer-events-none hidden md:block"></div>
+
+            <!-- Player Panel container (Glassmorphic border) -->
+            <div class="w-full backdrop-filter blur-[30px] saturate-[200%] bg-white/5 border-0 md:border border-white/10 rounded-none md:rounded-2xl overflow-hidden relative shadow-[0_25px_50px_-25px_rgba(0,242,254,0.08)]">
+                <!-- Video Container -->
+                <div id="video-wrapper" class="relative w-full aspect-video bg-[#000000] overflow-hidden group">
+                    <video id="video-player" class="w-full h-full object-contain" playsinline autoplay></video>
+                    <span id="player-source-url" style="display:none;">None Loaded</span>
+
+                    <!-- Autoplay unmute overlay -->
+                    <div id="player-unmute-overlay" class="absolute inset-0 z-30 bg-black/90 flex flex-col items-center justify-center gap-3 cursor-pointer hidden">
+                        <i class="fa-solid fa-volume-high text-white/80 text-lg animate-pulse"></i>
+                        <span class="text-[9px] tracking-[0.2em] uppercase text-white/60">Tap to Unmute</span>
+                    </div>
+
+                    <!-- Loader (shimmer skeleton) -->
+                    <div id="player-loader" class="absolute inset-0 z-30 bg-black flex flex-col items-center justify-center hidden">
+                        <div class="skeleton-shimmer-container">
+                            <div class="skeleton-shimmer skeleton-logo"></div>
+                            <div class="skeleton-shimmer skeleton-title mt-3"></div>
+                            <div class="skeleton-shimmer skeleton-description mt-1.5"></div>
+                        </div>
+                    </div>
+
+                    <!-- Error overlay -->
+                    <div id="player-error" class="absolute inset-0 z-30 bg-black/95 flex flex-col items-center justify-center gap-3 text-center px-6 hidden">
+                        <i class="fa-solid fa-circle-exclamation text-live-red text-xl"></i>
+                        <h4 id="error-title" class="text-[10px] uppercase tracking-[0.2em] text-white/80">Stream Offline or Blocked</h4>
+                        <p id="error-message" class="text-[10px] text-white/40 max-w-sm">Failed to load media. This stream may require custom CORS proxying or is currently inactive.</p>
+                        <button id="btn-error-retry" class="mt-2 text-[9px] tracking-[0.2em] uppercase text-white/60 hover:text-white/90 border border-white/10 px-4 py-1.5 rounded-full hover:bg-white/5 transition-all cursor-pointer">Retry Connection</button>
+                    </div>
+
+                    <!-- Placeholder overlay -->
+                    <div id="player-placeholder" class="absolute inset-0 z-30 bg-radial from-black/80 to-black flex flex-col items-center justify-center gap-2 cursor-pointer text-center px-6">
+                        <i class="fa-solid fa-circle-play text-white/40 text-4xl hover:text-white/80 transition-transform hover:scale-105 duration-300"></i>
+                        <h3 class="text-[10px] uppercase tracking-[0.2em] text-white/80 mt-1">ZID VAI ON AIR</h3>
+                        <p class="text-[10px] text-white/40">Select a broadcast server below to begin</p>
+                    </div>
+
+                    <!-- Custom controls overlay (Glass controls) -->
+                    <div id="custom-controls" class="absolute inset-x-4 bottom-4 z-20 p-3 backdrop-filter blur-[20px] saturate-[180%] bg-black/40 border border-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-2.5">
+                        <!-- Timeline container -->
+                        <div id="timeline-container" class="w-full h-1 bg-white/10 rounded-full cursor-pointer relative flex items-center group/time">
+                            <div class="absolute inset-y-0 left-0 bg-white/20 rounded-full" id="timeline-buffer" style="width: 0%"></div>
+                            <div class="absolute inset-y-0 left-0 bg-[#00f2fe] rounded-full group-hover/time:bg-white transition-colors" id="timeline-progress" style="width: 0%"></div>
+                        </div>
+                        <!-- Buttons Row -->
+                        <div class="flex justify-between items-center text-white/70">
+                            <div class="flex items-center gap-4">
+                                <button id="ctrl-play-pause" class="hover:text-white transition-colors focus:outline-none cursor-pointer"><i class="fa-solid fa-play text-xs"></i></button>
+                                <div class="flex items-center gap-2 group/volume">
+                                    <button id="ctrl-mute" class="hover:text-white transition-colors focus:outline-none cursor-pointer"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                    <input type="range" id="ctrl-volume" min="0" max="1" step="0.05" value="1" class="w-16 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-[#00f2fe] focus:outline-none">
+                                </div>
+                                <div class="flex items-center gap-2 text-[10px] tracking-[0.1em] font-light">
+                                    <span id="player-live-badge" class="flex items-center gap-1 text-live-red font-semibold"><span class="w-1.5 h-1.5 bg-live-red rounded-full animate-pulse"></span> LIVE</span>
+                                    <span id="time-elapsed">00:00</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button id="ctrl-pip" class="hover:text-white transition-colors focus:outline-none cursor-pointer" title="Picture in Picture"><i class="fa-solid fa-window-restore text-xs"></i></button>
+                                <button id="ctrl-fullscreen" class="hover:text-white transition-colors focus:outline-none cursor-pointer" title="Fullscreen"><i class="fa-solid fa-expand text-xs"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subtle Info Bar below video player (Desktop only) -->
+                <div class="hidden md:flex justify-between items-center py-3 px-6 bg-white/[0.02] border-t border-white/5 text-[10px] text-white/40">
+                    <div class="text-left flex items-center gap-2">
+                        <i class="fa-solid fa-satellite-dish text-[#00f2fe]"></i>
+                        <span id="current-server-title" class="font-medium text-white/70 uppercase">No Channel Loaded</span>
+                        <span id="current-server-desc">Select a Liquid Dot to stream</span>
+                    </div>
+                    <div>
+                        <button id="btn-copy-url" class="text-white/40 hover:text-white/80 transition-colors uppercase tracking-widest flex items-center gap-1 cursor-pointer">
+                            <i class="fa-regular fa-copy"></i> Copy stream link
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Hidden elements for script compatibility -->
-        <button id="btn-copy-url" style="display:none;"></button>
+        <!-- Mobile portrait spacer to prevent content overlapping with the fixed elements -->
+        <div class="h-[calc(100vw*9/16+50px)] w-full md:hidden"></div>
+
+        <!-- Server Selector: Liquid Dots Server Dock (Responsive bottom sheet on mobile, glass bar on desktop) -->
+        <div id="mobile-drawer" class="fixed inset-x-0 bottom-0 z-50 bg-[#070908]/95 border-t border-white/10 rounded-t-3xl transform translate-y-full transition-transform duration-300 md:relative md:translate-y-0 md:bg-white/5 md:border md:rounded-full py-4 px-8 shadow-2xl md:shadow-lg w-full flex flex-col md:flex-row justify-center items-center">
+            <!-- Mobile Close/Drag handle -->
+            <div id="mobile-drawer-header" class="flex flex-col items-center pb-3 cursor-pointer md:hidden select-none w-full">
+                <div class="w-10 h-1 bg-white/20 rounded-full mb-1"></div>
+                <div class="flex justify-between items-center w-full px-4 text-[9px] tracking-[0.2em] uppercase text-white/40">
+                    <span>Swipe down to close</span>
+                    <span class="text-[#00f2fe] font-medium" id="mobile-server-label">Servers</span>
+                </div>
+            </div>
+
+            <!-- Server Dock: Horizontal row of Liquid Dots -->
+            <div id="servers-container" class="flex justify-center items-center gap-6 overflow-x-auto scrollbar-hide py-2.5 w-full max-w-[600px] select-none">
+                <!-- Glowing liquid dots dynamically generated in app.js -->
+            </div>
+        </div>
 
     </main>
 
-    <!-- Footer Signature (Bottom-Right Negative Space) -->
-    <footer class="absolute bottom-6 right-6 md:bottom-10 md:right-10 text-[10px] tracking-[0.25em] font-light text-white/20 uppercase select-none pointer-events-none z-30">
+    <!-- Mobile Glass FAB (Toggles the bottom sheet drawer in mobile viewports) -->
+    <button id="fab-dots-toggle" class="fixed bottom-6 right-6 z-40 backdrop-filter blur-[30px] saturate-[200%] bg-white/10 border border-white/15 rounded-full w-12 h-12 flex items-center justify-center text-white/70 shadow-lg cursor-pointer md:hidden active:scale-95 transition-all focus:outline-none" aria-label="Toggle channels selection">
+        <i class="fa-solid fa-server text-xs"></i>
+    </button>
+
+    <!-- Footer Signature (Bottom-Right Minimal Negative Space) -->
+    <footer class="absolute bottom-6 right-6 md:bottom-10 md:right-10 text-[9px] tracking-[0.25em] font-light text-white/20 uppercase select-none pointer-events-none z-30">
         DEVELOPED BY SHAHIDUL ISLAM BAIZID
     </footer>
 
