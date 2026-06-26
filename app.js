@@ -278,91 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const scheduleContainer = document.getElementById('schedule-container');
     const toastContainer = document.getElementById('toast-container');
 
-    // Mobile Bottom Sheet Gesture Logic
-    const bottomSheet = document.getElementById('bottom-sheet');
-    const bottomSheetHeader = document.getElementById('bottom-sheet-header');
-    const bottomSheetTitle = document.getElementById('bottom-sheet-title');
-    
-    let isExpanded = false;
-    let startY = 0;
-    let currentY = 0;
-    let sheetHeight = 0;
-    let isDragging = false;
-
-    if (bottomSheet && bottomSheetHeader) {
-        // Touch Drag gestures for mobile portrait
-        bottomSheetHeader.addEventListener('touchstart', (e) => {
-            startY = e.touches[0].clientY;
-            currentY = startY;
-            sheetHeight = bottomSheet.getBoundingClientRect().height;
-            bottomSheet.classList.add('bottom-sheet-dragging');
-            isDragging = false;
-        }, { passive: true });
-
-        bottomSheetHeader.addEventListener('touchmove', (e) => {
-            currentY = e.touches[0].clientY;
-            let deltaY = currentY - startY;
-            
-            if (Math.abs(deltaY) > 5) {
-                isDragging = true;
-            }
-
-            // Allow dragging up (expanding) or down (collapsing)
-            if (isExpanded) {
-                if (deltaY > 0) {
-                    bottomSheet.style.transform = `translateY(${deltaY}px)`;
-                }
-            } else {
-                if (deltaY < 0) {
-                    let collapsedOffset = sheetHeight - 54;
-                    let targetTranslate = collapsedOffset + deltaY;
-                    if (targetTranslate > 0) {
-                        bottomSheet.style.transform = `translateY(${targetTranslate}px)`;
-                    }
-                }
-            }
-        }, { passive: true });
-
-        bottomSheetHeader.addEventListener('touchend', () => {
-            bottomSheet.classList.remove('bottom-sheet-dragging');
-            bottomSheet.style.transform = '';
-            
-            if (isDragging) {
-                let deltaY = currentY - startY;
-                if (isExpanded) {
-                    if (deltaY > 60) {
-                        isExpanded = false;
-                    }
-                } else {
-                    if (deltaY < -60) {
-                        isExpanded = true;
-                    }
-                }
-                toggleBottomSheet(isExpanded);
-            }
-        }, { passive: true });
-
-        // Toggle on tap/click
-        bottomSheetHeader.addEventListener('click', () => {
-            if (!isDragging) {
-                isExpanded = !isExpanded;
-                toggleBottomSheet(isExpanded);
-            }
-        });
-    }
-
-    function toggleBottomSheet(expand) {
-        if (!bottomSheet) return;
-        if (expand) {
-            bottomSheet.classList.remove('translate-y-[calc(100%-54px)]');
-            bottomSheet.classList.add('translate-y-0');
-            if (bottomSheetTitle) bottomSheetTitle.textContent = 'Swipe down to close';
-        } else {
-            bottomSheet.classList.remove('translate-y-0');
-            bottomSheet.classList.add('translate-y-[calc(100%-54px)]');
-            if (bottomSheetTitle) bottomSheetTitle.textContent = 'Swipe up for servers';
-        }
-    }
+    // No bottom-sheet controls needed in Active Dot layout
 
     // Failover & Auto-switching State
     let failoverCount = 0;
@@ -494,35 +410,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let globalIndex = 0;
         categories.forEach(cat => {
-            // Render category label indicator
-            const catLabel = document.createElement('span');
-            catLabel.className = 'text-[9px] uppercase tracking-[0.2em] text-white/35 select-none shrink-0 font-semibold ml-2';
-            catLabel.textContent = cat.category;
-            serversContainer.appendChild(catLabel);
-
-            // Separator pipe
-            const sep = document.createElement('span');
-            sep.className = 'text-[10px] text-white/10 select-none shrink-0 font-light mx-1';
-            sep.textContent = '|';
-            serversContainer.appendChild(sep);
-
             cat.servers.forEach(srv => {
                 const btn = document.createElement('button');
-                btn.className = 'server-btn font-light text-[12px] text-white/60 hover:text-white transition-all duration-200 cursor-pointer focus:outline-none select-none shrink-0 flex items-center justify-center';
+                btn.className = 'dot-btn';
                 btn.dataset.index = globalIndex;
-                btn.dataset.name = srv.name; // For layout-preserving weight trick
-                
-                // Add name text
-                const textSpan = document.createElement('span');
-                textSpan.textContent = srv.name;
-                btn.appendChild(textSpan);
+                btn.setAttribute('aria-label', srv.name);
 
-                // Prepend dot if it is a live match
-                if (srv.badge === 'live-badge' || srv.name.toLowerCase().includes('vs')) {
-                    const dot = document.createElement('span');
-                    dot.className = 'inline-block w-1.5 h-1.5 bg-live-red rounded-full mr-1.5 animate-pulse';
-                    btn.prepend(dot);
-                }
+                // Add Tooltip for stream name
+                const tooltip = document.createElement('span');
+                tooltip.className = 'dot-tooltip';
+                tooltip.textContent = srv.name;
+                btn.appendChild(tooltip);
 
                 const currentIndex = globalIndex;
                 btn.addEventListener('click', () => {
@@ -532,11 +430,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 serversContainer.appendChild(btn);
                 globalIndex++;
             });
-
-            // Add separator spacer between categories
-            const catSpacer = document.createElement('span');
-            catSpacer.className = 'w-6 shrink-0';
-            serversContainer.appendChild(catSpacer);
         });
     }
 
@@ -548,24 +441,16 @@ document.addEventListener('DOMContentLoaded', () => {
             failoverCount = 0;
         }
 
-        // Toggle active states on all dynamically created buttons
-        const allButtons = document.querySelectorAll('.server-btn');
-        allButtons.forEach(btn => {
-            btn.classList.remove('active', 'text-white');
-            btn.classList.add('text-white/60');
-        });
-        const activeBtns = document.querySelectorAll(`.server-btn[data-index="${index}"]`);
-        activeBtns.forEach(btn => {
-            btn.classList.remove('text-white/60');
-            btn.classList.add('active', 'text-white');
-        });
+        // Toggle active states on dots
+        const allDots = document.querySelectorAll('.dot-btn');
+        allDots.forEach(dot => dot.classList.remove('active'));
+        
+        const activeDots = document.querySelectorAll(`.dot-btn[data-index="${index}"]`);
+        activeDots.forEach(dot => dot.classList.add('active'));
 
         // Play the stream
         const server = SERVERS[index];
         playStream(url, server.name, server.detail);
-
-        // Collapse mobile bottom sheet on selection
-        toggleBottomSheet(false);
     };
 
     // Initialize the servers list in the DOM dynamically

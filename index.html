@@ -7,7 +7,7 @@
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Hls.js for direct HLS streaming -->
@@ -17,20 +17,27 @@
     <!-- Custom styling stylesheet link -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-void-black text-white/80 min-h-screen flex flex-col items-center justify-center p-0 md:p-8 relative select-none">
+<body class="bg-void-black text-white/80 min-h-screen flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden select-none">
+
+    <!-- Header Signature (Top-Left) -->
+    <header class="absolute top-6 left-6 md:top-10 md:left-10 flex flex-col gap-2 z-30 select-none pointer-events-none">
+        <h1 class="font-extralight text-[10px] md:text-[11px] tracking-[0.3em] text-white/50 uppercase font-inter">ZID VAI ON AIR X WC 2026</h1>
+        <div class="h-[1px] w-36 md:w-48 bg-gradient-to-r from-white/40 to-transparent"></div>
+    </header>
 
     <!-- Toast container for auto-failover notices -->
     <div id="toast-container"></div>
 
-    <main class="w-full md:w-[90vw] md:max-w-[1200px] flex flex-col items-center justify-center relative">
+    <!-- Main Container (Digital Gallery Centered Mode) -->
+    <main class="w-full md:w-[90vw] md:max-w-[1200px] flex flex-col items-center justify-center relative mt-16 md:mt-0 z-20">
         
-        <!-- Video Player Wrapper (Fixed on mobile portrait, natural relative flow on desktop) -->
-        <div class="w-full relative flex flex-col items-center z-20 fixed top-0 left-0 right-0 aspect-video md:relative md:w-full md:aspect-auto bg-black">
+        <!-- Video Player Wrapper (Fixed-aspect ratio floating card) -->
+        <div class="w-full relative flex flex-col items-center bg-black">
             <!-- Ambient Glow behind the player (pulse frequency 12s) -->
             <div class="absolute -inset-16 -z-10 rounded-full bg-radial from-white/10 to-transparent blur-[120px] animate-ambient-pulse pointer-events-none hidden md:block"></div>
 
             <!-- Video Container -->
-            <div id="video-wrapper" class="relative w-full aspect-video bg-[#000000] overflow-hidden shadow-none md:shadow-[0_20px_60px_-25px_rgba(255,255,255,0.06)] group">
+            <div id="video-wrapper" class="relative w-full aspect-video bg-[#000000] overflow-hidden shadow-[0_20px_50px_-25px_rgba(255,255,255,0.06)] group">
                 <video id="video-player" class="w-full h-full object-contain" playsinline autoplay></video>
                 <span id="player-source-url" style="display:none;">None Loaded</span>
 
@@ -64,7 +71,7 @@
                     <p class="text-[10px] text-white/40">Select a broadcast server below to begin</p>
                 </div>
 
-                <!-- Custom controls overlay -->
+                <!-- Custom controls overlay (minimal hover controls) -->
                 <div id="custom-controls" class="absolute inset-x-0 bottom-0 z-20 p-4 bg-gradient-to-t from-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-2.5">
                     <!-- Timeline container -->
                     <div id="timeline-container" class="w-full h-1 bg-white/10 rounded-full cursor-pointer relative flex items-center group/time">
@@ -94,60 +101,30 @@
             </div>
         </div>
 
-        <!-- Mobile portrait spacer to prevent content overlapping with the top-sticky player -->
-        <div class="h-[calc(100vw*9/16)] w-full md:hidden"></div>
-
-        <!-- Mobile Portrait Bottom Sheet / Desktop natural bottom metadata and Server Dock -->
-        <div id="bottom-sheet" class="w-full fixed inset-x-0 bottom-0 bg-[#0a0a0a] border-t border-white/10 rounded-t-2xl z-50 transform translate-y-[calc(100%-54px)] transition-transform duration-300 md:relative md:translate-y-0 md:bg-transparent md:border-none md:rounded-none md:p-0 md:z-auto">
-            <!-- Drawer drag handle (visible on mobile only) -->
-            <div id="bottom-sheet-header" class="flex flex-col items-center py-3 cursor-pointer md:hidden select-none">
-                <div class="w-10 h-1 bg-white/20 rounded-full mb-2"></div>
-                <div class="flex justify-between items-center w-full px-6 text-[10px] tracking-[0.2em] uppercase text-white/40">
-                    <span id="bottom-sheet-title">Swipe up for servers</span>
-                    <span class="flex items-center gap-1.5 text-live-red font-semibold"><span class="w-1.5 h-1.5 bg-live-red rounded-full animate-pulse"></span> LIVE</span>
-                </div>
+        <!-- Server Selector: Active Dot System Bar -->
+        <div id="dots-container" class="flex flex-col items-center gap-4 w-full py-4 mt-2">
+            <!-- Centered dot list -->
+            <div id="servers-container" class="flex justify-center items-center gap-5.5 py-2 w-full max-w-[600px] overflow-x-auto scrollbar-hide select-none">
+                <!-- Glowing dots dynamically generated by JS -->
             </div>
-
-            <!-- Bottom Sheet / Desktop Info Content -->
-            <div id="bottom-sheet-content" class="px-6 pb-6 pt-2 overflow-y-auto max-h-[70vh] flex flex-col gap-5 md:p-0 md:max-h-none md:overflow-visible md:mt-4">
-                
-                <!-- Metadata Info Bar -->
-                <div class="flex justify-between items-start w-full px-1">
-                    <div class="text-left">
-                        <h3 id="current-server-title" class="text-[12px] font-semibold text-white/80 uppercase tracking-wider">Select a server to start</h3>
-                        <p id="current-server-desc" class="text-[10px] text-white/40 mt-0.5 font-light">Click any broadcast channel below</p>
-                    </div>
-                    <div class="flex items-center">
-                        <button id="btn-copy-url" class="text-[10px] tracking-[0.2em] uppercase text-white/40 hover:text-white/80 transition-colors flex items-center gap-1.5 focus:outline-none cursor-pointer">
-                            <i class="fa-regular fa-copy"></i> Copy Link
-                        </button>
-                    </div>
+            
+            <div class="flex items-center gap-4 justify-between w-full max-w-[600px] px-2 text-[9px] tracking-[0.15em] uppercase text-white/30 font-light select-none pointer-events-none">
+                <div id="header-match-status" class="flex items-center gap-1.5 text-left">
+                    <span class="w-1 h-1 bg-live-red rounded-full animate-pulse" id="header-match-dot"></span>
+                    <span id="header-match-text">Loading matches...</span>
                 </div>
-
-                <!-- Thin Horizontal Scrollable Server Dock -->
-                <div id="servers-dock-container" class="w-full">
-                    <div id="servers-container" class="flex items-center gap-6 overflow-x-auto scrollbar-hide py-3 px-6 bg-ink-grey rounded-full border border-white/5 w-full select-none">
-                        <!-- Dynamic servers will be injected here as thin text buttons -->
-                    </div>
-                </div>
-
-                <!-- Clock & Match Status Bar -->
-                <div class="flex justify-between items-center border-t border-white/5 pt-3.5 px-1 text-[10px] tracking-[0.1em] text-white/40">
-                    <div id="header-match-status" class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 bg-live-red rounded-full animate-pulse" id="header-match-dot"></span>
-                        <span id="header-match-text" class="uppercase">Loading matches...</span>
-                    </div>
-                    <div id="clock">00:00:00</div>
-                </div>
-
+                <div id="clock" class="text-right">00:00:00</div>
             </div>
         </div>
 
+        <!-- Hidden elements for script compatibility -->
+        <button id="btn-copy-url" style="display:none;"></button>
+
     </main>
 
-    <!-- FOOT-PRINT: Extremely small minimal footer at absolute bottom -->
-    <footer class="absolute bottom-2 left-0 right-0 text-center select-none text-[9px] tracking-wider uppercase text-white/20 z-10 pointer-events-none">
-        &copy; 2026 • zid vai on air • shahidul islam baizid
+    <!-- Footer Signature (Bottom-Right Negative Space) -->
+    <footer class="absolute bottom-6 right-6 md:bottom-10 md:right-10 text-[10px] tracking-[0.25em] font-light text-white/20 uppercase select-none pointer-events-none z-30">
+        DEVELOPED BY SHAHIDUL ISLAM BAIZID
     </footer>
 
     <!-- Script Entrypoint -->
