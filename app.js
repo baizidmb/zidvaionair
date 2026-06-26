@@ -30,7 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
             { name: "SONY SPORTS TEN 5 HD", link: "https://sm-monirul.top/toffee/play/sony_sports_5_hd.m3u8", category_name: "LIVE" },
             { name: "SONY TEN Cricket", link: "https://sm-monirul.top/toffee/play/ten_cricket.m3u8", category_name: "LIVE" },
             { name: "TOFFEE Sports VIP", link: "https://sm-monirul.top/toffee/play/sports_highlights.m3u8", category_name: "LIVE" },
-            { name: "Euro Sport HD", link: "https://sm-monirul.top/toffee/play/euro_sports_hd.m3u8", category_name: "LIVE" }
+            { name: "Euro Sport HD", link: "https://sm-monirul.top/toffee/play/euro_sports_hd.m3u8", category_name: "LIVE" },
+            { name: "BTV National", link: "https://sm-monirul.top/toffee/play/btv_national.m3u8", category_name: "LIVE" },
+            { name: "Somoy TV", link: "https://sm-monirul.top/toffee/play/somoy_tv.m3u8", category_name: "LIVE" }
         ];
     }
 
@@ -92,8 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     badge: 'hd'
                 });
             }
-            // 3. Premium Sports channels
-            else if (nameLower.includes('sport') || nameLower.includes('ten') || nameLower.includes('cricket') || nameLower.includes('highlights')) {
+            // 3. Premium Sports channels / Channels broadcasting World Cup
+            else if (nameLower.includes('sport') || nameLower.includes('ten') || nameLower.includes('cricket') || nameLower.includes('highlights') || nameLower.includes('btv') || nameLower.includes('somoy')) {
                 sportsNetworkStreams.push({
                     name: name,
                     url: url,
@@ -102,6 +104,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
+
+        // Ensure BTV National is always present in the sports network streams
+        const hasBTV = sportsNetworkStreams.some(srv => srv.name.toLowerCase().includes('btv'));
+        if (!hasBTV) {
+            sportsNetworkStreams.push({
+                name: 'BTV National',
+                url: 'https://sm-monirul.top/toffee/play/btv_national.m3u8',
+                detail: 'Bangladesh Television Live Broadcast',
+                badge: 'hd'
+            });
+        }
+        
+        // Ensure Somoy TV is always present in the sports network streams
+        const hasSomoy = sportsNetworkStreams.some(srv => srv.name.toLowerCase().includes('somoy'));
+        if (!hasSomoy) {
+            sportsNetworkStreams.push({
+                name: 'Somoy TV',
+                url: 'https://sm-monirul.top/toffee/play/somoy_tv.m3u8',
+                detail: 'Somoy TV Live Broadcast',
+                badge: 'hd'
+            });
+        }
 
         // If no active matches are playing, show a default broadcast banner placeholder
         if (matchStreams.length === 0) {
