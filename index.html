@@ -45,8 +45,8 @@
             <!-- Ambient Glow behind the player (pulse frequency 12s) -->
             <div class="absolute -inset-16 -z-10 rounded-full bg-radial from-[#00f2fe]/10 to-transparent blur-[120px] animate-ambient-pulse pointer-events-none hidden md:block"></div>
 
-            <!-- Player Panel container (Glassmorphic border) -->
-            <div class="w-full backdrop-filter blur-[30px] saturate-[200%] bg-white/5 border-0 md:border border-white/10 rounded-none md:rounded-2xl overflow-hidden relative shadow-[0_25px_50px_-25px_rgba(0,242,254,0.08)]">
+            <!-- Player Panel container (Glassmorphic border removed to prevent video overlay blur) -->
+            <div class="w-full bg-[#000000] border-0 md:border border-white/10 rounded-none md:rounded-2xl overflow-hidden relative shadow-[0_25px_50px_-25px_rgba(0,242,254,0.08)]">
                 <!-- Video Container -->
                 <div id="video-wrapper" class="relative w-full aspect-video bg-[#000000] overflow-hidden group">
                     <video id="video-player" class="w-full h-full object-contain" playsinline autoplay></video>
