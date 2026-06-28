@@ -428,10 +428,18 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 640px) {
     /* Touch friendly active controls */
     #custom-controls {
-        inset-x: 2px !important;
-        bottom: 2px !important;
-        padding: 8px 10px !important;
-        border-radius: 10px !important;
+        inset-x: 6px !important;
+        bottom: 6px !important;
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+    }
+    
+    #custom-controls button {
+        padding: 6px !important;
+    }
+    
+    #ctrl-volume {
+        display: none !important;
     }
     
     .control-btn i {

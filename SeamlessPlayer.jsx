@@ -878,6 +878,13 @@ export default function SeamlessPlayer() {
             className={styles.videoPlayerBox}
             onMouseMove={handleTriggerControls}
             onMouseLeave={() => isPlaying && setShowControls(false)}
+            onTouchStart={handleTriggerControls}
+            onClick={(e) => {
+              if (e.target.closest('#react-timeline') || e.target.closest('button') || e.target.closest('input')) {
+                return;
+              }
+              setShowControls(prev => !prev);
+            }}
           >
             <video
               ref={videoRefA}
