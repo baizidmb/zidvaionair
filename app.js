@@ -650,14 +650,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Bring active player to front
-            targetPlayer.classList.remove('opacity-0');
-            targetPlayer.classList.add('opacity-100');
+            targetPlayer.style.opacity = '1';
             targetPlayer.style.zIndex = '20';
 
             // Ensure other player is hidden
             const backupPlayer = targetPlayer === videoA ? videoB : videoA;
-            backupPlayer.classList.remove('opacity-100');
-            backupPlayer.classList.add('opacity-0');
+            backupPlayer.style.opacity = '0';
             backupPlayer.style.zIndex = '10';
 
             updateTelemetry();
@@ -667,11 +665,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Initialize HLS.js
-        if (Hls.isSupported() && url.includes('.m3u8')) {
             const tempHls = new Hls({
                 maxMaxBufferLength: 10,
-                enableWorker: true,
-                lowLatencyMode: true
+                enableWorker: false, // Turn off web workers to fix mobile video decoding black screens
+                lowLatencyMode: true,
+                capLevelToPlayerSize: true, // Auto-scale resolution to player dimensions to prevent GPU stalls
+                maxBufferHole: 2 // Automatically skip small gaps in segment streams to avoid freezes
             });
             
             if (targetPlayer === videoA) {
@@ -682,6 +681,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tempHls.loadSource(url);
             tempHls.attachMedia(targetPlayer);
+
+            const handleNativeReady = () => {
+                onReady();
+                targetPlayer.removeEventListener('loadedmetadata', handleNativeReady);
+                targetPlayer.removeEventListener('canplay', handleNativeReady);
+            };
+            targetPlayer.addEventListener('loadedmetadata', handleNativeReady);
+            targetPlayer.addEventListener('canplay', handleNativeReady);
             
             tempHls.on(Hls.Events.MANIFEST_PARSED, () => {
                 onReady();
@@ -757,9 +764,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (Hls.isSupported() && backupUrl.includes('.m3u8')) {
             const tempHls = new Hls({
                 maxMaxBufferLength: 5, // only pre-buffer 5 seconds to conserve bandwidth
-                enableWorker: true,
+                enableWorker: false, // Turn off web workers to fix mobile video decoding black screens
                 lowLatencyMode: true,
-                autoStartLoad: true
+                autoStartLoad: true,
+                capLevelToPlayerSize: true,
+                maxBufferHole: 2
             });
 
             if (idlePlayer === videoA) {
@@ -1228,12 +1237,10 @@ document.addEventListener('DOMContentLoaded', () => {
             idlePlayer.play().catch(e => console.log('Failover play block:', e));
 
             // 3. Swap opacity and z-index (cross-fade transition)
-            idlePlayer.classList.remove('opacity-0');
-            idlePlayer.classList.add('opacity-100');
+            idlePlayer.style.opacity = '1';
             idlePlayer.style.zIndex = '20';
 
-            activePlayer.classList.remove('opacity-100');
-            activePlayer.classList.add('opacity-0');
+            activePlayer.style.opacity = '0';
             activePlayer.style.zIndex = '10';
 
             // 4. Swap variables

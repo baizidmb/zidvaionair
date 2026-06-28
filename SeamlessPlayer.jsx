@@ -606,8 +606,10 @@ export default function SeamlessPlayer() {
     if (Hls.isSupported() && url.includes('.m3u8')) {
       hlsInstance = new Hls({
         maxMaxBufferLength: 10,
-        enableWorker: true,
+        enableWorker: false, // Turn off web workers to fix mobile video decoding black screens
         lowLatencyMode: true,
+        capLevelToPlayerSize: true, // Auto-scale resolution to player dimensions to prevent GPU stalls
+        maxBufferHole: 2 // Automatically skip small gaps in segment streams to avoid freezes
       });
 
       if (isTargetA) {
@@ -618,6 +620,14 @@ export default function SeamlessPlayer() {
 
       hlsInstance.loadSource(url);
       hlsInstance.attachMedia(targetVideo);
+
+      const handleNativeReady = () => {
+        onReady();
+        targetVideo.removeEventListener('loadedmetadata', handleNativeReady);
+        targetVideo.removeEventListener('canplay', handleNativeReady);
+      };
+      targetVideo.addEventListener('loadedmetadata', handleNativeReady);
+      targetVideo.addEventListener('canplay', handleNativeReady);
 
       hlsInstance.on(Hls.Events.MANIFEST_PARSED, onReady);
       hlsInstance.on(Hls.Events.ERROR, (_, data) => {
@@ -671,9 +681,11 @@ export default function SeamlessPlayer() {
     if (Hls.isSupported() && backupServer.url.includes('.m3u8')) {
       const tempHls = new Hls({
         maxMaxBufferLength: 5,
-        enableWorker: true,
+        enableWorker: false, // Turn off web workers to fix mobile video decoding black screens
         lowLatencyMode: true,
-        autoStartLoad: true
+        autoStartLoad: true,
+        capLevelToPlayerSize: true,
+        maxBufferHole: 2
       });
 
       if (isIdleA) {
