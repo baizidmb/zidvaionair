@@ -427,25 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cleanupPlayer(idlePlayer);
     }
 
-    window.changeServer = function(url, index, isAutoSwitch = false) {
-        currentServerIndex = index;
 
-        if (!isAutoSwitch) {
-            failoverCount = 0;
-        }
-
-        // Re-render server grid
-        renderServersGrid(SERVERS);
-
-        // Play the stream
-        playStream(index);
-
-        toggleMobileDrawer(false);
-        drawerExpanded = false;
-    };
-
-    // Initialize the servers list in the DOM dynamically
-    loadDynamicStreams();
 
 
     // ---------------------------------------------------------
@@ -1038,7 +1020,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const isLive = status === 'live';
             const tuneInBtn = isLive ? `
-                <button class="bg-[#ff7a00] hover:bg-[#ff7a00]/90 text-white font-bold px-3 py-1 rounded-lg text-[10px] cursor-pointer" onclick="window.changeServer(SERVERS[0].url, 0)">
+                <button class="bg-[#ff7a00] hover:bg-[#ff7a00]/90 text-white font-bold px-3 py-1 rounded-lg text-[10px] cursor-pointer" onclick="window.playStream(1)">
                     Tune In
                 </button>
             ` : `<span class="text-white/30 text-[10px] font-semibold">${timeLabel}</span>`;
