@@ -568,11 +568,7 @@ export default function SeamlessPlayer() {
             <span className={styles.statsIcon}><i className="fa-solid fa-users"></i></span>
             <span className={styles.statsCount}>24.5K</span> online
           </div>
-          <div className={styles.clockContainer}>
-            <span className={styles.clockText}>{systemTime}</span>
-            <span className={styles.timezoneLabel}>{timezoneLabel}</span>
-          </div>
-          <div className={styles.userProfile}>Z</div>
+          <a href="https://www.facebook.com/shahidulislam.bayzid.37" target="_blank" rel="noopener noreferrer" className={styles.userProfile} style={{ textDecoration: 'none' }}>Z</a>
         </div>
       </header>
 

@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentServerDesc = document.getElementById('current-server-desc');
     const playerSourceUrl = document.getElementById('player-source-url');
     const btnCopyUrl = document.getElementById('btn-copy-url');
-    const clock = document.getElementById('clock');
     const serversContainer = document.getElementById('servers-container');
 
     // Custom Accessible Player DOM Elements
@@ -1533,39 +1532,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initLiveChatSimulation();
 
-    // ---------------------------------------------------------
-    // 8. CLOCK HEADER INITIATION
-    // ---------------------------------------------------------
-    function updateClock() {
-        if (clock) {
-            const now = new Date();
-            clock.textContent = now.toLocaleTimeString('en-US', { hour12: false });
-            
-            const clockTimezone = document.getElementById('clock-timezone');
-            if (clockTimezone) {
-                let tzString = 'UTC';
-                try {
-                    const parts = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' }).formatToParts(now);
-                    const tzPart = parts.find(p => p.type === 'timeZoneName');
-                    if (tzPart) {
-                        tzString = tzPart.value;
-                    }
-                } catch (e) {
-                    const offset = -now.getTimezoneOffset() / 60;
-                    const sign = offset >= 0 ? '+' : '';
-                    tzString = `GMT${sign}${offset}`;
-                }
-                
-                const utcHour = now.getUTCHours().toString().padStart(2, '0');
-                const utcMin = now.getUTCMinutes().toString().padStart(2, '0');
-                const utcSec = now.getUTCSeconds().toString().padStart(2, '0');
-                
-                clockTimezone.textContent = `${tzString} | UTC ${utcHour}:${utcMin}:${utcSec}`;
-            }
-        }
-    }
-    updateClock();
-    setInterval(updateClock, 1000);
+
 
     // Messi Memes Interactive Segmented Slider
     const messiBtn0 = document.getElementById('messi-btn-0');
