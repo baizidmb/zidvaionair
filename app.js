@@ -2065,12 +2065,15 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClock();
     setInterval(updateClock, 1000);
 
-    // Messi Memes Interactive Slider
-    const messiSlider = document.getElementById('messi-slider');
+    // Messi Memes Interactive Segmented Slider
+    const messiBtn0 = document.getElementById('messi-btn-0');
+    const messiBtn1 = document.getElementById('messi-btn-1');
+    const messiBtn2 = document.getElementById('messi-btn-2');
+    const messiTabIndicator = document.getElementById('messi-tab-indicator');
     const messiMemeImg = document.getElementById('messi-meme-img');
     const messiSliderLabel = document.getElementById('messi-slider-label');
 
-    if (messiSlider && messiMemeImg && messiSliderLabel) {
+    if (messiMemeImg && messiSliderLabel && messiTabIndicator) {
         const MESSI_MEMES = [
             {
                 url: 'https://api.memegen.link/images/custom/WHEN_YOU_SWAP_SERVERS/AND_IT_TAKES_0.01_SECONDS.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png',
@@ -2086,11 +2089,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         ];
 
-        messiSlider.addEventListener('input', (e) => {
-            const idx = parseInt(e.target.value);
+        const setMemeIndex = (idx) => {
             const meme = MESSI_MEMES[idx];
             
-            // Add a quick visual swap transition
+            // Slide indicator
+            messiTabIndicator.style.transform = `translateX(${idx * 100}%)`;
+            
+            // Adjust buttons opacity/classes
+            const buttons = [messiBtn0, messiBtn1, messiBtn2];
+            buttons.forEach((btn, i) => {
+                if (btn) {
+                    if (i === idx) {
+                        btn.style.color = 'rgba(255,255,255,0.95)';
+                    } else {
+                        btn.style.color = 'rgba(255,255,255,0.4)';
+                    }
+                }
+            });
+
+            // Fade transition
             messiMemeImg.style.opacity = '0';
             messiMemeImg.style.transform = 'scale(0.95)';
             setTimeout(() => {
@@ -2099,7 +2116,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 messiMemeImg.style.opacity = '1';
                 messiMemeImg.style.transform = 'scale(1)';
             }, 150);
-        });
+        };
+
+        if (messiBtn0) messiBtn0.addEventListener('click', () => setMemeIndex(0));
+        if (messiBtn1) messiBtn1.addEventListener('click', () => setMemeIndex(1));
+        if (messiBtn2) messiBtn2.addEventListener('click', () => setMemeIndex(2));
     }
 
     console.log('✅ Zid Vai On Air x WC 2026 — Active');

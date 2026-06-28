@@ -30,6 +30,14 @@ const MOCK_SCHEDULE = [
 export default function SeamlessPlayer() {
   const [servers, setServers] = useState([]);
   const [messiIndex, setMessiIndex] = useState(0);
+  const [messiFade, setMessiFade] = useState(false);
+  const handleSetMessiIndex = (idx) => {
+    setMessiFade(true);
+    setTimeout(() => {
+      setMessiIndex(idx);
+      setMessiFade(false);
+    }, 150);
+  };
   const [currentIdx, setCurrentIdx] = useState(-1); // -1 means placeholder/sweeping active
   const [activePlayer, setActivePlayer] = useState('A'); // 'A' or 'B'
   const [isLoading, setIsLoading] = useState(false);
@@ -1171,19 +1179,21 @@ export default function SeamlessPlayer() {
               }}
             />
           </div>
-          {/* Interactive Slider */}
+          {/* Interactive Segmented Selector */}
           <div style={{
             width: '100%',
             maxWidth: '24rem',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.5rem',
-            alignItems: 'center'
+            gap: '0.75rem',
+            alignItems: 'center',
+            marginTop: '0.5rem'
           }}>
             <span style={{
               fontSize: '0.75rem',
               color: 'rgba(255, 255, 255, 0.5)',
-              fontWeight: 500
+              fontWeight: 500,
+              fontFamily: "'Space Grotesk', sans-serif"
             }}>
               {
                 messiIndex === 0 
@@ -1193,37 +1203,111 @@ export default function SeamlessPlayer() {
                   : 'Reaction #3: Simulating 24K Viewer Bots'
               }
             </span>
-            <input 
-              type="range" 
-              min="0" 
-              max="2" 
-              value={messiIndex} 
-              onChange={(e) => setMessiIndex(parseInt(e.target.value))}
-              style={{
-                width: '100%',
-                height: '4px',
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                borderRadius: '9999px',
-                outline: 'none',
-                cursor: 'pointer',
-                appearance: 'none',
-                accentColor: '#ff7a00'
-              }}
-            />
             <div style={{
               display: 'flex',
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              borderRadius: '0.75rem',
+              padding: '0.25rem',
               width: '100%',
-              fontSize: '9px',
-              color: 'rgba(255, 255, 255, 0.3)',
-              fontFamily: 'monospace',
-              textTransform: 'uppercase',
-              marginTop: '0.25rem'
+              position: 'relative',
+              userSelect: 'none'
             }}>
-              <span style={{ flex: 1, textAlign: 'left' }}>Speedy swap</span>
-              <span style={{ flex: 1, textAlign: 'center' }}>Time fix</span>
-              <span style={{ flex: 1, textAlign: 'right' }}>Bot army</span>
+              <button 
+                onClick={() => handleSetMessiIndex(0)} 
+                style={{
+                  flexGrow: 1,
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '0.05em',
+                  padding: '0.5rem 0',
+                  textAlign: 'center',
+                  color: messiIndex === 0 ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
+                  borderRadius: '0.5rem',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  zIndex: 10,
+                  border: 0,
+                  backgroundColor: 'transparent'
+                }}
+              >
+                Fast Swap
+              </button>
+              <button 
+                onClick={() => handleSetMessiIndex(1)} 
+                style={{
+                  flexGrow: 1,
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '0.05em',
+                  padding: '0.5rem 0',
+                  textAlign: 'center',
+                  color: messiIndex === 1 ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
+                  borderRadius: '0.5rem',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  zIndex: 10,
+                  border: 0,
+                  backgroundColor: 'transparent'
+                }}
+              >
+                Time Fix
+              </button>
+              <button 
+                onClick={() => handleSetMessiIndex(2)} 
+                style={{
+                  flexGrow: 1,
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '0.05em',
+                  padding: '0.5rem 0',
+                  textAlign: 'center',
+                  color: messiIndex === 2 ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
+                  borderRadius: '0.5rem',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  zIndex: 10,
+                  border: 0,
+                  backgroundColor: 'transparent'
+                }}
+              >
+                Bot Army
+              </button>
+              {/* Slide highlight background */}
+              <div style={{
+                position: 'absolute',
+                top: '0.25rem',
+                bottom: '0.25rem',
+                left: '0.25rem',
+                backgroundColor: 'rgba(255, 85, 0, 0.2)',
+                border: '1px solid rgba(255, 122, 0, 0.3)',
+                borderRadius: '0.5rem',
+                transition: 'all 0.3s ease',
+                width: 'calc(33.333% - 0.333rem)',
+                transform: `translateX(${messiIndex * 100}%)`,
+                pointerEvents: 'none'
+              }} />
             </div>
           </div>
+        </div>
+        {/* Bengali fun label */}
+        <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+          <span style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            letterSpacing: '0.25em',
+            color: 'rgba(255, 255, 255, 0.15)',
+            textTransform: 'uppercase',
+            fontFamily: "'Space Grotesk', sans-serif",
+            transition: 'color 0.3s ease',
+            cursor: 'default',
+            userSelect: 'none'
+          }}
+          onMouseEnter={(e) => e.target.style.color = '#ff7a00'}
+          onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.15)'}
+          >
+            RAG KORLA?
+          </span>
         </div>
       </section>
 
