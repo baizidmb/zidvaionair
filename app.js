@@ -665,6 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Initialize HLS.js
+        if (Hls.isSupported() && url.includes('.m3u8')) {
             const tempHls = new Hls({
                 maxMaxBufferLength: 10,
                 enableWorker: false, // Turn off web workers to fix mobile video decoding black screens
@@ -921,10 +922,11 @@ document.addEventListener('DOMContentLoaded', () => {
             clearStallTimer();
         });
 
-        // Click on video playing area toggles play/pause
-        videoEl.addEventListener('click', () => {
+        // Click on video playing area toggles controls temporarily (does not pause stream)
+        videoEl.addEventListener('click', (e) => {
             if (videoEl !== activePlayer) return;
-            togglePlay();
+            e.stopPropagation();
+            showControlsTemporarily();
         });
 
         // Progress updates & timeline buffering
@@ -1080,33 +1082,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ghost UI Mobile touch trigger class toggling (for header, dock, controls)
+    // Ghost UI Mobile touch trigger class toggling (for controls overlay)
     let mobileControlsTimeout = null;
     function showMobileControls() {
-        const playerContainer = document.getElementById('player-container');
-        if (!playerContainer) return;
-        
-        playerContainer.classList.add('show-controls');
+        if (!customControls) return;
+        customControls.classList.remove('hide-controls');
+        if (videoWrapper) videoWrapper.classList.remove('hide-cursor');
         
         clearTimeout(mobileControlsTimeout);
         mobileControlsTimeout = setTimeout(() => {
-            playerContainer.classList.remove('show-controls');
+            if (activePlayer && !activePlayer.paused) {
+                customControls.classList.add('hide-controls');
+                if (videoWrapper) videoWrapper.classList.add('hide-cursor');
+            }
         }, 4000);
     }
     
-    videoWrapper.addEventListener('touchstart', (e) => {
-        if (e.target.closest('#custom-controls')) {
-            return;
-        }
-        showMobileControls();
-    }, { passive: true });
-    
-    videoWrapper.addEventListener('click', (e) => {
-        if (e.target.closest('#custom-controls')) {
-            return;
-        }
-        showMobileControls();
-    });
+    if (videoWrapper) {
+        videoWrapper.addEventListener('touchstart', (e) => {
+            if (e.target.closest('#custom-controls')) {
+                return;
+            }
+            showMobileControls();
+        }, { passive: true });
+        
+        videoWrapper.addEventListener('click', (e) => {
+            if (e.target.closest('#custom-controls')) {
+                return;
+            }
+            // Toggle controls overlay visibility on click/tap
+            const isHidden = customControls.classList.contains('hide-controls');
+            if (isHidden) {
+                showControlsTemporarily();
+            } else {
+                customControls.classList.add('hide-controls');
+                videoWrapper.classList.add('hide-cursor');
+            }
+        });
+    }
 
     // Global Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
@@ -1165,35 +1178,43 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Retry button on error overlay
-    btnRetry.addEventListener('click', () => {
-        if (currentServerIndex !== null) {
-            const server = SERVERS[currentServerIndex];
-            window.changeServer(server.url, currentServerIndex);
-        }
-    });
+    if (btnRetry) {
+        btnRetry.addEventListener('click', () => {
+            if (currentServerIndex !== null) {
+                const server = SERVERS[currentServerIndex];
+                window.changeServer(server.url, currentServerIndex);
+            }
+        });
+    }
 
     // Copy stream link button
-    btnCopyUrl.addEventListener('click', () => {
-        const url = playerSourceUrl.textContent;
-        if (url && url !== 'None Loaded') {
-            navigator.clipboard.writeText(url).then(() => {
-                const icon = btnCopyUrl.querySelector('i');
-                icon.className = 'fa-solid fa-check text-accent';
-                setTimeout(() => {
-                    icon.className = 'fa-regular fa-copy';
-                }, 2000);
-            }).catch(err => {
-                alert('Failed to copy: ' + err);
-            });
-        }
-    });
+    if (btnCopyUrl) {
+        btnCopyUrl.addEventListener('click', () => {
+            const url = playerSourceUrl.textContent;
+            if (url && url !== 'None Loaded') {
+                navigator.clipboard.writeText(url).then(() => {
+                    const icon = btnCopyUrl.querySelector('i');
+                    if (icon) {
+                        icon.className = 'fa-solid fa-check text-accent';
+                        setTimeout(() => {
+                            icon.className = 'fa-regular fa-copy';
+                        }, 2000);
+                    }
+                }).catch(err => {
+                    alert('Failed to copy: ' + err);
+                });
+            }
+        });
+    }
 
     // Placeholder click triggers Server 1 (index 0)
-    playerPlaceholder.addEventListener('click', () => {
-        if (SERVERS.length > 0) {
-            window.changeServer(SERVERS[0].url, 0);
-        }
-    });
+    if (playerPlaceholder) {
+        playerPlaceholder.addEventListener('click', () => {
+            if (SERVERS.length > 0) {
+                window.changeServer(SERVERS[0].url, 0);
+            }
+        });
+    }
 
     // ---------------------------------------------------------
     // 5. TOAST NOTIFICATIONS & AUTO-FAILOVER RECOVERY
@@ -1552,16 +1573,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 score2 = liveScore.score2;
             }
             
-            headerMatchText.innerHTML = `<span class="live-pulse-dot"></span> <strong>LIVE:</strong> ${liveMatch.homeTeam} ${score1} - ${score2} ${liveMatch.awayTeam}`;
-            headerMatchDot.style.display = 'inline-block';
+            if (headerMatchText) {
+                headerMatchText.innerHTML = `<span class="live-pulse-dot inline-block w-1.5 h-1.5 bg-[#ef4444] rounded-full mr-1.5 animate-ping"></span> <strong>LIVE:</strong> ${liveMatch.homeTeam} ${score1} - ${score2} ${liveMatch.awayTeam}`;
+            }
+            if (headerMatchDot) headerMatchDot.style.display = 'inline-block';
         } else if (nextUpcoming) {
             const kickoff = new Date(nextUpcoming.kickoffUtc);
             const formattedTime = kickoff.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
-            headerMatchText.textContent = `NEXT: ${nextUpcoming.homeTeam} vs. ${nextUpcoming.awayTeam} (${formattedTime})`;
-            headerMatchDot.style.display = 'none';
+            if (headerMatchText) {
+                headerMatchText.textContent = `NEXT: ${nextUpcoming.homeTeam} vs. ${nextUpcoming.awayTeam} (${formattedTime})`;
+            }
+            if (headerMatchDot) headerMatchDot.style.display = 'none';
         } else {
-            headerMatchText.textContent = "All matches completed for today";
-            headerMatchDot.style.display = 'none';
+            if (headerMatchText) headerMatchText.textContent = "All matches completed for today";
+            if (headerMatchDot) headerMatchDot.style.display = 'none';
         }
     }
 
