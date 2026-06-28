@@ -2065,5 +2065,42 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClock();
     setInterval(updateClock, 1000);
 
+    // Messi Memes Interactive Slider
+    const messiSlider = document.getElementById('messi-slider');
+    const messiMemeImg = document.getElementById('messi-meme-img');
+    const messiSliderLabel = document.getElementById('messi-slider-label');
+
+    if (messiSlider && messiMemeImg && messiSliderLabel) {
+        const MESSI_MEMES = [
+            {
+                url: 'https://api.memegen.link/images/custom/WHEN_YOU_SWAP_SERVERS/AND_IT_TAKES_0.01_SECONDS.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png',
+                label: 'Reaction #1: Fast Server Swapping'
+            },
+            {
+                url: 'https://api.memegen.link/images/custom/CLOCK_FREEZES_AT_00~00/ANTIGRAVITY_FIXES_IT_INSTANTLY.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png',
+                label: 'Reaction #2: Freeze-Proof Clock'
+            },
+            {
+                url: 'https://api.memegen.link/images/custom/CHAT_SIMULATION_ACTIVE/24K_BOTS_TALKING_TO_THEMSELVES.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png',
+                label: 'Reaction #3: Simulating 24K Viewer Bots'
+            }
+        ];
+
+        messiSlider.addEventListener('input', (e) => {
+            const idx = parseInt(e.target.value);
+            const meme = MESSI_MEMES[idx];
+            
+            // Add a quick visual swap transition
+            messiMemeImg.style.opacity = '0';
+            messiMemeImg.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                messiMemeImg.src = meme.url;
+                messiSliderLabel.textContent = meme.label;
+                messiMemeImg.style.opacity = '1';
+                messiMemeImg.style.transform = 'scale(1)';
+            }, 150);
+        });
+    }
+
     console.log('✅ Zid Vai On Air x WC 2026 — Active');
 });

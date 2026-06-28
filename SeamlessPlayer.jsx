@@ -29,6 +29,7 @@ const MOCK_SCHEDULE = [
 
 export default function SeamlessPlayer() {
   const [servers, setServers] = useState([]);
+  const [messiIndex, setMessiIndex] = useState(0);
   const [currentIdx, setCurrentIdx] = useState(-1); // -1 means placeholder/sweeping active
   const [activePlayer, setActivePlayer] = useState('A'); // 'A' or 'B'
   const [isLoading, setIsLoading] = useState(false);
@@ -1107,6 +1108,124 @@ export default function SeamlessPlayer() {
           </div>
         </div>
       </div>
+
+      {/* Messi Funny Memes Slider Section */}
+      <section style={{
+        backgroundColor: 'rgba(15, 15, 19, 0.85)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        borderRadius: '1rem',
+        padding: '1.5rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        marginTop: '1.5rem'
+      }}>
+        <h2 style={{
+          fontSize: '0.875rem',
+          fontWeight: 800,
+          letterSpacing: '0.05em',
+          color: 'rgba(255, 255, 255, 0.8)',
+          textTransform: 'uppercase',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          fontFamily: "'Space Grotesk', sans-serif"
+        }}>
+          <i className="fa-solid fa-face-laugh-beam" style={{ color: '#ff7a00' }}></i> Fan Zone: Messi Reactions
+        </h2>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem',
+          padding: '0.5rem 0'
+        }}>
+          {/* Meme Display Box */}
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: '28rem',
+            aspectRatio: '16/9',
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            borderRadius: '0.75rem',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <img 
+              src={
+                messiIndex === 0 
+                  ? 'https://api.memegen.link/images/custom/WHEN_YOU_SWAP_SERVERS/AND_IT_TAKES_0.01_SECONDS.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png'
+                  : messiIndex === 1
+                  ? 'https://api.memegen.link/images/custom/CLOCK_FREEZES_AT_00~00/ANTIGRAVITY_FIXES_IT_INSTANTLY.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png'
+                  : 'https://api.memegen.link/images/custom/CHAT_SIMULATION_ACTIVE/24K_BOTS_TALKING_TO_THEMSELVES.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png'
+              } 
+              alt="Messi Funny Meme" 
+              style={{
+                height: '100%',
+                objectFit: 'contain',
+                transition: 'all 0.3s ease'
+              }}
+            />
+          </div>
+          {/* Interactive Slider */}
+          <div style={{
+            width: '100%',
+            maxWidth: '24rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem',
+            alignItems: 'center'
+          }}>
+            <span style={{
+              fontSize: '0.75rem',
+              color: 'rgba(255, 255, 255, 0.5)',
+              fontWeight: 500
+            }}>
+              {
+                messiIndex === 0 
+                  ? 'Reaction #1: Fast Server Swapping' 
+                  : messiIndex === 1 
+                  ? 'Reaction #2: Freeze-Proof Clock' 
+                  : 'Reaction #3: Simulating 24K Viewer Bots'
+              }
+            </span>
+            <input 
+              type="range" 
+              min="0" 
+              max="2" 
+              value={messiIndex} 
+              onChange={(e) => setMessiIndex(parseInt(e.target.value))}
+              style={{
+                width: '100%',
+                height: '4px',
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '9999px',
+                outline: 'none',
+                cursor: 'pointer',
+                appearance: 'none',
+                accentColor: '#ff7a00'
+              }}
+            />
+            <div style={{
+              display: 'flex',
+              width: '100%',
+              fontSize: '9px',
+              color: 'rgba(255, 255, 255, 0.3)',
+              fontFamily: 'monospace',
+              textTransform: 'uppercase',
+              marginTop: '0.25rem'
+            }}>
+              <span style={{ flex: 1, textAlign: 'left' }}>Speedy swap</span>
+              <span style={{ flex: 1, textAlign: 'center' }}>Time fix</span>
+              <span style={{ flex: 1, textAlign: 'right' }}>Bot army</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className={styles.footer}>
