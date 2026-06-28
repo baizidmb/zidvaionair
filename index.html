@@ -138,56 +138,7 @@
                     </div>
                 </div>
 
-                <!-- Stream Details & Channel Info Card -->
-                <div class="bg-[#0f0f13]/85 border border-white/8 shadow-xl rounded-2xl p-4 md:p-6 flex flex-col gap-4">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-4">
-                        <div class="flex items-center gap-4">
-                            <!-- Channel Avatar -->
-                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#ff7a00] to-[#ff3c00] border border-white/10 flex items-center justify-center shadow-md">
-                                <i class="fa-solid fa-satellite-dish text-white/80"></i>
-                            </div>
-                            <!-- Title & Stream Stats -->
-                            <div>
-                                <h1 id="current-server-title" class="text-base font-bold text-white tracking-wide">NO BROADCAST LOADED</h1>
-                                <p id="current-server-desc" class="text-xs text-white/50 mt-0.5">Please select an active broadcast feed in the right sidebar.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button class="bg-[#ff7a00] hover:bg-[#ff7a00]/90 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-md flex items-center gap-1 border-0 cursor-pointer">
-                                <i class="fa-solid fa-heart"></i> Follow
-                            </button>
-                            <button class="bg-white/5 hover:bg-white/10 text-white/80 text-xs font-semibold px-4 py-2 rounded-xl border border-white/5 transition-all cursor-pointer">
-                                <i class="fa-solid fa-share"></i> Share
-                            </button>
-                        </div>
-                    </div>
 
-                    <!-- Collapsible Stream Diagnostics Panel -->
-                    <details class="group/diag text-xs text-white/50">
-                        <summary class="list-none cursor-pointer flex justify-between items-center py-1 font-semibold hover:text-white transition-colors select-none">
-                            <span>STREAM DIAGNOSTICS & TELEMETRY</span>
-                            <i class="fa-solid fa-chevron-down group-open/diag:rotate-180 transition-transform"></i>
-                        </summary>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-3 pt-3 border-t border-white/5 font-medium tracking-wide">
-                            <div class="flex flex-col gap-1">
-                                <span class="text-[9px] text-white/30 uppercase">DECK CONTROLLER</span>
-                                <span id="active-deck-label" class="text-white">STANDBY</span>
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <span class="text-[9px] text-white/30 uppercase">STANDBY ENGINE</span>
-                                <span id="backup-engine-status" class="text-[#ff7a00]">PRE-BUFFERED</span>
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <span class="text-[9px] text-white/30 uppercase">FEED SPEC</span>
-                                <span id="telemetry-latency" class="text-white">LATENCY TESTING...</span>
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <span class="text-[9px] text-white/30 uppercase">PRELOAD QUEUE</span>
-                                <span id="telemetry-preloaded" class="text-[#ffaa00]">NONE PRELOADED</span>
-                            </div>
-                        </div>
-                    </details>
-                </div>
             </div>
 
             <!-- Right Column: Sidebar (1/4 Grid - Tabs: Server Feeds & Live Chat) -->

@@ -973,53 +973,6 @@ export default function SeamlessPlayer() {
               </div>
             </div>
           </div>
-
-          {/* Details & diagnostics panel */}
-          <div className={styles.detailsCard}>
-            <div className={styles.detailsHeader}>
-              <div className={styles.detailsChannelInfo}>
-                <div className={styles.channelIconBox}>
-                  <i className="fa-solid fa-satellite-dish"></i>
-                </div>
-                <div>
-                  <h1 className={styles.streamTitle}>{currentServer ? currentServer.name : 'NO BROADCAST LOADED'}</h1>
-                  <p className={styles.streamDesc}>{currentServer ? currentServer.detail : 'Please select an active broadcast feed in the right sidebar.'}</p>
-                </div>
-              </div>
-              <div className={styles.detailsActions}>
-                <button className={styles.followBtn}><i className="fa-solid fa-heart"></i> Follow</button>
-                <button className={styles.shareBtn}><i className="fa-solid fa-share"></i> Share</button>
-              </div>
-            </div>
-
-            {/* Diagnostic collapsible dropdown */}
-            <details className={styles.diagnosticsAccordion}>
-              <summary className={styles.diagnosticsSummary}>
-                <span>STREAM DIAGNOSTICS & TELEMETRY</span>
-                <i className={`fa-solid fa-chevron-down ${styles.accordionChevron}`}></i>
-              </summary>
-              <div className={styles.diagnosticsContent}>
-                <div className={styles.diagCell}>
-                  <span className={styles.diagLabel}>DECK CONTROLLER</span>
-                  <span className={styles.diagValue}>{currentIdx >= 0 ? `PRIMARY ENGINE ${activePlayer}` : 'STANDBY'}</span>
-                </div>
-                <div className={styles.diagCell}>
-                  <span className={styles.diagLabel}>STANDBY ENGINE</span>
-                  <span className={`${styles.diagValue} ${styles.textOrange}`}>{backupServer ? 'PRE-BUFFERED' : 'NONE'}</span>
-                </div>
-                <div className={styles.diagCell}>
-                  <span className={styles.diagLabel}>FEED SPEC</span>
-                  <span className={styles.diagValue}>
-                    {currentServer?.latency ? `LATENCY: ${Math.round(currentServer.latency)}ms` : 'LATENCY TESTING...'}
-                  </span>
-                </div>
-                <div className={styles.diagCell}>
-                  <span className={styles.diagLabel}>PRELOAD QUEUE</span>
-                  <span className={`${styles.diagValue} ${styles.textOrange}`}>{backupServer ? backupServer.name : 'NONE PRELOADED'}</span>
-                </div>
-              </div>
-            </details>
-          </div>
         </div>
 
         {/* Right Column: Tabbed Sidebar */}
