@@ -5,7 +5,20 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Live Feed Stream URL Configuration
-    const DEFAULT_STREAM_URL = 'https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8';
+    const CHANNELS = [
+        { name: "SP - SD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OukERocFRoTLpNhopWhojWRopWkQVbmFk6nI0zf&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy SD Clean Feed", badge: "sd" },
+        { name: "SP - HD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OuzERokijak4MYmoV9JdsHJokrJdkABFhNcE0zKLw&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy HD Clean Feed", badge: "fhd" },
+        { name: "FAST 1", url: "https://pullsgp.yyzb456.top/live/stream-698168_lhd.m3u8", detail: "High Speed Routing 1", badge: "hd" },
+        { name: "FAST 2", url: "https://pul-tenm.nbs3g.com/live/hd-en-1-4459717.m3u8?txSecret=cb546b67173ce18b5d6e9c15e9ec6b4b&txTime=6A42BDE0", detail: "High Speed Routing 2", badge: "hd" },
+        { name: "Arabic", url: "https://em.golatooa.site/Canads1.m3u8", detail: "Arabic Broadcast Feed", badge: "sd" },
+        { name: "CCTV 5", url: "https://live.666666.zip/cctv/5.m3u8", detail: "CCTV Sports Broadcast", badge: "hd" },
+        { name: "SP - 2", url: "https://live.666666.zip/migu/1.m3u8", detail: "Migu Live Broadcast", badge: "hd" },
+        { name: "SP - 3", url: "https://hqlive.yarncdn.live/live/hqtv_blv_phanma/playlist.m3u8", detail: "HQTV Live Feed", badge: "hd" },
+        { name: "FUSSBALL (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_hd/DASH/index.mpd", detail: "Fussball TV HD (DASH/DRM)", badge: "fhd" },
+        { name: "FUSSBALL 4K (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd", detail: "Fussball TV 4K (DASH/DRM)", badge: "4k" }
+    ];
+
+    let currentChannelIndex = 1; // Play SP - HD by default
     let hls = null;
 
     // Player State
@@ -187,8 +200,14 @@ document.addEventListener('DOMContentLoaded', () => {
         player.load();
     }
 
-    function playStream() {
-        const url = DEFAULT_STREAM_URL;
+    function playStream(index) {
+        if (index !== undefined) {
+            currentChannelIndex = index;
+        }
+        const channel = CHANNELS[currentChannelIndex];
+        if (!channel) return;
+
+        const url = channel.url;
 
         // If placeholder is not hidden, show full loader. Otherwise, load silently in background.
         const isInitialLoad = !playerPlaceholder.classList.contains('hidden') || !playerError.classList.contains('hidden');
@@ -203,12 +222,17 @@ document.addEventListener('DOMContentLoaded', () => {
         startStallTimer();
 
         // Update titles and info
-        if (currentServerTitle) currentServerTitle.textContent = "World Cup Live Feed";
-        if (currentServerDesc) currentServerDesc.textContent = "Primary Broadcast Server";
+        if (currentServerTitle) currentServerTitle.textContent = channel.name;
+        if (currentServerDesc) currentServerDesc.textContent = channel.detail || 'Live Stream Feed';
         playerSourceUrl.textContent = url;
 
         // Clean up any stale load on the active player
         cleanupPlayer(activePlayer);
+
+        if (url.includes('.mpd')) {
+            handlePlayerError('DASH / Widevine DRM channels require a Germany VPN and specialized player components. Please select an HLS stream.');
+            return;
+        }
 
         let networkRetryCount = 0;
         const maxNetworkRetries = 3;
@@ -331,7 +355,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function renderChannelsGrid() {
+        if (!serversContainer) return;
+        serversContainer.innerHTML = '';
+
+        CHANNELS.forEach((channel, index) => {
+            const card = document.createElement('div');
+            const isActive = currentChannelIndex === index;
+            card.className = `server-card ${isActive ? 'active' : ''} glossy-shine`;
+            card.dataset.index = index;
+
+            const qualityBadge = channel.badge ? channel.badge.toUpperCase() : 'HD';
+
+            card.innerHTML = `
+                <div class="server-thumb">${qualityBadge}</div>
+                <div class="flex-grow flex flex-col overflow-hidden text-left">
+                    <span class="server-card-name font-bold text-xs truncate text-white" title="${channel.name}">[${index + 1}] ${channel.name}</span>
+                    <span class="text-[10px] text-white/40 truncate">${channel.detail || 'Live Broadcast Feed'}</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
+                    <span>online</span>
+                    <span class="status-dot status-green"></span>
+                </div>
+            `;
+
+            card.addEventListener('click', () => {
+                playStream(index);
+                renderChannelsGrid();
+            });
+
+            serversContainer.appendChild(card);
+        });
+    }
+
     window.playStream = playStream;
+    window.renderChannelsGrid = renderChannelsGrid;
 
     function updateTelemetry() {
         const sentimentVal = Math.round(70 + Math.random() * 20);
@@ -1259,9 +1317,36 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchMatches();
 
     // ---------------------------------------------------------
-    // 7. DEFAULT BROADCAST LOADING
+    // 7. DEFAULT BROADCAST LOADING & SIDEBAR INTERACTION
     // ---------------------------------------------------------
-    playStream();
+    const tabBtnServers = document.getElementById('tab-btn-servers');
+    const tabBtnChat = document.getElementById('tab-btn-chat');
+    const panelServers = document.getElementById('sidebar-servers-panel');
+    const panelChat = document.getElementById('sidebar-chat-panel');
+
+    if (tabBtnServers && tabBtnChat && panelServers && panelChat) {
+        tabBtnServers.addEventListener('click', () => {
+            tabBtnServers.classList.add('active');
+            tabBtnChat.classList.remove('active');
+            panelServers.classList.remove('hidden');
+            panelChat.classList.add('hidden');
+        });
+
+        tabBtnChat.addEventListener('click', () => {
+            tabBtnChat.classList.add('active');
+            tabBtnServers.classList.remove('active');
+            panelChat.classList.remove('hidden');
+            panelServers.classList.add('hidden');
+            
+            const chatContainer = document.getElementById('chat-messages-container');
+            if (chatContainer) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        });
+    }
+
+    renderChannelsGrid();
+    playStream(1);
 
 
 

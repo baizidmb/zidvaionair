@@ -27,8 +27,23 @@ const MOCK_SCHEDULE = [
   { id: 5, homeTeam: 'Norway', awayTeam: 'France', homeInit: 'NO', awayInit: 'FR', score1: null, score2: null, status: 'upcoming', kickoffUtc: new Date(Date.now() + 86400000).toISOString() },
 ];
 
+const CHANNELS = [
+  { name: "SP - SD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OukERocFRoTLpNhopWhojWRopWkQVbmFk6nI0zf&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy SD Clean Feed", badge: "sd" },
+  { name: "SP - HD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OuzERokijak4MYmoV9JdsHJokrJdkABFhNcE0zKLw&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy HD Clean Feed", badge: "fhd" },
+  { name: "FAST 1", url: "https://pullsgp.yyzb456.top/live/stream-698168_lhd.m3u8", detail: "High Speed Routing 1", badge: "hd" },
+  { name: "FAST 2", url: "https://pul-tenm.nbs3g.com/live/hd-en-1-4459717.m3u8?txSecret=cb546b67173ce18b5d6e9c15e9ec6b4b&txTime=6A42BDE0", detail: "High Speed Routing 2", badge: "hd" },
+  { name: "Arabic", url: "https://em.golatooa.site/Canads1.m3u8", detail: "Arabic Broadcast Feed", badge: "sd" },
+  { name: "CCTV 5", url: "https://live.666666.zip/cctv/5.m3u8", detail: "CCTV Sports Broadcast", badge: "hd" },
+  { name: "SP - 2", url: "https://live.666666.zip/migu/1.m3u8", detail: "Migu Live Broadcast", badge: "hd" },
+  { name: "SP - 3", url: "https://hqlive.yarncdn.live/live/hqtv_blv_phanma/playlist.m3u8", detail: "HQTV Live Feed", badge: "hd" },
+  { name: "FUSSBALL (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_hd/DASH/index.mpd", detail: "Fussball TV HD (DASH/DRM)", badge: "fhd" },
+  { name: "FUSSBALL 4K (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd", detail: "Fussball TV 4K (DASH/DRM)", badge: "4k" }
+];
+
 export default function SeamlessPlayer() {
-  const [streamUrl, setStreamUrl] = useState('https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8');
+  const [currentChannelIndex, setCurrentChannelIndex] = useState(1);
+  const [streamUrl, setStreamUrl] = useState(CHANNELS[1].url);
+  const [activeTab, setActiveTab] = useState('feeds');
   const [messiIndex, setMessiIndex] = useState(0);
   const [messiFade, setMessiFade] = useState(false);
   const handleSetMessiIndex = (idx) => {
@@ -509,7 +524,7 @@ export default function SeamlessPlayer() {
     }, 3000);
   };
 
-  const currentServer = { name: "World Cup Live Feed", detail: "Primary Broadcast Server", url: streamUrl };
+  const currentServer = CHANNELS[currentChannelIndex];
   const backupServer = null;
 
   return (
@@ -684,42 +699,132 @@ export default function SeamlessPlayer() {
         {/* Right Column: Tabbed Sidebar */}
         <div className={styles.sidebarColumn}>
           <div className={styles.sidebarConsole}>
+            {/* Sidebar header with tab selectors */}
+            <div className={styles.tabHeaderRow} style={{ display: 'flex', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: 'rgba(0, 0, 0, 0.2)', userSelect: 'none' }}>
+              <button 
+                onClick={() => setActiveTab('feeds')} 
+                className={`${styles.tabBtn} ${activeTab === 'feeds' ? styles.activeTabBtn : ''}`}
+                style={{ flexGrow: 1, fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em', padding: '0.875rem 0', textAlign: 'center', cursor: 'pointer', background: 'transparent', border: 'none', borderBottom: activeTab === 'feeds' ? '2px solid #ff7a00' : '2px solid transparent', color: activeTab === 'feeds' ? '#ff7a00' : 'rgba(255, 255, 255, 0.4)' }}
+              >
+                LIVE FEEDS
+              </button>
+              <button 
+                onClick={() => {
+                  setActiveTab('chat');
+                  setTimeout(() => {
+                    if (chatContainerRef.current) {
+                      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+                    }
+                  }, 50);
+                }} 
+                className={`${styles.tabBtn} ${activeTab === 'chat' ? styles.activeTabBtn : ''}`}
+                style={{ flexGrow: 1, fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em', padding: '0.875rem 0', textAlign: 'center', cursor: 'pointer', background: 'transparent', border: 'none', borderBottom: activeTab === 'chat' ? '2px solid #ff7a00' : '2px solid transparent', color: activeTab === 'chat' ? '#ff7a00' : 'rgba(255, 255, 255, 0.4)' }}
+              >
+                FAN CHAT
+              </button>
+            </div>
+
             {/* Tab Panels */}
             <div className={styles.tabContentPanel}>
+              {/* Feeds Panel */}
+              {activeTab === 'feeds' && (
+                <div className={styles.feedsPanel} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem', overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
+                  {CHANNELS.map((ch, idx) => {
+                    const isActive = currentChannelIndex === idx;
+                    return (
+                      <div 
+                        key={idx}
+                        onClick={() => {
+                          if (ch.url.includes('.mpd')) {
+                            setErrorMessage('DASH / Widevine DRM channels require a Germany VPN and specialized player components. Please select an HLS stream.');
+                          } else {
+                            setErrorMessage('');
+                            setStreamUrl(ch.url);
+                          }
+                          setCurrentChannelIndex(idx);
+                        }}
+                        className={`${styles.serverCard} ${isActive ? styles.activeServerCard : ''}`}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          background: isActive ? 'rgba(255, 122, 0, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                          border: isActive ? '1px solid #ff7a00' : '1px solid rgba(255, 255, 255, 0.08)',
+                          padding: '10px 12px',
+                          borderRadius: '14px',
+                          cursor: 'pointer',
+                          transition: 'all 0.25s ease'
+                        }}
+                      >
+                        <div 
+                          className={styles.serverThumb}
+                          style={{
+                            width: '42px',
+                            height: '28px',
+                            background: 'linear-gradient(135deg, #ff7a00 0%, #ff3c00 100%)',
+                            borderRadius: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justify-content: 'center',
+                            fontSize: '9px',
+                            fontWeight: 800,
+                            color: '#ffffff',
+                            flexShrink: 0,
+                            border: '1px solid rgba(255, 255, 255, 0.15)'
+                          }}
+                        >
+                          {ch.badge.toUpperCase()}
+                        </div>
+                        <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', textAlign: 'left' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>[{idx + 1}] {ch.name}</span>
+                          <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.detail}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontFamily: 'monospace' }}>
+                          <span>online</span>
+                          <span className={styles.statusDot} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#39ff14', boxShadow: '0 0 8px #39ff14' }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Chat Panel */}
-              <div className={styles.chatPanel}>
-                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '0.5rem 0.75rem 0 0.75rem', boxSizing: 'border-box' }}>
-                  <span>Global Chat Room</span>
-                  <span>Your Name: <span style={{ fontWeight: 700, color: '#ff7a00', cursor: 'pointer', textDecoration: 'underline' }} onClick={changeUsername}>{localUsername}</span></span>
+              {activeTab === 'chat' && (
+                <div className={styles.chatPanel}>
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '0.5rem 0.75rem 0 0.75rem', boxSizing: 'border-box' }}>
+                    <span>Global Chat Room</span>
+                    <span>Your Name: <span style={{ fontWeight: 700, color: '#ff7a00', cursor: 'pointer', textDecoration: 'underline' }} onClick={changeUsername}>{localUsername}</span></span>
+                  </div>
+                  <div ref={chatContainerRef} className={styles.chatMessagesContainer}>
+                    {chatMessages.map((msg) => (
+                      <div key={msg.id} className={styles.chatBubble}>
+                        {msg.system ? (
+                          <span style={{ color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', fontSize: '10px' }}>{msg.text}</span>
+                        ) : (
+                          <>
+                            <span className={styles.chatUsername} style={{ color: msg.color }}>{msg.user}:</span>
+                            <span className={styles.chatMessageText}>{msg.text}</span>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className={styles.chatInputBar}>
+                    <input 
+                      type="text" 
+                      placeholder="Send a message..." 
+                      className={styles.chatInputField} 
+                      value={inputText}
+                      onChange={e => setInputText(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+                    />
+                    <button className={styles.chatSendBtn} style={{ opacity: 1, cursor: 'pointer' }} onClick={handleSendMessage}>
+                      <i className="fa-solid fa-paper-plane"></i>
+                    </button>
+                  </div>
                 </div>
-                <div ref={chatContainerRef} className={styles.chatMessagesContainer}>
-                  {chatMessages.map((msg) => (
-                    <div key={msg.id} className={styles.chatBubble}>
-                      {msg.system ? (
-                        <span style={{ color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', fontSize: '10px' }}>{msg.text}</span>
-                      ) : (
-                        <>
-                          <span className={styles.chatUsername} style={{ color: msg.color }}>{msg.user}:</span>
-                          <span className={styles.chatMessageText}>{msg.text}</span>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div className={styles.chatInputBar}>
-                  <input 
-                    type="text" 
-                    placeholder="Send a message..." 
-                    className={styles.chatInputField} 
-                    value={inputText}
-                    onChange={e => setInputText(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                  />
-                  <button className={styles.chatSendBtn} style={{ opacity: 1, cursor: 'pointer' }} onClick={handleSendMessage}>
-                    <i className="fa-solid fa-paper-plane"></i>
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

@@ -143,15 +143,32 @@
 
             </div>
 
-            <!-- Right Column: Sidebar (1/4 Grid - Live Chat Only) -->
+            <!-- Right Column: Sidebar (1/4 Grid - Live Feeds & Chat) -->
             <div class="lg:col-span-1 flex flex-col">
                 <div class="bg-[#0f0f13]/85 border border-white/8 shadow-2xl rounded-2xl flex flex-col h-[450px] lg:h-full overflow-hidden">
                     
+                    <!-- Sidebar header with tab selectors -->
+                    <div class="flex border-b border-white/5 bg-black/20 select-none">
+                        <button id="tab-btn-servers" class="flex-grow text-[10px] md:text-xs font-bold tracking-wider py-3.5 text-center cursor-pointer relative tab-btn active">
+                            LIVE FEEDS
+                        </button>
+                        <button id="tab-btn-chat" class="flex-grow text-[10px] md:text-xs font-bold tracking-wider py-3.5 text-center cursor-pointer relative tab-btn">
+                            FAN CHAT
+                        </button>
+                    </div>
+
                     <!-- Sidebar content panels -->
                     <div class="flex-grow flex flex-col overflow-hidden relative">
                         
+                        <!-- Panel: Channel Feed Selectors -->
+                        <div id="sidebar-servers-panel" class="absolute inset-0 flex flex-col overflow-y-auto p-4 scrollbar-style gap-3">
+                            <div id="servers-container" class="flex flex-col gap-3">
+                                <!-- Dynamic server cards injected by app.js -->
+                            </div>
+                        </div>
+
                         <!-- Panel: Simulated Live Chat -->
-                        <div id="sidebar-chat-panel" class="absolute inset-0 flex flex-col bg-black/10">
+                        <div id="sidebar-chat-panel" class="absolute inset-0 flex flex-col bg-black/10 hidden">
                             <!-- Scrolling Chat Messages -->
                             <div id="chat-messages-container" class="flex-grow overflow-y-auto p-4 flex flex-col gap-3 scrollbar-style text-xs font-light">
                                 <!-- Chat messages injected by app.js interval -->
