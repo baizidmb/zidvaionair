@@ -38,6 +38,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadDynamicStreams() {
         let channels = [];
+        
+        // Show sweeping loader in serversContainer immediately
+        if (serversContainer) {
+            serversContainer.innerHTML = `
+                <div class="flex flex-col items-center justify-center p-8 text-center text-xs text-white/50">
+                    <div class="spinner-modern mb-2"></div>
+                    <span>SWEEPING FEEDS FOR ACTIVE CHANNELS...</span>
+                </div>
+            `;
+        }
+
         try {
             const res = await fetch('https://raw.githubusercontent.com/sm-monirulislam/Toffee-Auto-Update-Playlist/main/toffee_data.json?t=' + Date.now());
             if (!res.ok) throw new Error('Network error fetching stream JSON');
@@ -58,6 +69,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (e) {
             console.warn('Failed to load Sportzfy streams:', e);
+        }
+
+        // Fetch iptv-org sports channels dynamically
+        let iptvOrgChannels = [];
+        try {
+            const res = await fetch('https://iptv-org.github.io/iptv/categories/sports.m3u');
+            if (res.ok) {
+                const text = await res.text();
+                const lines = text.split('\n');
+                let currentName = null;
+                const KEYWORDS = ['fifa', 'world cup', 'worldcup', 'sony', 'ten', 'espn', 'fox', 'sky', 'bein', 'tsport', 'gtv', 'gazi', 'btv', 'fussball', 'football', 'soccer', 'supersport', 'arena', 'dazn', 'star sports', 'premier', 'cctv'];
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line.startsWith('#EXTINF:')) {
+                        const parts = line.split(',');
+                        if (parts.length > 1) {
+                            currentName = parts.slice(1).join(',');
+                        }
+                    } else if (line && !line.startsWith('#')) {
+                        if (currentName) {
+                            const nameLower = currentName.toLowerCase();
+                            if (KEYWORDS.some(k => nameLower.includes(k))) {
+                                iptvOrgChannels.push({
+                                    name: currentName,
+                                    url: line,
+                                    detail: 'Global Live Sports Broadcast Feed',
+                                    badge: nameLower.includes('1080p') ? 'fhd' : 'hd'
+                                });
+                            }
+                            currentName = null;
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to load iptv-org sports streams:', e);
         }
 
         const matchStreams = [];
@@ -96,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: name,
                     url: url,
                     detail: `Live Match Broadcast: ${name}`,
-                    badge: 'live-badge'
+                    badge: 'live'
                 });
             }
             // 2. Generic FIFA channels
@@ -189,6 +237,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 servers: genericFifaStreams
             });
         }
+        if (iptvOrgChannels.length > 0) {
+            categories.push({
+                category: 'Global IPTV Sports Feeds',
+                servers: iptvOrgChannels
+            });
+        }
         if (sportsNetworkStreams.length > 0) {
             categories.push({
                 category: 'Premium Sports Networks',
@@ -196,8 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Re-populate SERVERS in-place
-        SERVERS.length = 0;
         // Re-populate SERVERS in-place
         SERVERS.length = 0;
         categories.forEach(cat => {
@@ -215,35 +267,25 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Re-render server grid
-        renderServersGrid(SERVERS);
+        // Run health check immediately to filter out dead servers before rendering and play
+        await runHealthCheck();
 
-        // Update server count badge
+        // Update server count badge to reflect only active servers
+        const activeCount = SERVERS.filter(s => s.status !== 'offline').length;
         const serverCountBadge = document.getElementById('server-count-badge');
         if (serverCountBadge) {
-            serverCountBadge.textContent = `${SERVERS.length} SERVERS`;
+            serverCountBadge.textContent = `${activeCount} ACTIVE SERVERS`;
         }
 
-        // Select the default server (prioritize active matches if available)
-        let startIdx = 0;
-        const firstMatchIdx = SERVERS.findIndex(srv => srv.category === 'World Cup Live Match Servers' && srv.name !== 'No Live Matches Currently');
-        if (firstMatchIdx !== -1) {
-            startIdx = firstMatchIdx;
+        // Select the default server from the working ones (index 0 is the best sorted active one)
+        if (SERVERS.length > 0 && SERVERS[0].status !== 'offline') {
+            console.log(`🚀 Dynamically defaulting to ${SERVERS[0].name} (Index 0)`);
+            window.changeServer(SERVERS[0].url, 0);
         } else {
-            const firstSportzfyIdx = SERVERS.findIndex(srv => srv.category === 'Sportzfy Premium Broadcasts');
-            if (firstSportzfyIdx !== -1) {
-                startIdx = firstSportzfyIdx;
-            }
+            handlePlayerError("No active broadcast feeds detected. Please try reloading or check network.");
         }
 
-        const defaultServer = SERVERS[startIdx];
-        if (defaultServer) {
-            console.log(`🚀 Dynamically defaulting to ${defaultServer.name} (Index ${startIdx})`);
-            window.changeServer(defaultServer.url, startIdx);
-        }
-
-        // Start background health checking
-        setTimeout(runHealthCheck, 3000);
+        // Start background health checking interval (every 30s)
         setInterval(runHealthCheck, 30000);
     }
 
@@ -251,19 +293,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!serversContainer) return;
         serversContainer.innerHTML = '';
         
+        let renderedCount = 0;
         serversList.forEach((srv, index) => {
+            if (srv.status === 'offline') return; // Skip dead servers completely!
+            
+            renderedCount++;
             const card = document.createElement('div');
             const isActive = currentServerIndex !== null && SERVERS[currentServerIndex]?.url === srv.url;
-            card.className = `server-card ${isActive ? 'active' : ''} ${srv.status === 'offline' ? 'dead' : ''}`;
+            card.className = `server-card ${isActive ? 'active' : ''} glossy-shine`;
             card.dataset.index = index;
             
             let statusDotClass = 'status-green';
             let statusText = srv.latency ? `${Math.round(srv.latency)}ms` : 'online';
             if (srv.status === 'amber') {
                 statusDotClass = 'status-amber';
-            } else if (srv.status === 'offline') {
-                statusDotClass = 'status-red';
-                statusText = 'OFFLINE';
             }
             
             const qualityBadge = srv.badge ? srv.badge.toUpperCase() : 'HD';
@@ -280,18 +323,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             
-            if (srv.status !== 'offline') {
-                card.addEventListener('click', () => {
-                    window.changeServer(srv.url, index);
-                });
-            }
+            card.addEventListener('click', () => {
+                window.changeServer(srv.url, index);
+            });
             
             serversContainer.appendChild(card);
         });
 
+        if (renderedCount === 0) {
+            serversContainer.innerHTML = `
+                <div class="flex flex-col items-center justify-center p-8 text-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-[#ff7a00] text-xl animate-bounce"></i>
+                    <span class="text-xs text-white/60">No active feeds found.</span>
+                    <button id="btn-force-scan" class="mt-2 bg-[#ff7a00] text-white text-[10px] font-bold px-3 py-1.5 rounded-lg border-0 cursor-pointer">
+                        Force Scan
+                    </button>
+                </div>
+            `;
+            const btnForceScan = document.getElementById('btn-force-scan');
+            if (btnForceScan) {
+                btnForceScan.addEventListener('click', () => {
+                    loadDynamicStreams();
+                });
+            }
+        }
+
         const serverCountBadge = document.getElementById('server-count-badge');
         if (serverCountBadge) {
-            serverCountBadge.textContent = `${serversList.length} SERVERS`;
+            serverCountBadge.textContent = `${renderedCount} ACTIVE SERVERS`;
         }
     }
 
@@ -939,16 +998,25 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
 
-    // Seek track clicks
-    timelineContainer.addEventListener('click', (e) => {
+    function handleSeekEvent(clientX) {
         if (activePlayer.duration && activePlayer.duration !== Infinity) {
             const rect = timelineContainer.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
+            const clickX = clientX - rect.left;
             const width = rect.width;
-            const newTime = (clickX / width) * activePlayer.duration;
+            const newTime = Math.max(0, Math.min(activePlayer.duration, (clickX / width) * activePlayer.duration));
             activePlayer.currentTime = newTime;
         }
+    }
+
+    timelineContainer.addEventListener('click', (e) => {
+        handleSeekEvent(e.clientX);
     });
+
+    timelineContainer.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches[0]) {
+            handleSeekEvent(e.touches[0].clientX);
+        }
+    }, { passive: true });
 
     // Picture in Picture
     if (!document.pictureInPictureEnabled) {
@@ -1421,9 +1489,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 score2 = finalScore.score2;
             }
             
-            const isLive = status === 'live';
             const tuneInBtn = isLive ? `
-                <button class="bg-[#7c3aed] hover:bg-[#7c3aed]/90 text-white font-bold px-3 py-1 rounded-lg text-[10px] cursor-pointer" onclick="window.changeServer(SERVERS[0].url, 0)">
+                <button class="bg-[#ff7a00] hover:bg-[#ff7a00]/90 text-white font-bold px-3 py-1 rounded-lg text-[10px] cursor-pointer" onclick="window.changeServer(SERVERS[0].url, 0)">
                     Tune In
                 </button>
             ` : `<span class="text-white/30 text-[10px] font-semibold">${timeLabel}</span>`;
@@ -1752,7 +1819,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "ZERO LAG DETECTED SO FAR",
             "ANYONE ELSE WATCHING FROM MOBILE?"
         ];
-        const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#ec4899', '#06b6d4'];
+        const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#ff9f0a', '#a855f7', '#ec4899', '#ff7a00'];
 
         function generateMessage() {
             const user = USERNAMES[Math.floor(Math.random() * USERNAMES.length)];
@@ -1791,7 +1858,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---------------------------------------------------------
     function updateClock() {
         if (clock) {
-            clock.textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const now = new Date();
+            clock.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+            
+            const clockTimezone = document.getElementById('clock-timezone');
+            if (clockTimezone) {
+                let tzString = 'UTC';
+                try {
+                    const parts = now.toLocaleDateString('en-US', { day: 'numeric', timeZoneName: 'short' }).split(', ');
+                    if (parts.length > 1) {
+                        tzString = parts[1];
+                    }
+                } catch (e) {
+                    const offset = -now.getTimezoneOffset() / 60;
+                    const sign = offset >= 0 ? '+' : '';
+                    tzString = `GMT${sign}${offset}`;
+                }
+                
+                const utcHour = now.getUTCHours().toString().padStart(2, '0');
+                const utcMin = now.getUTCMinutes().toString().padStart(2, '0');
+                const utcSec = now.getUTCSeconds().toString().padStart(2, '0');
+                
+                clockTimezone.textContent = `${tzString} | UTC ${utcHour}:${utcMin}:${utcSec}`;
+            }
         }
     }
     updateClock();

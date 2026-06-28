@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zid Live - Premium Sports Streaming Portal</title>
+    <title>ZID VAI ON AIR X WC 2026 - Premium Streaming Portal</title>
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,22 +17,24 @@
     <!-- Custom styling stylesheet link -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#07070a] bg-gradient-to-b from-[#07070a] via-[#0b0c10] to-[#030305] text-white/90 min-h-screen font-outfit flex flex-col overflow-x-hidden relative select-none">
+<body class="bg-[#050508] bg-gradient-to-b from-[#050508] via-[#0b0a10] to-[#020204] text-white/90 min-h-screen font-outfit flex flex-col overflow-x-hidden relative select-none">
 
-    <!-- Ambient glowing lights behind content -->
-    <div class="ambient-glow pointer-events-none absolute top-[-20%] left-[20%] w-[500px] h-[500px] rounded-full bg-[#7c3aed]/10 blur-[150px]"></div>
-    <div class="ambient-glow pointer-events-none absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] rounded-full bg-[#06b6d4]/10 blur-[120px]"></div>
+    <!-- Ambient cosmic glowing lights behind content -->
+    <div class="ambient-glow pointer-events-none absolute top-[-10%] left-[10%] w-[600px] h-[600px] rounded-full bg-[#ff5500]/5 blur-[160px] animate-pulse"></div>
+    <div class="ambient-glow pointer-events-none absolute bottom-[10%] right-[5%] w-[500px] h-[500px] rounded-full bg-[#ffaa00]/5 blur-[140px]"></div>
 
     <!-- Toast container for failover notices -->
     <div id="toast-container"></div>
 
     <!-- Header Navigation Bar -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-[#07070a]/75 border-b border-white/5 py-3 px-4 md:px-8 flex justify-between items-center shadow-lg">
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-[#050508]/75 border-b border-white/5 py-3 px-4 md:px-8 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-6">
             <!-- Brand Logo -->
-            <a href="#" class="flex items-center gap-2 group">
-                <span class="w-3 h-3 bg-[#ef4444] rounded-full animate-pulse shadow-[0_0_8px_#ef4444]"></span>
-                <span class="font-extrabold text-lg tracking-wider text-white group-hover:text-[#7c3aed] transition-colors">ZID<span class="text-[#7c3aed]">LIVE</span></span>
+            <a href="#" class="flex items-center gap-2 group text-decoration-none">
+                <span class="w-3 h-3 bg-[#ff5500] rounded-full animate-pulse shadow-[0_0_8px_#ff5500]"></span>
+                <span class="font-extrabold text-base md:text-lg tracking-wider text-white transition-colors group-hover:text-[#ff7a00] uppercase header-title-glow">
+                    ZID VAI ON AIR <span class="text-[#ff7a00]">X WC 2026</span>
+                </span>
             </a>
             <!-- Links -->
             <nav class="hidden md:flex items-center gap-6 text-xs font-semibold tracking-wider text-white/60">
@@ -45,20 +47,23 @@
         <div class="flex items-center gap-4 text-xs">
             <!-- Global Stats -->
             <div class="hidden sm:flex items-center gap-1.5 text-white/40 tracking-wider">
-                <i class="fa-solid fa-users text-[#7c3aed]"></i>
+                <i class="fa-solid fa-users text-[#ff7a00]"></i>
                 <span class="font-semibold text-white/70">24.5K</span> online
             </div>
-            <!-- Clock -->
-            <div id="clock" class="font-mono text-white/50 bg-white/5 border border-white/5 px-2.5 py-1 rounded-md">00:00:00</div>
+            <!-- Synced Local & UTC Clock -->
+            <div id="clock-container" class="flex flex-col items-end font-mono text-[9px] sm:text-xs text-white/50 bg-white/5 border border-white/5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md leading-tight">
+                <span id="clock" class="font-bold text-white">00:00:00</span>
+                <span id="clock-timezone" class="text-[8px] sm:text-[9px] text-white/30 hidden sm:inline">UTC</span>
+            </div>
             <!-- User Profile -->
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#7c3aed] to-[#06b6d4] border border-white/10 flex items-center justify-center text-xs font-bold text-white shadow-md">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff7a00] to-[#ff3c00] border border-white/10 flex items-center justify-center text-xs font-bold text-white shadow-md">
                 Z
             </div>
         </div>
     </header>
 
     <!-- Main Content Container -->
-    <div class="max-w-[1600px] mx-auto w-full flex-grow flex flex-col p-4 md:p-6 gap-6 relative z-10">
+    <div class="max-w-[1600px] mx-auto w-full flex-grow flex flex-col p-4 md:p-6 gap-6 relative z-10 box-border">
         
         <!-- Video Hero & Sidebar Grid -->
         <main class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-stretch">
@@ -67,7 +72,7 @@
             <div class="lg:col-span-3 flex flex-col gap-4">
                 
                 <!-- Video Player Box -->
-                <div class="bg-[#0f0f13]/80 border border-white/5 shadow-2xl rounded-2xl overflow-hidden relative aspect-video w-full group">
+                <div class="bg-[#0f0f13]/85 border border-white/8 shadow-2xl rounded-2xl overflow-hidden relative aspect-video w-full group">
                     <div id="video-wrapper" class="relative w-full h-full bg-[#000000] overflow-hidden">
                         <!-- Dual Player Engines -->
                         <video id="video-player-a" class="w-full h-full object-contain absolute inset-0 transition-opacity duration-300 opacity-0 z-10" playsinline autoplay></video>
@@ -76,27 +81,27 @@
 
                         <!-- Autoplay Unmute Screen -->
                         <div id="player-unmute-overlay" class="absolute inset-0 z-30 bg-black/95 flex flex-col items-center justify-center gap-3 cursor-pointer hidden">
-                            <i class="fa-solid fa-volume-high text-[#7c3aed] text-3xl animate-bounce"></i>
+                            <i class="fa-solid fa-volume-high text-[#ff7a00] text-3xl animate-bounce"></i>
                             <span class="text-xs tracking-widest font-semibold text-white/80">TAP PLAYER TO UNMUTE AUDIO</span>
                         </div>
 
                         <!-- Buffer Loader -->
                         <div id="player-loader" class="absolute inset-0 z-30 bg-black/80 flex flex-col items-center justify-center gap-2 hidden">
                             <div class="spinner-modern"></div>
-                            <span class="text-[10px] tracking-widest text-[#7c3aed] font-semibold animate-pulse mt-1">BUFFERING STREAM...</span>
+                            <span class="text-[10px] tracking-widest text-[#ff7a00] font-semibold animate-pulse mt-1">BUFFERING STREAM...</span>
                         </div>
 
                         <!-- Error Screen -->
-                        <div id="player-error" class="absolute inset-0 z-30 bg-[#07070a]/95 flex flex-col items-center justify-center gap-3 text-center px-6 hidden">
+                        <div id="player-error" class="absolute inset-0 z-30 bg-[#050508]/95 flex flex-col items-center justify-center gap-3 text-center px-6 hidden">
                             <i class="fa-solid fa-circle-exclamation text-[#ef4444] text-3xl"></i>
                             <h4 id="error-title" class="text-sm font-bold tracking-wider text-white">Broadcast Disrupted</h4>
                             <p id="error-message" class="text-xs text-white/50 max-w-sm font-light">The stream failed to connect. Attempting backup server failover routing...</p>
-                            <button id="btn-error-retry" class="mt-2 text-xs tracking-wider font-semibold text-white bg-[#7c3aed] hover:bg-[#7c3aed]/80 px-5 py-2 rounded-xl transition-all cursor-pointer">Retry Feed</button>
+                            <button id="btn-error-retry" class="mt-2 text-xs tracking-wider font-semibold text-white bg-[#ff7a00] hover:bg-[#ff7a00]/80 px-5 py-2 rounded-xl transition-all cursor-pointer">Retry Feed</button>
                         </div>
 
                         <!-- Player Placeholder Overlay -->
                         <div id="player-placeholder" class="absolute inset-0 z-30 bg-gradient-to-br from-[#0c0d12] to-[#040406] flex flex-col items-center justify-center gap-3 cursor-pointer text-center px-6">
-                            <div class="w-14 h-14 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/40 flex items-center justify-center text-white/80 hover:text-white hover:scale-105 transition-all duration-300 shadow-lg">
+                            <div class="w-14 h-14 rounded-full bg-[#ff7a00]/20 border border-[#ff7a00]/40 flex items-center justify-center text-white/80 hover:text-white hover:scale-105 transition-all duration-300 shadow-lg">
                                 <i class="fa-solid fa-play text-lg ml-1"></i>
                             </div>
                             <h3 class="text-sm font-extrabold tracking-wider text-white/90">SELECT MATCH FEED</h3>
@@ -104,11 +109,11 @@
                         </div>
 
                         <!-- Video Custom Controls (Twitch-Style) -->
-                        <div id="custom-controls" class="absolute inset-x-4 bottom-4 z-20 p-3 bg-black/60 backdrop-blur-md border border-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-2">
+                        <div id="custom-controls" class="absolute inset-x-4 bottom-4 z-20 p-3 bg-black/70 backdrop-blur-xl border border-white/8 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-2">
                             <!-- Timeline -->
                             <div id="timeline-container" class="w-full h-1 bg-white/20 rounded-full cursor-pointer relative flex items-center group/time">
                                 <div class="absolute inset-y-0 left-0 bg-white/10 rounded-full" id="timeline-buffer" style="width: 0%"></div>
-                                <div class="absolute inset-y-0 left-0 bg-[#7c3aed] rounded-full" id="timeline-progress" style="width: 0%"></div>
+                                <div class="absolute inset-y-0 left-0 bg-[#ff7a00] rounded-full" id="timeline-progress" style="width: 0%"></div>
                             </div>
                             <!-- Controls Row -->
                             <div class="flex justify-between items-center text-white/80">
@@ -116,7 +121,7 @@
                                     <button id="ctrl-play-pause" class="hover:text-white transition-colors cursor-pointer"><i class="fa-solid fa-play text-xs"></i></button>
                                     <div class="flex items-center gap-2">
                                         <button id="ctrl-mute" class="hover:text-white transition-colors cursor-pointer"><i class="fa-solid fa-volume-high text-xs"></i></button>
-                                        <input type="range" id="ctrl-volume" min="0" max="1" step="0.05" value="1" class="w-16 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-[#7c3aed]">
+                                        <input type="range" id="ctrl-volume" min="0" max="1" step="0.05" value="1" class="w-16 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-[#ff7a00]">
                                     </div>
                                     <div class="flex items-center gap-2 text-xs font-medium tracking-wide">
                                         <span id="player-live-badge" class="flex items-center gap-1 text-[#ef4444] font-semibold"><span class="w-1.5 h-1.5 bg-[#ef4444] rounded-full animate-ping"></span> LIVE</span>
@@ -133,11 +138,11 @@
                 </div>
 
                 <!-- Stream Details & Channel Info Card -->
-                <div class="bg-[#0f0f13]/80 border border-white/5 shadow-xl rounded-2xl p-4 md:p-6 flex flex-col gap-4">
+                <div class="bg-[#0f0f13]/85 border border-white/8 shadow-xl rounded-2xl p-4 md:p-6 flex flex-col gap-4">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-4">
                         <div class="flex items-center gap-4">
                             <!-- Channel Avatar -->
-                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#7c3aed] to-[#06b6d4] border border-white/10 flex items-center justify-center shadow-md">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#ff7a00] to-[#ff3c00] border border-white/10 flex items-center justify-center shadow-md">
                                 <i class="fa-solid fa-satellite-dish text-white/80"></i>
                             </div>
                             <!-- Title & Stream Stats -->
@@ -147,16 +152,16 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <button class="bg-[#7c3aed] hover:bg-[#7c3aed]/90 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-md flex items-center gap-1">
+                            <button class="bg-[#ff7a00] hover:bg-[#ff7a00]/90 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-md flex items-center gap-1 border-0 cursor-pointer">
                                 <i class="fa-solid fa-heart"></i> Follow
                             </button>
-                            <button class="bg-white/5 hover:bg-white/10 text-white/80 text-xs font-semibold px-4 py-2 rounded-xl border border-white/5 transition-all">
+                            <button class="bg-white/5 hover:bg-white/10 text-white/80 text-xs font-semibold px-4 py-2 rounded-xl border border-white/5 transition-all cursor-pointer">
                                 <i class="fa-solid fa-share"></i> Share
                             </button>
                         </div>
                     </div>
 
-                    <!-- Collapsible Stream Diagnostics Panel (Twitch stats for nerds) -->
+                    <!-- Collapsible Stream Diagnostics Panel -->
                     <details class="group/diag text-xs text-white/50">
                         <summary class="list-none cursor-pointer flex justify-between items-center py-1 font-semibold hover:text-white transition-colors select-none">
                             <span>STREAM DIAGNOSTICS & TELEMETRY</span>
@@ -169,7 +174,7 @@
                             </div>
                             <div class="flex flex-col gap-1">
                                 <span class="text-[9px] text-white/30 uppercase">STANDBY ENGINE</span>
-                                <span id="backup-engine-status" class="text-[#39ff14]">PRE-BUFFERED</span>
+                                <span id="backup-engine-status" class="text-[#ff7a00]">PRE-BUFFERED</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <span class="text-[9px] text-white/30 uppercase">FEED SPEC</span>
@@ -177,7 +182,7 @@
                             </div>
                             <div class="flex flex-col gap-1">
                                 <span class="text-[9px] text-white/30 uppercase">PRELOAD QUEUE</span>
-                                <span id="telemetry-preloaded" class="text-[#06b6d4]">NONE PRELOADED</span>
+                                <span id="telemetry-preloaded" class="text-[#ffaa00]">NONE PRELOADED</span>
                             </div>
                         </div>
                     </details>
@@ -186,7 +191,7 @@
 
             <!-- Right Column: Sidebar (1/4 Grid - Tabs: Server Feeds & Live Chat) -->
             <div class="lg:col-span-1 flex flex-col">
-                <div class="bg-[#0f0f13]/80 border border-white/5 shadow-2xl rounded-2xl flex flex-col h-[500px] lg:h-full overflow-hidden">
+                <div class="bg-[#0f0f13]/85 border border-white/8 shadow-2xl rounded-2xl flex flex-col h-[450px] lg:h-full overflow-hidden">
                     
                     <!-- Sidebar Tab Header -->
                     <div class="flex border-b border-white/5 bg-black/20 text-xs font-bold tracking-wider relative">
@@ -213,8 +218,8 @@
                             </div>
                             <!-- Chat Input Bar -->
                             <div class="border-t border-white/5 p-3 flex gap-2 bg-black/25">
-                                <input type="text" id="chat-input-field" placeholder="Send a message..." class="flex-grow bg-white/5 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#7c3aed]" disabled>
-                                <button class="bg-[#7c3aed] text-white px-3 py-2 rounded-xl text-xs font-semibold cursor-not-allowed opacity-50" disabled><i class="fa-solid fa-paper-plane"></i></button>
+                                <input type="text" id="chat-input-field" placeholder="Send a message..." class="flex-grow bg-white/5 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#ff7a00]" disabled>
+                                <button class="bg-[#ff7a00] text-white px-3 py-2 rounded-xl text-xs font-semibold cursor-not-allowed opacity-50 border-0" disabled><i class="fa-solid fa-paper-plane"></i></button>
                             </div>
                         </div>
                     </div>
@@ -225,7 +230,7 @@
         <!-- Live Matches & Upcoming Schedule Section -->
         <section class="flex flex-col gap-4 mt-2">
             <h2 class="text-sm font-extrabold tracking-wider text-white/80 uppercase flex items-center gap-2">
-                <i class="fa-solid fa-calendar-days text-[#7c3aed]"></i> Live matches & schedule
+                <i class="fa-solid fa-calendar-days text-[#ff7a00]"></i> Live matches & schedule
             </h2>
             <div id="schedule-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Matches injected dynamically by app.js -->
@@ -234,8 +239,8 @@
 
         <!-- Footer -->
         <footer class="border-t border-white/5 pt-6 pb-4 mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold text-white/30 tracking-wider">
-            <div>
-                © 2026 COPASTREAM. ALL FEEDS PRIVATELY ENCODED.
+            <div class="uppercase">
+                © 2026 ZID VAI ON AIR X WC 2026. ALL FEEDS PRIVATELY ENCODED.
             </div>
             <div class="text-right">
                 DEVELOPED BY <span class="text-white/60 font-bold">SHAHIDUL ISLAM BAIZID</span>

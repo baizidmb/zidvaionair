@@ -2,15 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import Hls from 'hls.js';
 import styles from './SeamlessPlayer.module.css';
 
-// Default mock server stream links for reference
-const DEFAULT_SERVERS = [
-  { name: 'Server 1 (World Cup Live)', url: 'https://sm-monirul.top/tof/live/toffee6/index.m3u8', detail: 'Primary Match Broadcast', badge: '1080p' },
-  { name: 'Server 2 (Sports Network)', url: 'https://sm-monirul.top/tof/live/toffee5/index.m3u8', detail: 'Secondary Match Broadcast', badge: '1080p' },
-  { name: 'Server 3 (Alternate HD)', url: 'https://sm-monirul.top/tof/live/toffee1/index.m3u8', detail: 'Alternate Sports Feed', badge: '720p' },
-  { name: 'Server 4 (BTV National)', url: 'https://sm-monirul.top/toffee/play/btv_national.m3u8', detail: 'BTV National Live Broadcast', badge: '720p' },
-  { name: 'Server 5 (Somoy TV)', url: 'https://sm-monirul.top/toffee/play/somoy_tv.m3u8', detail: 'Somoy TV News Feed', badge: '720p' },
-];
-
 const MOCK_CHAT_USERNAMES = ['GamerPro2026', 'CopaViewer', 'FifaFanatic', 'MonirulFan', 'ZidLiveStream', 'GoalGetter', 'FootyBuff', 'MessiGOAT', 'Cr7Legacy', 'SambaMagic'];
 const MOCK_CHAT_MESSAGES = [
   "LET'S GOOOO! WHAT A MATCH!",
@@ -26,7 +17,7 @@ const MOCK_CHAT_MESSAGES = [
   "ZERO LAG DETECTED SO FAR",
   "ANYONE ELSE WATCHING FROM MOBILE?"
 ];
-const MOCK_CHAT_COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#ec4899', '#06b6d4'];
+const MOCK_CHAT_COLORS = ['#ff7a00', '#3b82f6', '#10b981', '#ff9f0a', '#a855f7', '#ec4899', '#ef4444'];
 
 const MOCK_SCHEDULE = [
   { id: 1, homeTeam: 'Brazil', awayTeam: 'Scotland', homeInit: 'BR', awayInit: 'SC', score1: 3, score2: 1, status: 'live', timeLabel: 'Live Now' },
@@ -36,9 +27,9 @@ const MOCK_SCHEDULE = [
   { id: 5, homeTeam: 'Norway', awayTeam: 'France', homeInit: 'NO', awayInit: 'FR', score1: null, score2: null, status: 'upcoming', timeLabel: 'Tomorrow' },
 ];
 
-export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
-  const [servers, setServers] = useState(initialServers);
-  const [currentIdx, setCurrentIdx] = useState(-1); // -1 means no server selected yet (placeholder active)
+export default function SeamlessPlayer() {
+  const [servers, setServers] = useState([]);
+  const [currentIdx, setCurrentIdx] = useState(-1); // -1 means placeholder/sweeping active
   const [activePlayer, setActivePlayer] = useState('A'); // 'A' or 'B'
   const [isLoading, setIsLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -51,7 +42,9 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
   const [activeTab, setActiveTab] = useState('feeds'); // 'feeds' or 'chat'
   const [chatMessages, setChatMessages] = useState([]);
   const [systemTime, setSystemTime] = useState('00:00:00');
+  const [timezoneLabel, setTimezoneLabel] = useState('UTC');
   const [showControls, setShowControls] = useState(true);
+  const [isSweeping, setIsSweeping] = useState(true);
 
   const videoRefA = useRef(null);
   const videoRefB = useRef(null);
@@ -63,22 +56,33 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
   const chatContainerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
 
-  // System time clock hook
+  // Region-aware Clock sync
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
       setSystemTime(now.toLocaleTimeString('en-US', { hour12: false }));
+      
+      try {
+        const parts = now.toLocaleDateString('en-US', { day: 'numeric', timeZoneName: 'short' }).split(', ');
+        if (parts.length > 1) {
+          setTimezoneLabel(parts[1]);
+        }
+      } catch (e) {
+        const offset = -now.getTimezoneOffset() / 60;
+        const sign = offset >= 0 ? '+' : '';
+        setTimezoneLabel(`GMT${sign}${offset}`);
+      }
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Background health check & sorting
+  // Fetch and parse streams dynamically
   useEffect(() => {
     async function checkHealth(url) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
       const start = performance.now();
       try {
         await fetch(url, { method: 'GET', mode: 'no-cors', signal: controller.signal });
@@ -91,50 +95,217 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
       }
     }
 
-    async function runHealthCheck() {
-      console.log('🔄 Telemetry Sweep: Performing background ping check...');
-      const currentActiveUrl = currentIdx >= 0 ? servers[currentIdx]?.url : null;
+    async function loadStreams() {
+      setIsSweeping(true);
+      
+      // 1. Fetch Toffee JSON
+      let toffeeChannels = [];
+      try {
+        const res = await fetch('https://raw.githubusercontent.com/sm-monirulislam/Toffee-Auto-Update-Playlist/main/toffee_data.json?t=' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          toffeeChannels = data.response || [];
+        }
+      } catch (e) {
+        console.warn('Failed to load Toffee streams:', e);
+      }
 
+      // 2. Fetch Sportzfy JSON
+      let sportzfyStreams = [];
+      try {
+        const res = await fetch('./sportzfy_streams.json?t=' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          sportzfyStreams = data.streams || [];
+        }
+      } catch (e) {
+        console.warn('Failed to load Sportzfy streams:', e);
+      }
+
+      // 3. Fetch iptv-org sports
+      let iptvOrgChannels = [];
+      try {
+        const res = await fetch('https://iptv-org.github.io/iptv/categories/sports.m3u');
+        if (res.ok) {
+          const text = await res.text();
+          const lines = text.split('\n');
+          let currentName = null;
+          const KEYWORDS = ['fifa', 'world cup', 'worldcup', 'sony', 'ten', 'espn', 'fox', 'sky', 'bein', 'tsport', 'gtv', 'gazi', 'btv', 'fussball', 'football', 'soccer', 'supersport', 'arena', 'dazn', 'star sports', 'premier', 'cctv'];
+          
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line.startsWith('#EXTINF:')) {
+              const parts = line.split(',');
+              if (parts.length > 1) {
+                currentName = parts.slice(1).join(',');
+              }
+            } else if (line && !line.startsWith('#')) {
+              if (currentName) {
+                const nameLower = currentName.toLowerCase();
+                if (KEYWORDS.some(k => nameLower.includes(k))) {
+                  iptvOrgChannels.push({
+                    name: currentName,
+                    url: line,
+                    detail: 'Global Live Sports Broadcast Feed',
+                    badge: nameLower.includes('1080p') ? 'fhd' : 'hd'
+                  });
+                }
+                currentName = null;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load iptv-org sports streams:', e);
+      }
+
+      const matchStreams = [];
+      const genericFifaStreams = [];
+      const sportsNetworkStreams = [];
+      const sportzfyMatchStreams = [];
+
+      // Parse Toffee
+      toffeeChannels.forEach(ch => {
+        const name = ch.name || '';
+        const rawUrl = ch.link || ch.url || '';
+        if (!rawUrl) return;
+
+        let url = rawUrl;
+        if (rawUrl.includes('bldcmprod-cdn.toffeelive.com/cdn/live/')) {
+          url = rawUrl.replace('https://bldcmprod-cdn.toffeelive.com/cdn/live/', 'https://sm-monirul.top/toffee/play/')
+                      .replace('/playlist.m3u8', '.m3u8');
+        } else if (rawUrl.includes('prod-cdn01-live.toffeelive.com/live/')) {
+          const parts = rawUrl.split('/live/');
+          if (parts.length > 1) {
+            const id = parts[1].split('/')[0];
+            url = `https://sm-monirul.top/toffee/play/${id}.m3u8`;
+          }
+        }
+
+        const nameLower = name.toLowerCase();
+        if (nameLower.includes('vs') && !nameLower.includes('highlight') && !nameLower.includes('show')) {
+          matchStreams.push({ name, url, detail: `Live Match Broadcast: ${name}`, badge: 'live' });
+        } else if (nameLower.includes('fifa')) {
+          genericFifaStreams.push({ name, url, detail: `FIFA World Cup Live Broadcast`, badge: 'hd' });
+        } else if (nameLower.includes('sport') || nameLower.includes('ten') || nameLower.includes('cricket') || nameLower.includes('btv') || nameLower.includes('somoy')) {
+          sportsNetworkStreams.push({ name, url, detail: `Live Sports Network Feed`, badge: nameLower.includes('vip') ? 'fhd' : 'hd' });
+        }
+      });
+
+      // Parse Sportzfy
+      sportzfyStreams.forEach(ch => {
+        if (!ch.stream_url || ch.stream_type !== 'hls' || ch.drm_kid) return;
+        sportzfyMatchStreams.push({
+          name: ch.label || `Sportzfy Server ${ch.id}`,
+          url: ch.stream_url,
+          detail: `Sportzfy Premium Broadcast Feed`,
+          badge: (ch.label && ch.label.toLowerCase().includes('hd')) ? 'fhd' : 'hd'
+        });
+      });
+
+      // Merge
+      const allCandidates = [];
+      const addCandidates = (list, category) => {
+        list.forEach(s => {
+          allCandidates.push({
+            name: s.name,
+            url: s.url,
+            detail: s.detail || 'Live Sports Broadcast Feed',
+            badge: s.badge || 'hd',
+            category
+          });
+        });
+      };
+
+      addCandidates(matchStreams, 'World Cup Live Match Servers');
+      addCandidates(sportzfyMatchStreams, 'Sportzfy Premium Broadcasts');
+      addCandidates(genericFifaStreams, 'FIFA World Cup Live Feeds');
+      addCandidates(iptvOrgChannels, 'Global IPTV Sports Feeds');
+      addCandidates(sportsNetworkStreams, 'Premium Sports Networks');
+
+      console.log(`Checking health of ${allCandidates.length} parsed candidate feeds...`);
+
+      // Parallel health pinger
       const checkedServers = await Promise.all(
-        servers.map(async (server) => {
+        allCandidates.map(async (server) => {
           const res = await checkHealth(server.url);
           return {
             ...server,
             latency: res.latency,
-            status: res.online ? (res.latency < 1000 ? 'online' : 'amber') : 'offline',
-            isDead: !res.online
+            status: res.online ? (res.latency < 1000 ? 'online' : 'amber') : 'offline'
           };
         })
       );
 
-      // Sort: Online/Amber first, Offline at bottom
-      const activeGroup = checkedServers.filter(s => s.status !== 'offline');
-      const offlineGroup = checkedServers.filter(s => s.status === 'offline');
-      const sorted = [...activeGroup, ...offlineGroup];
+      // Filter out offline servers completely & sort online ones
+      const onlineServers = checkedServers.filter(s => s.status !== 'offline');
+      setServers(onlineServers);
+      setIsSweeping(false);
 
-      setServers(sorted);
+      if (onlineServers.length > 0) {
+        setCurrentIdx(0);
+      } else {
+        setErrorMessage("No active broadcast feeds detected. All servers are currently offline.");
+      }
+    }
 
-      // Restore current active index based on URL
-      if (currentActiveUrl) {
-        const newIdx = sorted.findIndex(s => s.url === currentActiveUrl);
+    loadStreams();
+  }, []);
+
+  // Periodic health checking
+  useEffect(() => {
+    if (servers.length === 0 || isSweeping) return;
+
+    async function checkHealth(url) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      try {
+        await fetch(url, { method: 'GET', mode: 'no-cors', signal: controller.signal });
+        clearTimeout(timeoutId);
+        return true;
+      } catch {
+        clearTimeout(timeoutId);
+        return false;
+      }
+    }
+
+    async function runHealthCheck() {
+      console.log('🔄 Telemetry Sweep: Performing background check...');
+      const activeUrl = currentIdx >= 0 ? servers[currentIdx]?.url : null;
+
+      const checked = await Promise.all(
+        servers.map(async (s) => {
+          const online = await checkHealth(s.url);
+          return {
+            ...s,
+            status: online ? 'online' : 'offline'
+          };
+        })
+      );
+
+      // Keep only online ones
+      const onlineFiltered = checked.filter(s => s.status !== 'offline');
+      setServers(onlineFiltered);
+
+      if (activeUrl) {
+        const newIdx = onlineFiltered.findIndex(s => s.url === activeUrl);
         if (newIdx !== -1) {
           setCurrentIdx(newIdx);
+        } else if (onlineFiltered.length > 0) {
+          setCurrentIdx(0);
+        } else {
+          setCurrentIdx(-1);
+          setErrorMessage("Stream failed. No other working server found.");
         }
       }
     }
 
-    // Run health check initially after a delay, and then every 30 seconds
-    const timeout = setTimeout(runHealthCheck, 3000);
-    const interval = setInterval(runHealthCheck, 30000);
-    return () => {
-      clearTimeout(timeout);
-      clearInterval(interval);
-    };
-  }, [servers, currentIdx]);
+    const interval = setInterval(runHealthCheck, 35000);
+    return () => clearInterval(interval);
+  }, [servers, currentIdx, isSweeping]);
 
-  // Live Chat Simulator Engine
+  // Live Chat Simulator
   useEffect(() => {
-    // Generate initial messages
     const initialMsgs = [];
     for (let i = 0; i < 6; i++) {
       initialMsgs.push({
@@ -167,14 +338,14 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-scroll chat to bottom
+  // Auto-scroll chat
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatMessages, activeTab]);
 
-  // Stall detector
+  // Stall detector & failover switcher
   const startStallTimer = () => {
     clearStallTimer();
     stallTimerRef.current = setTimeout(() => {
@@ -214,14 +385,10 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
 
       console.warn(`[Failover] Routing hot-switch to backup: ${backupServer.name}`);
 
-      // Sync settings
       targetVideo.volume = volume;
       targetVideo.muted = isMuted;
-
-      // Play backup
       targetVideo.play().catch(() => {});
 
-      // Cross-fade
       targetVideo.style.opacity = '1';
       targetVideo.style.zIndex = '20';
       currentVideo.style.opacity = '0';
@@ -230,17 +397,14 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
       setActivePlayer(isTargetA ? 'A' : 'B');
       setCurrentIdx(backupIndex);
 
-      // Cleanup old player after cross-fade delay
       if (fadeTimeoutRef.current) clearTimeout(fadeTimeoutRef.current);
       fadeTimeoutRef.current = setTimeout(() => {
         currentVideo.pause();
         cleanupPlayer(isTargetA ? 'B' : 'A');
-        
-        // Background load next backup stream on newly freed idle player
         preloadBackup(backupIndex);
       }, 350);
     } else {
-      setErrorMessage('ALL BROADCAST FEEDS ARE CURRENTLY OFFLINE. ROUTING ENGINE SUSPENDED.');
+      setErrorMessage('ALL BROADCAST FEEDS ARE CURRENTLY OFFLINE.');
       setIsLoading(false);
       failoverCountRef.current = 0;
     }
@@ -248,7 +412,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
 
   // Primary stream loader
   useEffect(() => {
-    if (currentIdx === -1) return;
+    if (currentIdx === -1 || servers.length === 0) return;
     const url = servers[currentIdx]?.url;
     if (!url) return;
 
@@ -285,7 +449,6 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
 
       targetVideo.style.opacity = '1';
       targetVideo.style.zIndex = '20';
-
       currentVideo.style.opacity = '0';
       currentVideo.style.zIndex = '10';
 
@@ -342,7 +505,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
     };
   }, [currentIdx]);
 
-  // Preload secondary backup on idle player
+  // Preload secondary backup
   const preloadBackup = (activeIdx) => {
     const backupIndex = getBackupIndex(activeIdx);
     if (backupIndex === null) return;
@@ -416,16 +579,9 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
     const video = e.currentTarget;
     if (activePlayer === 'A' && video !== videoRefA.current) return;
     if (activePlayer === 'B' && video !== videoRefB.current) return;
-
-    clearStallTimer();
     
     if (video.duration && video.duration !== Infinity) {
       setProgress((video.currentTime / video.duration) * 100);
-      const mins = Math.floor(video.currentTime / 60).toString().padStart(2, '0');
-      const secs = Math.floor(video.currentTime % 60).toString().padStart(2, '0');
-      setPlaybackTime(`${mins}:${secs}`);
-    } else {
-      setProgress(0);
       const mins = Math.floor(video.currentTime / 60).toString().padStart(2, '0');
       const secs = Math.floor(video.currentTime % 60).toString().padStart(2, '0');
       setPlaybackTime(`${mins}:${secs}`);
@@ -434,8 +590,6 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
     if (video.buffered.length > 0 && video.duration) {
       const bufferedEnd = video.buffered.end(video.buffered.length - 1);
       setBuffer((bufferedEnd / video.duration) * 100);
-    } else {
-      setBuffer(0);
     }
   };
 
@@ -470,12 +624,14 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
     if (videoRefB.current) videoRefB.current.muted = targetMuted;
   };
 
-  const handleSeek = (e) => {
+  const handleSeek = (clientX) => {
     const active = activePlayer === 'A' ? videoRefA.current : videoRefB.current;
     if (!active || !active.duration || active.duration === Infinity) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const seekTime = (clickX / rect.width) * active.duration;
+    const timeline = document.getElementById('react-timeline');
+    if (!timeline) return;
+    const rect = timeline.getBoundingClientRect();
+    const clickX = clientX - rect.left;
+    const seekTime = Math.max(0, Math.min(active.duration, (clickX / rect.width) * active.duration));
     active.currentTime = seekTime;
   };
 
@@ -493,9 +649,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
     setShowControls(true);
     if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     controlsTimeoutRef.current = setTimeout(() => {
-      if (isPlaying) {
-        setShowControls(false);
-      }
+      if (isPlaying) setShowControls(false);
     }, 3000);
   };
 
@@ -514,7 +668,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
         <div className={styles.headerLeft}>
           <a href="#" className={styles.logoGroup}>
             <span className={styles.liveIndicatorDot} />
-            <span className={styles.logoText}>ZID<span className={styles.logoAccent}>LIVE</span></span>
+            <span className={styles.logoText}>ZID VAI ON AIR <span className={styles.logoAccent}>X WC 2026</span></span>
           </a>
           <nav className={styles.navLinks}>
             <a href="#" className={`${styles.navLink} ${styles.navLinkActive}`}>LIVE MATCHES</a>
@@ -528,7 +682,10 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
             <span className={styles.statsIcon}><i className="fa-solid fa-users"></i></span>
             <span className={styles.statsCount}>24.5K</span> online
           </div>
-          <div className={styles.clockDisplay}>{systemTime}</div>
+          <div className={styles.clockContainer}>
+            <span className={styles.clockText}>{systemTime}</span>
+            <span className={styles.timezoneLabel}>{timezoneLabel}</span>
+          </div>
           <div className={styles.userProfile}>Z</div>
         </div>
       </header>
@@ -546,7 +703,6 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
             onMouseMove={handleTriggerControls}
             onMouseLeave={() => isPlaying && setShowControls(false)}
           >
-            {/* Dual Player Engines */}
             <video
               ref={videoRefA}
               className={styles.videoElement}
@@ -598,20 +754,34 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
               </div>
             )}
 
-            {/* Placeholder Screen */}
-            {currentIdx === -1 && (
+            {/* Placeholder Screen / Sweeping Loader */}
+            {isSweeping && (
+              <div className={styles.placeholderOverlay}>
+                <div className={styles.spinner} />
+                <h3 className={styles.placeholderTitle}>SWEEPING BROADCAST FEEDS</h3>
+                <p className={styles.placeholderText}>Testing latencies and auto-finding active channels. Please hold...</p>
+              </div>
+            )}
+
+            {/* Select Match Placeholder */}
+            {!isSweeping && currentIdx === -1 && !errorMessage && (
               <div className={styles.placeholderOverlay}>
                 <div className={styles.placeholderPlayBtn} onClick={() => setCurrentIdx(0)}>
                   <i className="fa-solid fa-play"></i>
                 </div>
                 <h3 className={styles.placeholderTitle}>SELECT MATCH FEED</h3>
-                <p className={styles.placeholderText}>Pick one of the live broadcast servers in the sidebar console to begin streaming the Copa matches.</p>
+                <p className={styles.placeholderText}>Pick one of the live broadcast servers in the sidebar console to begin streaming.</p>
               </div>
             )}
 
-            {/* Custom Video Controls overlay */}
+            {/* Custom Video Controls */}
             <div className={`${styles.customControls} ${(!showControls && isPlaying) ? styles.controlsHidden : ''}`}>
-              <div className={styles.timelineContainer} onClick={handleSeek}>
+              <div 
+                id="react-timeline" 
+                className={styles.timelineContainer} 
+                onClick={(e) => handleSeek(e.clientX)}
+                onTouchStart={(e) => e.touches && e.touches[0] && handleSeek(e.touches[0].clientX)}
+              >
                 <div className={styles.timelineBuffer} style={{ width: `${buffer}%` }} />
                 <div className={styles.timelineProgress} style={{ width: `${progress}%` }} />
               </div>
@@ -681,7 +851,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
                 </div>
                 <div className={styles.diagCell}>
                   <span className={styles.diagLabel}>STANDBY ENGINE</span>
-                  <span className={`${styles.diagValue} ${styles.textGreen}`}>{backupServer ? 'PRE-BUFFERED' : 'NONE'}</span>
+                  <span className={`${styles.diagValue} ${styles.textOrange}`}>{backupServer ? 'PRE-BUFFERED' : 'NONE'}</span>
                 </div>
                 <div className={styles.diagCell}>
                   <span className={styles.diagLabel}>FEED SPEC</span>
@@ -691,7 +861,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
                 </div>
                 <div className={styles.diagCell}>
                   <span className={styles.diagLabel}>PRELOAD QUEUE</span>
-                  <span className={`${styles.diagValue} ${styles.textCyan}`}>{backupServer ? backupServer.name : 'NONE PRELOADED'}</span>
+                  <span className={`${styles.diagValue} ${styles.textOrange}`}>{backupServer ? backupServer.name : 'NONE PRELOADED'}</span>
                 </div>
               </div>
             </details>
@@ -723,21 +893,33 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
               {/* Feeds Panel */}
               {activeTab === 'feeds' && (
                 <div className={styles.feedsPanel}>
-                  {servers.map((srv, idx) => {
+                  {isSweeping && (
+                    <div className="flex flex-col items-center justify-center p-8 text-center text-xs text-white/50 h-full">
+                      <div className={styles.spinner} />
+                      <span className="mt-2">Sweeping active feeds...</span>
+                    </div>
+                  )}
+
+                  {!isSweeping && servers.length === 0 && (
+                    <div className="flex flex-col items-center justify-center p-8 text-center text-xs text-white/50 h-full gap-2">
+                      <i className="fa-solid fa-triangle-exclamation text-[#ff7a00] text-xl" />
+                      <span>No active streams found.</span>
+                    </div>
+                  )}
+
+                  {!isSweeping && servers.map((srv, idx) => {
                     const isActive = currentIdx === idx;
-                    const isDead = srv.status === 'offline';
                     let statusColor = styles.statusGreen;
                     if (srv.status === 'amber') statusColor = styles.statusAmber;
-                    else if (srv.status === 'offline') statusColor = styles.statusRed;
 
                     return (
                       <div
-                        key={srv.url}
-                        className={`${styles.serverCard} ${isActive ? styles.serverCardActive : ''} ${isDead ? styles.serverCardDead : ''}`}
-                        onClick={() => !isDead && setCurrentIdx(idx)}
+                        key={srv.url + '-' + idx}
+                        className={`${styles.serverCard} ${isActive ? styles.serverCardActive : ''} ${styles.glossyShine}`}
+                        onClick={() => setCurrentIdx(idx)}
                       >
                         <div className={styles.serverThumb}>
-                          {srv.badge || 'HD'}
+                          {srv.badge.toUpperCase()}
                         </div>
                         <div className={styles.serverCardDetails}>
                           <span className={styles.serverCardName}>{srv.name}</span>
@@ -745,7 +927,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
                         </div>
                         <div className={styles.serverCardStatus}>
                           <span className={styles.latencyValue}>
-                            {srv.latency && srv.latency < 9999 ? `${Math.round(srv.latency)}ms` : 'offline'}
+                            {srv.latency ? `${Math.round(srv.latency)}ms` : 'online'}
                           </span>
                           <span className={`${styles.statusDot} ${statusColor}`} />
                         </div>
@@ -827,7 +1009,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
                   </span>
                   {isLive ? (
                     <button 
-                      onClick={() => setCurrentIdx(0)} 
+                      onClick={() => servers.length > 0 && setCurrentIdx(0)} 
                       className={styles.tuneInBtn}
                     >
                       Tune In
@@ -844,7 +1026,7 @@ export default function SeamlessPlayer({ initialServers = DEFAULT_SERVERS }) {
 
       {/* Footer */}
       <footer className={styles.footer}>
-        <div>© 2026 COPASTREAM. ALL FEEDS PRIVATELY ENCODED.</div>
+        <div>© 2026 ZID VAI ON AIR X WC 2026. ALL FEEDS PRIVATELY ENCODED.</div>
         <div>
           DEVELOPED BY <span className={styles.footerAuthor}>SHAHIDUL ISLAM BAIZID</span>
         </div>
