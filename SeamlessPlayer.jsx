@@ -728,13 +728,7 @@ export default function SeamlessPlayer() {
               autoPlay
             />
 
-            {/* Unmute Overlay */}
-            {isMuted && isPlaying && (
-              <div className={styles.unmuteOverlay} onClick={toggleMute}>
-                <i className={`fa-solid fa-volume-high ${styles.unmuteIcon}`}></i>
-                <span className={styles.unmuteText}>TAP PLAYER TO UNMUTE AUDIO</span>
-              </div>
-            )}
+
 
             {/* Buffer Loader */}
             {isLoading && (

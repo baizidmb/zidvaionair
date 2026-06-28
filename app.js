@@ -442,7 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Custom Accessible Player DOM Elements
     const videoWrapper = document.getElementById('video-wrapper');
     const customControls = document.getElementById('custom-controls');
-    const unmuteOverlay = document.getElementById('player-unmute-overlay');
     const ctrlPlayPause = document.getElementById('ctrl-play-pause');
     const ctrlMute = document.getElementById('ctrl-mute');
     const ctrlVolume = document.getElementById('ctrl-volume');
@@ -641,15 +640,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Play the target player
             const playPromise = targetPlayer.play();
             if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    unmuteOverlay.classList.add('hidden');
-                }).catch(e => {
+                playPromise.catch(e => {
                     console.log('Autoplay blocked. Starting muted.');
                     targetPlayer.muted = true;
                     ctrlMute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
                     ctrlVolume.value = 0;
-                    unmuteOverlay.classList.remove('hidden');
-                    targetPlayer.play();
+                    targetPlayer.play().catch(err => console.error('Play retry failed:', err));
                 });
             }
 
@@ -919,11 +915,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Click on video playing area toggles play/pause
         videoEl.addEventListener('click', () => {
             if (videoEl !== activePlayer) return;
-            if (unmuteOverlay.classList.contains('hidden')) {
-                togglePlay();
-            } else {
-                unmuteOverlay.click();
-            }
+            togglePlay();
         });
 
         // Progress updates & timeline buffering
@@ -1054,11 +1046,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Unmute overlay click handler
-    unmuteOverlay.addEventListener('click', () => {
-        setVolume(1);
-        unmuteOverlay.classList.add('hidden');
-    });
 
     // Auto-hide Control Bar logic for desktop mouse movements
     let controlsTimeout = null;
@@ -1099,14 +1086,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     videoWrapper.addEventListener('touchstart', (e) => {
-        if (e.target.closest('#custom-controls') || e.target.closest('#player-unmute-overlay')) {
+        if (e.target.closest('#custom-controls')) {
             return;
         }
         showMobileControls();
     }, { passive: true });
     
     videoWrapper.addEventListener('click', (e) => {
-        if (e.target.closest('#custom-controls') || e.target.closest('#player-unmute-overlay')) {
+        if (e.target.closest('#custom-controls')) {
             return;
         }
         showMobileControls();
