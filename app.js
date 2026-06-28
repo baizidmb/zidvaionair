@@ -9,281 +9,82 @@ document.addEventListener('DOMContentLoaded', () => {
     let hls = null;
     let currentServerIndex = null;
 
+    const STATIC_CHANNELS = [
+        // Toffee Live Match Feeds
+        { name: "Norway vs France (WC)", url: "https://sm-monirul.top/tof/live/toffee6/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
+        { name: "Cabo Verde vs South Africa (WC)", url: "https://sm-monirul.top/tof/live/toffee5/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
+        { name: "Egypt vs Iran (WC)", url: "https://sm-monirul.top/tof/live/toffee1/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
+        { name: "New Zealand vs Belgium (WC)", url: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", detail: "Live Match Broadcast", badge: "live" },
+        { name: "Senegal vs Iraq (WC)", url: "https://sm-monirul.top/tof/live/toffee3/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
+        { name: "Uruguay vs Spain (WC)", url: "https://sm-monirul.top/tof/live/toffee4/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
+
+        // Toffee FIFA Channels
+        { name: "Toffee FIFA 1 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8", detail: "FIFA World Cup Feed 1", badge: "fhd" },
+        { name: "Toffee FIFA 2 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-2.m3u8", detail: "FIFA World Cup Feed 2", badge: "fhd" },
+        { name: "Toffee FIFA 3 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-3.m3u8", detail: "FIFA World Cup Feed 3", badge: "fhd" },
+        { name: "Toffee FIFA 4 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-4.m3u8", detail: "FIFA World Cup Feed 4", badge: "fhd" },
+        { name: "Toffee FIFA 5 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", detail: "FIFA World Cup Feed 5", badge: "fhd" },
+        { name: "Toffee FIFA 6 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-6.m3u8", detail: "FIFA World Cup Feed 6", badge: "fhd" },
+
+        // Premium Local & Sports Channels
+        { name: "BTV National", url: "https://sm-monirul.top/toffee/play/btv_national.m3u8", detail: "Bangladesh Television National", badge: "hd" },
+        { name: "BTV Chattogram", url: "https://bozztv.com/rongo/rongo-BTVChattagram/index.m3u8", detail: "Bangladesh Television Chattogram", badge: "hd" },
+        { name: "Somoy TV", url: "https://sm-monirul.top/toffee/play/somoy_tv.m3u8", detail: "Somoy News Live Stream", badge: "hd" },
+        { name: "SONY SPORTS TEN 1 HD", url: "https://sm-monirul.top/toffee/play/sony_sports_1_hd.m3u8", detail: "Sony Sports Network", badge: "hd" },
+        { name: "SONY SPORTS TEN 2 HD", url: "https://sm-monirul.top/toffee/play/sony_sports_2_hd.m3u8", detail: "Sony Sports Network", badge: "hd" },
+        { name: "SONY SPORTS TEN 5 HD", url: "https://sm-monirul.top/toffee/play/sony_sports_5_hd.m3u8", detail: "Sony Sports Network", badge: "hd" },
+        { name: "SONY TEN Cricket", url: "https://sm-monirul.top/toffee/play/ten_cricket.m3u8", detail: "Sony Ten Cricket Live", badge: "hd" },
+        { name: "TOFFEE Sports VIP", url: "https://sm-monirul.top/toffee/play/sports_highlights.m3u8", detail: "Toffee Sports VIP Channel", badge: "fhd" },
+        { name: "Euro Sport HD", url: "https://sm-monirul.top/toffee/play/euro_sports_hd.m3u8", detail: "Eurosport HD Stream", badge: "hd" },
+
+        // Sportzfy streams
+        { name: "Sportzfy SP - HD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OuvO9_v1Oak4MYmokrJdsHJokrJdkABFhNcE0zKLw&headers=3OvT47zfFUzf75IJq1aTL768EAv3ERq3qMu840zmHSo3osynd_anIGo3qMBh4RI3r9qvzjasEhukI51JH7I8qjuRIREmFk6nI0zfysfjEU1hqGq_9jv2", detail: "Sportzfy Premium HD Feed", badge: "fhd" },
+        { name: "Sportzfy FAST 1", url: "https://pullsgp.yyzb456.top/live/stream-698168_lhd.m3u8", detail: "Sportzfy High Speed Routing 1", badge: "hd" },
+        { name: "Sportzfy FAST 2", url: "https://pulltx.jdnzrgm.com/live/hd-en-6MvZ6BDhJ2nQTAy3UJ.m3u8?txSecret=5a733c6d2b5b557345bb398060dad1cb&txTime=6A3EEF59", detail: "Sportzfy High Speed Routing 2", badge: "hd" },
+        { name: "Sportzfy Arabic", url: "https://za.teworld.online/mooott1.m3u8", detail: "Sportzfy Arabic Language Feed", badge: "hd" },
+        { name: "Sportzfy CCTV 5", url: "https://live.666666.zip/stream/20233432.m3u8", detail: "CCTV Sports Broadcast Channel", badge: "hd" },
+        { name: "Sportzfy SP - 2", url: "https://live.666666.zip/migu/1.m3u8", detail: "Migu Live Broadcast Server", badge: "hd" },
+        { name: "Sportzfy SP - 3", url: "https://tdlive.yarncdn.live/live/tdtv_blv_taovannghe/playlist.m3u8", detail: "TDTV Live Sports Feed", badge: "hd" },
+
+        // Public Broadcaster Fallbacks
+        { name: "Fox Sports 1 US", url: "http://tv.nkiri.com:8080/live/606555/606555/129759.m3u8", detail: "Fox Sports US", badge: "hd" },
+        { name: "Telemundo Deportes", url: "http://iptv.cricfree.io:8080/live/test/test/1.m3u8", detail: "Telemundo Deportes Spanish", badge: "hd" },
+        { name: "beIN Sports Qatar", url: "http://premium.cricfree.io:8080/live/test/test/2.m3u8", detail: "beIN Sports Premium Qatar", badge: "fhd" },
+        { name: "TUDN Mexico", url: "http://premium.cricfree.io:8080/live/test/test/3.m3u8", detail: "TUDN Sports Mexico", badge: "hd" },
+        { name: "BBC One UK", url: "http://premium.cricfree.io:8080/live/test/test/4.m3u8", detail: "BBC One Live Broadcast", badge: "hd" },
+        { name: "ITV 1 UK", url: "http://premium.cricfree.io:8080/live/test/test/5.m3u8", detail: "ITV 1 Sports Broadcast", badge: "hd" }
+    ];
+
     function getFallbackChannels() {
-        return [
-            { name: "Norway vs France", link: "https://sm-monirul.top/tof/live/toffee6/index.m3u8", category_name: "Sports Channels" },
-            { name: "Cabo Verde vs South Africa", link: "https://sm-monirul.top/tof/live/toffee5/index.m3u8", category_name: "Sports Channels" },
-            { name: "Egypt vs Iran", link: "https://sm-monirul.top/tof/live/toffee1/index.m3u8", category_name: "Sports Channels" },
-            { name: "New Zealand vs Belgium", link: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", category_name: "Sports Channels" },
-            { name: "Senegal vs Iraq", link: "https://sm-monirul.top/tof/live/toffee3/index.m3u8", category_name: "Sports Channels" },
-            { name: "Uruguay vs Spain", link: "https://sm-monirul.top/tof/live/toffee4/index.m3u8", category_name: "Sports Channels" },
-            
-            { name: "Toffee FIFA 1", link: "https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8", category_name: "Sports Channels" },
-            { name: "Toffee FIFA 2", link: "https://sm-monirul.top/toffee/play/FIFA-2026-2.m3u8", category_name: "Sports Channels" },
-            { name: "Toffee FIFA 3", link: "https://sm-monirul.top/toffee/play/FIFA-2026-3.m3u8", category_name: "Sports Channels" },
-            { name: "Toffee FIFA 4", link: "https://sm-monirul.top/toffee/play/FIFA-2026-4.m3u8", category_name: "Sports Channels" },
-            { name: "Toffee FIFA 5", link: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", category_name: "Sports Channels" },
-            { name: "Toffee FIFA 6", link: "https://sm-monirul.top/toffee/play/FIFA-2026-6.m3u8", category_name: "Sports Channels" },
-            
-            { name: "SONY SPORTS TEN 1 HD", link: "https://sm-monirul.top/toffee/play/sony_sports_1_hd.m3u8", category_name: "LIVE" },
-            { name: "SONY SPORTS TEN 2 HD", link: "https://sm-monirul.top/toffee/play/sony_sports_2_hd.m3u8", category_name: "LIVE" },
-            { name: "SONY SPORTS TEN 5 HD", link: "https://sm-monirul.top/toffee/play/sony_sports_5_hd.m3u8", category_name: "LIVE" },
-            { name: "SONY TEN Cricket", link: "https://sm-monirul.top/toffee/play/ten_cricket.m3u8", category_name: "LIVE" },
-            { name: "TOFFEE Sports VIP", link: "https://sm-monirul.top/toffee/play/sports_highlights.m3u8", category_name: "LIVE" },
-            { name: "Euro Sport HD", link: "https://sm-monirul.top/toffee/play/euro_sports_hd.m3u8", category_name: "LIVE" },
-            { name: "BTV National", link: "https://sm-monirul.top/toffee/play/btv_national.m3u8", category_name: "LIVE" },
-            { name: "Somoy TV", link: "https://sm-monirul.top/toffee/play/somoy_tv.m3u8", category_name: "LIVE" }
-        ];
+        return STATIC_CHANNELS;
     }
 
     async function loadDynamicStreams() {
-        let channels = [];
-        
-        // Show sweeping loader in serversContainer immediately
-        if (serversContainer) {
-            serversContainer.innerHTML = `
-                <div class="flex flex-col items-center justify-center p-8 text-center text-xs text-white/50">
-                    <div class="spinner-modern mb-2"></div>
-                    <span>SWEEPING FEEDS FOR ACTIVE CHANNELS...</span>
-                </div>
-            `;
-        }
-
-        try {
-            const res = await fetch('https://raw.githubusercontent.com/sm-monirulislam/Toffee-Auto-Update-Playlist/main/toffee_data.json?t=' + Date.now());
-            if (!res.ok) throw new Error('Network error fetching stream JSON');
-            const data = await res.json();
-            channels = data.response || [];
-        } catch (e) {
-            console.warn('Failed to load dynamic streams from GitHub, loading fallback channels:', e);
-            channels = getFallbackChannels();
-        }
-
-        // Load Sportzfy streams from local decrypted JSON
-        let sportzfyStreams = [];
-        try {
-            const res = await fetch('./sportzfy_streams.json?t=' + Date.now());
-            if (res.ok) {
-                const data = await res.json();
-                sportzfyStreams = data.streams || [];
-            }
-        } catch (e) {
-            console.warn('Failed to load Sportzfy streams:', e);
-        }
-
-        // Fetch iptv-org sports channels dynamically
-        let iptvOrgChannels = [];
-        try {
-            const res = await fetch('https://iptv-org.github.io/iptv/categories/sports.m3u');
-            if (res.ok) {
-                const text = await res.text();
-                const lines = text.split('\n');
-                let currentName = null;
-                const KEYWORDS = ['fifa', 'world cup', 'worldcup', 'sony', 'ten', 'espn', 'fox', 'sky', 'bein', 'tsport', 'gtv', 'gazi', 'btv', 'fussball', 'football', 'soccer', 'supersport', 'arena', 'dazn', 'star sports', 'premier', 'cctv'];
-                
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (line.startsWith('#EXTINF:')) {
-                        const parts = line.split(',');
-                        if (parts.length > 1) {
-                            currentName = parts.slice(1).join(',');
-                        }
-                    } else if (line && !line.startsWith('#')) {
-                        if (currentName) {
-                            const nameLower = currentName.toLowerCase();
-                            if (KEYWORDS.some(k => nameLower.includes(k))) {
-                                iptvOrgChannels.push({
-                                    name: currentName,
-                                    url: line,
-                                    detail: 'Global Live Sports Broadcast Feed',
-                                    badge: nameLower.includes('1080p') ? 'fhd' : 'hd'
-                                });
-                            }
-                            currentName = null;
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            console.warn('Failed to load iptv-org sports streams:', e);
-        }
-
-        const matchStreams = [];
-        const genericFifaStreams = [];
-        const sportsNetworkStreams = [];
-        const sportzfyMatchStreams = [];
-
-        // Parse Toffee channels
-        channels.forEach(ch => {
-            const name = ch.name || '';
-            const rawUrl = ch.link || ch.url || '';
-            const category = ch.category_name || '';
-            
-            if (!rawUrl) return;
-
-            // Rewrite URL using proxy rules to bypass CORS/cookie restrictions
-            let url = rawUrl;
-            if (rawUrl.includes('bldcmprod-cdn.toffeelive.com/cdn/live/')) {
-                url = rawUrl.replace('https://bldcmprod-cdn.toffeelive.com/cdn/live/', 'https://sm-monirul.top/toffee/play/')
-                            .replace('/playlist.m3u8', '.m3u8');
-            } else if (rawUrl.includes('prod-cdn01-live.toffeelive.com/live/')) {
-                const parts = rawUrl.split('/live/');
-                if (parts.length > 1) {
-                    const id = parts[1].split('/')[0];
-                    url = `https://sm-monirul.top/toffee/play/${id}.m3u8`;
-                }
-            } else if (rawUrl.startsWith('http://sm-monirul.top/')) {
-                url = rawUrl.replace('http://', 'https://');
-            }
-
-            const nameLower = name.toLowerCase();
-
-            // 1. Live Match streams
-            if (nameLower.includes('vs') && !nameLower.includes('highlight') && !nameLower.includes('show')) {
-                matchStreams.push({
-                    name: name,
-                    url: url,
-                    detail: `Live Match Broadcast: ${name}`,
-                    badge: 'live'
-                });
-            }
-            // 2. Generic FIFA channels
-            else if (nameLower.includes('fifa')) {
-                genericFifaStreams.push({
-                    name: name,
-                    url: url,
-                    detail: `FIFA World Cup Live Broadcast`,
-                    badge: 'hd'
-                });
-            }
-            // 3. Premium Sports channels / Channels broadcasting World Cup
-            else if (nameLower.includes('sport') || nameLower.includes('ten') || nameLower.includes('cricket') || nameLower.includes('highlights') || nameLower.includes('btv') || nameLower.includes('somoy')) {
-                sportsNetworkStreams.push({
-                    name: name,
-                    url: url,
-                    detail: `Live Sports Network Feed`,
-                    badge: nameLower.includes('vip') ? 'fhd' : 'hd'
-                });
-            }
-        });
-
-        // Parse Sportzfy channels (filter out DRM and non-HLS streams)
-        sportzfyStreams.forEach(ch => {
-            if (!ch.stream_url || ch.stream_type !== 'hls' || ch.drm_kid) return;
-            sportzfyMatchStreams.push({
-                name: ch.label || `Sportzfy Server ${ch.id}`,
-                url: ch.stream_url,
-                detail: `Sportzfy Premium Broadcast Feed`,
-                badge: (ch.label && ch.label.toLowerCase().includes('hd')) ? 'fhd' : 'hd'
-            });
-        });
-
-        // Ensure BTV National is always present in the sports network streams
-        const hasBTV = sportsNetworkStreams.some(srv => srv.name.toLowerCase().includes('btv'));
-        if (!hasBTV) {
-            sportsNetworkStreams.push({
-                name: 'BTV National',
-                url: 'https://sm-monirul.top/toffee/play/btv_national.m3u8',
-                detail: 'Bangladesh Television Live Broadcast',
-                badge: 'hd'
-            });
-        }
-
-        // Add working BTV Chattogram Bozztv alternative stream
-        sportsNetworkStreams.push({
-            name: 'BTV Chattogram',
-            url: 'https://bozztv.com/rongo/rongo-BTVChattagram/index.m3u8',
-            detail: 'BTV Chattogram Live Broadcast (Bozztv CDN)',
-            badge: 'hd'
-        });
-        
-        // Ensure Somoy TV is always present in the sports network streams
-        const hasSomoy = sportsNetworkStreams.some(srv => srv.name.toLowerCase().includes('somoy'));
-        if (!hasSomoy) {
-            sportsNetworkStreams.push({
-                name: 'Somoy TV',
-                url: 'https://sm-monirul.top/toffee/play/somoy_tv.m3u8',
-                detail: 'Somoy TV Live Broadcast',
-                badge: 'hd'
-            });
-        }
-
-        // If no active matches are playing, show a default broadcast banner placeholder
-        if (matchStreams.length === 0) {
-            matchStreams.push({
-                name: 'No Live Matches Currently',
-                url: genericFifaStreams.length > 0 ? genericFifaStreams[0].url : 'https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8',
-                detail: 'No match is live right now. Showing default FIFA feed.',
-                badge: 'hd'
-            });
-        }
-
-        const categories = [];
-        if (matchStreams.length > 0) {
-            categories.push({
-                category: 'World Cup Live Match Servers',
-                servers: matchStreams
-            });
-        }
-        if (sportzfyMatchStreams.length > 0) {
-            categories.push({
-                category: 'Sportzfy Premium Broadcasts',
-                servers: sportzfyMatchStreams
-            });
-        }
-        if (genericFifaStreams.length > 0) {
-            categories.push({
-                category: 'FIFA World Cup Live Feeds',
-                servers: genericFifaStreams
-            });
-        }
-        if (iptvOrgChannels.length > 0) {
-            categories.push({
-                category: 'Global IPTV Sports Feeds',
-                servers: iptvOrgChannels
-            });
-        }
-        if (sportsNetworkStreams.length > 0) {
-            categories.push({
-                category: 'Premium Sports Networks',
-                servers: sportsNetworkStreams
-            });
-        }
-
-        // Re-populate SERVERS in-place
+        // Populate SERVERS statically
         SERVERS.length = 0;
-        categories.forEach(cat => {
-            cat.servers.forEach(srv => {
-                SERVERS.push({
-                    name: srv.name,
-                    url: srv.url,
-                    detail: srv.detail,
-                    category: cat.category,
-                    badge: srv.badge,
-                    status: 'online',
-                    latency: 0,
-                    isDead: false
-                });
+        STATIC_CHANNELS.forEach(ch => {
+            SERVERS.push({
+                name: ch.name,
+                url: ch.url,
+                detail: ch.detail,
+                category: "Sports Channels",
+                badge: ch.badge,
+                status: 'online',
+                latency: 0,
+                isDead: false
             });
         });
 
-        // Run health check immediately to filter out dead servers before rendering and play
-        await runHealthCheck();
+        // Render channels immediately to make them interactive
+        renderServersGrid(SERVERS);
 
-        // Update server count badge to reflect only active servers
-        const activeCount = SERVERS.filter(s => s.status !== 'offline').length;
-        const serverCountBadge = document.getElementById('server-count-badge');
-        if (serverCountBadge) {
-            serverCountBadge.textContent = `${activeCount} ACTIVE SERVERS`;
-        }
-
-        // Select the default server from the working ones (index 0 is the best sorted active one)
-        if (SERVERS.length > 0 && SERVERS[0].status !== 'offline') {
-            console.log(`🚀 Dynamically defaulting to ${SERVERS[0].name} (Index 0)`);
+        // Auto-play the first channel initially
+        if (SERVERS.length > 0) {
             window.changeServer(SERVERS[0].url, 0);
-        } else {
-            handlePlayerError("No active broadcast feeds detected. Please try reloading or check network.");
         }
+
+        // Run health check once immediately to update online/offline indicators
+        runHealthCheck();
 
         // Start background health checking interval (every 30s)
         setInterval(runHealthCheck, 30000);
@@ -293,11 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!serversContainer) return;
         serversContainer.innerHTML = '';
         
-        let renderedCount = 0;
         serversList.forEach((srv, index) => {
-            if (srv.status === 'offline') return; // Skip dead servers completely!
-            
-            renderedCount++;
             const card = document.createElement('div');
             const isActive = currentServerIndex !== null && SERVERS[currentServerIndex]?.url === srv.url;
             card.className = `server-card ${isActive ? 'active' : ''} glossy-shine`;
@@ -307,6 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let statusText = srv.latency ? `${Math.round(srv.latency)}ms` : 'online';
             if (srv.status === 'amber') {
                 statusDotClass = 'status-amber';
+            } else if (srv.status === 'offline') {
+                statusDotClass = 'status-red';
+                statusText = 'offline';
             }
             
             const qualityBadge = srv.badge ? srv.badge.toUpperCase() : 'HD';
@@ -314,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div class="server-thumb">${qualityBadge}</div>
                 <div class="flex-grow flex flex-col overflow-hidden text-left">
-                    <span class="server-card-name font-bold text-xs truncate text-white" title="${srv.name}">[${renderedCount}] ${srv.name}</span>
+                    <span class="server-card-name font-bold text-xs truncate text-white" title="${srv.name}">[${index + 1}] ${srv.name}</span>
                     <span class="text-[10px] text-white/40 truncate">${srv.detail || 'Live Broadcast Feed'}</span>
                 </div>
                 <div class="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
@@ -330,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             serversContainer.appendChild(card);
         });
 
-        if (renderedCount === 0) {
+        if (serversList.length === 0) {
             serversContainer.innerHTML = `
                 <div class="flex flex-col items-center justify-center p-8 text-center gap-2">
                     <i class="fa-solid fa-triangle-exclamation text-[#ff7a00] text-xl animate-bounce"></i>
@@ -348,9 +148,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        const activeCount = serversList.filter(s => s.status !== 'offline').length;
         const serverCountBadge = document.getElementById('server-count-badge');
         if (serverCountBadge) {
-            serverCountBadge.textContent = `${renderedCount} ACTIVE SERVERS`;
+            serverCountBadge.textContent = `${activeCount}/${serversList.length} ONLINE`;
         }
     }
 
