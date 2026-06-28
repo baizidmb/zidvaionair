@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div class="server-thumb">${qualityBadge}</div>
                 <div class="flex-grow flex flex-col overflow-hidden text-left">
-                    <span class="server-card-name font-bold text-xs truncate text-white" title="${srv.name}">${srv.name}</span>
+                    <span class="server-card-name font-bold text-xs truncate text-white" title="${srv.name}">[${renderedCount}] ${srv.name}</span>
                     <span class="text-[10px] text-white/40 truncate">${srv.detail || 'Live Broadcast Feed'}</span>
                 </div>
                 <div class="flex items-center gap-1.5 text-[10px] font-mono text-white/50">

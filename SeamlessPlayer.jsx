@@ -1091,7 +1091,7 @@ export default function SeamlessPlayer() {
                           {srv.badge.toUpperCase()}
                         </div>
                         <div className={styles.serverCardDetails}>
-                          <span className={styles.serverCardName}>{srv.name}</span>
+                          <span className={styles.serverCardName}>{`[${idx + 1}] ${srv.name}`}</span>
                           <span className={styles.serverCardDesc}>{srv.detail}</span>
                         </div>
                         <div className={styles.serverCardStatus}>
