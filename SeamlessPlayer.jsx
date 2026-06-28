@@ -167,7 +167,20 @@ export default function SeamlessPlayer() {
     async function loadStreams() {
       setIsSweeping(true);
       
-      const mapped = STATIC_CHANNELS.map(ch => ({
+      let channels = [];
+      try {
+        const res = await fetch('./compiled_channels.json?t=' + Date.now());
+        if (res.ok) {
+          channels = await res.json();
+        } else {
+          channels = STATIC_CHANNELS;
+        }
+      } catch (e) {
+        console.warn('Failed to load compiled_channels.json, using fallback:', e);
+        channels = STATIC_CHANNELS;
+      }
+
+      const mapped = channels.map(ch => ({
         name: ch.name,
         url: ch.url,
         detail: ch.detail,

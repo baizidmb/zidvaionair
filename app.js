@@ -60,9 +60,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadDynamicStreams() {
-        // Populate SERVERS statically
+        if (serversContainer) {
+            serversContainer.innerHTML = `
+                <div class="flex flex-col items-center justify-center p-8 text-center text-xs text-white/50">
+                    <div class="spinner-modern mb-2"></div>
+                    <span>LOADING MASTER CHANNELS...</span>
+                </div>
+            `;
+        }
+
+        let channels = [];
+        try {
+            const res = await fetch('./compiled_channels.json?t=' + Date.now());
+            if (res.ok) {
+                channels = await res.json();
+            } else {
+                channels = getFallbackChannels();
+            }
+        } catch (e) {
+            console.warn('Failed to load compiled_channels.json, using fallback:', e);
+            channels = getFallbackChannels();
+        }
+
+        // Populate SERVERS in-place
         SERVERS.length = 0;
-        STATIC_CHANNELS.forEach(ch => {
+        channels.forEach(ch => {
             SERVERS.push({
                 name: ch.name,
                 url: ch.url,
