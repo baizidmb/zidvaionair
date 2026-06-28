@@ -153,26 +153,7 @@ export default function SeamlessPlayer() {
           const text = await res.text();
           const lines = text.split('\n');
           let currentName = null;
-          const KEYWORDS = [
-            'fifa', 'world cup', 'worldcup', 'wc 2026', 'wc2026', 'worldcup2026',
-            'fox sports', 'fs1', 'telemundo', 'universo', 'peacock', 'fox one',
-            'tsn', 'ctv', 'rds', 'televisauvision', 'tudn', 'vix', 'tv azteca',
-            'bein sports', 'alkass', 'entv', 'snrt', 'sports18', 'jiocinema', 'doordarshan',
-            'btv', 't sports', 'somoy tv', 'toffee', 'bioscope', 'ptv sports', 'tapmad',
-            'sbs', 'tvnz', 'cmg', 'migu', 'nhk', 'nippon tv', 'fuji tv', 'dazn',
-            'jtbc', 'kbs', 'naver sports', 'chzzk', 'tvri', 'maxstream', 'rtm', 'unifi tv',
-            'mediacorp', 'pccw', 'elta sports', 'ebc', 'ttv', 'monomax', 'bbc', 'itv', 'stv', 'rté',
-            'm6', 'ard', 'zdf', 'magenta sport', 'rai', 'rtve', 'mediapro', 'rtp', 'sic', 'tvi',
-            'sport tv', 'livemodetv', 'nos', 'vrt', 'rtbf', 'srg ssr', 'orf', 'servustv',
-            'svt', 'tv4', 'nrk', 'tv2', 'dr', 'yle', 'mtv3', 'tvp', 'trt', 'megogo',
-            'arena sport', 'hrt', 'rts', 'rtvfbih', 'telefe', 'tv pública', 'tv publica', 'tyc sports',
-            'dsports', 'grupo globo', 'globo', 'cazétv', 'cazetv', 'sbt', 'n sports',
-            'caracol', 'canal rcn', 'win sports', 'chilevisión', 'chilevision', 'teleamazonas',
-            'américa televisión', 'america television', 'canal 5', 'antel tv', 'televen',
-            'red uno', 'unitel', 'entel', 'tigo sports', 'teletica', 'rpc', 'tvn',
-            'supersport', 'new world tv', 'sabc', 'sportytv', 'startimes', 'kbc', 'tbc',
-            'azam tv', 'gbc', 'multimedia group', 'utv', 'tpa', 'z sports', 'fifa+', 'sport24'
-          ];
+          const KEYWORDS = ['fifa', 'world cup', 'worldcup', 'sony', 'ten', 'espn', 'fox', 'sky', 'bein', 'tsport', 'gtv', 'gazi', 'btv', 'fussball', 'football', 'soccer', 'supersport', 'arena', 'dazn', 'star sports', 'premier', 'cctv'];
           
           for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
@@ -188,7 +169,7 @@ export default function SeamlessPlayer() {
                   iptvOrgChannels.push({
                     name: currentName,
                     url: line,
-                    detail: 'Global World Cup Broadcast Feed',
+                    detail: 'Global Live Sports Broadcast Feed',
                     badge: nameLower.includes('1080p') ? 'fhd' : 'hd'
                   });
                 }
@@ -203,6 +184,7 @@ export default function SeamlessPlayer() {
 
       const matchStreams = [];
       const genericFifaStreams = [];
+      const sportsNetworkStreams = [];
       const sportzfyMatchStreams = [];
 
       // Parse Toffee
@@ -226,10 +208,10 @@ export default function SeamlessPlayer() {
         const nameLower = name.toLowerCase();
         if (nameLower.includes('vs') && !nameLower.includes('highlight') && !nameLower.includes('show')) {
           matchStreams.push({ name, url, detail: `Live Match Broadcast: ${name}`, badge: 'live' });
-        } else if (nameLower.includes('fifa') || nameLower.includes('world cup') || nameLower.includes('worldcup')) {
+        } else if (nameLower.includes('fifa')) {
           genericFifaStreams.push({ name, url, detail: `FIFA World Cup Live Broadcast`, badge: 'hd' });
-        } else if (nameLower.includes('btv national') || nameLower.includes('btv-national') || (nameLower === 'btv' && ch.category_name && ch.category_name.includes('Sports'))) {
-          genericFifaStreams.push({ name: 'BTV National (WC Broadcaster)', url, detail: `BTV National World Cup Live Broadcast`, badge: 'hd' });
+        } else if (nameLower.includes('sport') || nameLower.includes('ten') || nameLower.includes('cricket') || nameLower.includes('btv') || nameLower.includes('somoy')) {
+          sportsNetworkStreams.push({ name, url, detail: `Live Sports Network Feed`, badge: nameLower.includes('vip') ? 'fhd' : 'hd' });
         }
       });
 
@@ -243,17 +225,6 @@ export default function SeamlessPlayer() {
           badge: (ch.label && ch.label.toLowerCase().includes('hd')) ? 'fhd' : 'hd'
         });
       });
-
-      // Ensure BTV National fallback is present under FIFA World Cup Live Feeds if not loaded dynamically
-      const hasBTV = genericFifaStreams.some(srv => srv.name.toLowerCase().includes('btv'));
-      if (!hasBTV) {
-        genericFifaStreams.push({
-          name: 'BTV National (WC Broadcaster)',
-          url: 'https://sm-monirul.top/toffee/play/btv_national.m3u8',
-          detail: 'Bangladesh Television World Cup Broadcast',
-          badge: 'hd'
-        });
-      }
 
       // Merge
       const allCandidates = [];
@@ -272,9 +243,8 @@ export default function SeamlessPlayer() {
       addCandidates(matchStreams, 'World Cup Live Match Servers');
       addCandidates(sportzfyMatchStreams, 'Sportzfy Premium Broadcasts');
       addCandidates(genericFifaStreams, 'FIFA World Cup Live Feeds');
-      if (iptvOrgChannels.length > 0) {
-        addCandidates(iptvOrgChannels, 'Global World Cup Channels');
-      }
+      addCandidates(iptvOrgChannels, 'Global IPTV Sports Feeds');
+      addCandidates(sportsNetworkStreams, 'Premium Sports Networks');
 
       console.log(`Checking health of ${allCandidates.length} parsed candidate feeds...`);
 
