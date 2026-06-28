@@ -20,11 +20,11 @@ const MOCK_CHAT_MESSAGES = [
 const MOCK_CHAT_COLORS = ['#ff7a00', '#3b82f6', '#10b981', '#ff9f0a', '#a855f7', '#ec4899', '#ef4444'];
 
 const MOCK_SCHEDULE = [
-  { id: 1, homeTeam: 'Brazil', awayTeam: 'Scotland', homeInit: 'BR', awayInit: 'SC', score1: 3, score2: 1, status: 'live', timeLabel: 'Live Now' },
-  { id: 2, homeTeam: 'Morocco', awayTeam: 'Haiti', homeInit: 'MA', awayInit: 'HT', score1: 0, score2: 0, status: 'live', timeLabel: 'Live Now' },
-  { id: 3, homeTeam: 'Ecuador', awayTeam: 'Germany', homeInit: 'EC', awayInit: 'DE', score1: null, score2: null, status: 'upcoming', timeLabel: '20:00 UTC' },
-  { id: 4, homeTeam: 'Japan', awayTeam: 'Sweden', homeInit: 'JP', awayInit: 'SE', score1: null, score2: null, status: 'upcoming', timeLabel: '23:00 UTC' },
-  { id: 5, homeTeam: 'Norway', awayTeam: 'France', homeInit: 'NO', awayInit: 'FR', score1: null, score2: null, status: 'upcoming', timeLabel: 'Tomorrow' },
+  { id: 1, homeTeam: 'Brazil', awayTeam: 'Scotland', homeInit: 'BR', awayInit: 'SC', score1: 3, score2: 1, status: 'live', kickoffUtc: new Date(Date.now() - 3600000).toISOString() },
+  { id: 2, homeTeam: 'Morocco', awayTeam: 'Haiti', homeInit: 'MA', awayInit: 'HT', score1: 0, score2: 0, status: 'live', kickoffUtc: new Date(Date.now() - 1800000).toISOString() },
+  { id: 3, homeTeam: 'Ecuador', awayTeam: 'Germany', homeInit: 'EC', awayInit: 'DE', score1: null, score2: null, status: 'upcoming', kickoffUtc: new Date(Date.now() + 7200000).toISOString() },
+  { id: 4, homeTeam: 'Japan', awayTeam: 'Sweden', homeInit: 'JP', awayInit: 'SE', score1: null, score2: null, status: 'upcoming', kickoffUtc: new Date(Date.now() + 18000000).toISOString() },
+  { id: 5, homeTeam: 'Norway', awayTeam: 'France', homeInit: 'NO', awayInit: 'FR', score1: null, score2: null, status: 'upcoming', kickoffUtc: new Date(Date.now() + 86400000).toISOString() },
 ];
 
 export default function SeamlessPlayer() {
@@ -1118,7 +1118,18 @@ export default function SeamlessPlayer() {
                       Tune In
                     </button>
                   ) : (
-                    <span className={styles.upcomingTime}>{match.timeLabel}</span>
+                    <span className={styles.upcomingTime}>
+                      {(() => {
+                        const kickoff = new Date(match.kickoffUtc);
+                        try {
+                          const timeStr = kickoff.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                          const tzPart = kickoff.toLocaleDateString('en-US', { day: 'numeric', timeZoneName: 'short' }).split(', ')[1] || 'UTC';
+                          return `${timeStr} ${tzPart}`;
+                        } catch (e) {
+                          return kickoff.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                        }
+                      })()}
+                    </span>
                   )}
                 </div>
               </div>

@@ -1434,7 +1434,15 @@ document.addEventListener('DOMContentLoaded', () => {
             let status = 'upcoming';
             let badgeClass = 'upcoming';
             let statusText = 'Upcoming';
-            let timeLabel = kickoff.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            
+            let timeLabel = '';
+            try {
+                const timeStr = kickoff.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                const tzPart = kickoff.toLocaleDateString('en-US', { day: 'numeric', timeZoneName: 'short' }).split(', ')[1] || '';
+                timeLabel = `${timeStr} ${tzPart}`;
+            } catch (e) {
+                timeLabel = kickoff.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            }
             
             let score1 = null;
             let score2 = null;
@@ -1476,6 +1484,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 score2 = finalScore.score2;
             }
             
+            const isLive = status === 'live';
             const tuneInBtn = isLive ? `
                 <button class="bg-[#ff7a00] hover:bg-[#ff7a00]/90 text-white font-bold px-3 py-1 rounded-lg text-[10px] cursor-pointer" onclick="window.changeServer(SERVERS[0].url, 0)">
                     Tune In
