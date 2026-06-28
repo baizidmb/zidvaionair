@@ -27,54 +27,8 @@ const MOCK_SCHEDULE = [
   { id: 5, homeTeam: 'Norway', awayTeam: 'France', homeInit: 'NO', awayInit: 'FR', score1: null, score2: null, status: 'upcoming', kickoffUtc: new Date(Date.now() + 86400000).toISOString() },
 ];
 
-const STATIC_CHANNELS = [
-  // Toffee Live Match Feeds
-  { name: "Norway vs France (WC)", url: "https://sm-monirul.top/tof/live/toffee6/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
-  { name: "Cabo Verde vs South Africa (WC)", url: "https://sm-monirul.top/tof/live/toffee5/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
-  { name: "Egypt vs Iran (WC)", url: "https://sm-monirul.top/tof/live/toffee1/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
-  { name: "New Zealand vs Belgium (WC)", url: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", detail: "Live Match Broadcast", badge: "live" },
-  { name: "Senegal vs Iraq (WC)", url: "https://sm-monirul.top/tof/live/toffee3/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
-  { name: "Uruguay vs Spain (WC)", url: "https://sm-monirul.top/tof/live/toffee4/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
-
-  // Toffee FIFA Channels
-  { name: "Toffee FIFA 1 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8", detail: "FIFA World Cup Feed 1", badge: "fhd" },
-  { name: "Toffee FIFA 2 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-2.m3u8", detail: "FIFA World Cup Feed 2", badge: "fhd" },
-  { name: "Toffee FIFA 3 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-3.m3u8", detail: "FIFA World Cup Feed 3", badge: "fhd" },
-  { name: "Toffee FIFA 4 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-4.m3u8", detail: "FIFA World Cup Feed 4", badge: "fhd" },
-  { name: "Toffee FIFA 5 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", detail: "FIFA World Cup Feed 5", badge: "fhd" },
-  { name: "Toffee FIFA 6 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-6.m3u8", detail: "FIFA World Cup Feed 6", badge: "fhd" },
-
-  // Premium Local & Sports Channels
-  { name: "BTV National", url: "https://sm-monirul.top/toffee/play/btv_national.m3u8", detail: "Bangladesh Television National", badge: "hd" },
-  { name: "BTV Chattogram", url: "https://bozztv.com/rongo/rongo-BTVChattagram/index.m3u8", detail: "Bangladesh Television Chattogram", badge: "hd" },
-  { name: "Somoy TV", url: "https://sm-monirul.top/toffee/play/somoy_tv.m3u8", detail: "Somoy News Live Stream", badge: "hd" },
-  { name: "SONY SPORTS TEN 1 HD", url: "https://sm-monirul.top/toffee/play/sony_sports_1_hd.m3u8", detail: "Sony Sports Network", badge: "hd" },
-  { name: "SONY SPORTS TEN 2 HD", url: "https://sm-monirul.top/toffee/play/sony_sports_2_hd.m3u8", detail: "Sony Sports Network", badge: "hd" },
-  { name: "SONY SPORTS TEN 5 HD", url: "https://sm-monirul.top/toffee/play/sony_sports_5_hd.m3u8", detail: "Sony Sports Network", badge: "hd" },
-  { name: "SONY TEN Cricket", url: "https://sm-monirul.top/toffee/play/ten_cricket.m3u8", detail: "Sony Ten Cricket Live", badge: "hd" },
-  { name: "TOFFEE Sports VIP", url: "https://sm-monirul.top/toffee/play/sports_highlights.m3u8", detail: "Toffee Sports VIP Channel", badge: "fhd" },
-  { name: "Euro Sport HD", url: "https://sm-monirul.top/toffee/play/euro_sports_hd.m3u8", detail: "Eurosport HD Stream", badge: "hd" },
-
-  // Sportzfy streams
-  { name: "Sportzfy SP - HD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OuvO9_v1Oak4MYmokrJdsHJokrJdkABFhNcE0zKLw&headers=3OvT47zfFUzf75IJq1aTL768EAv3ERq3qMu840zmHSo3osynd_anIGo3qMBh4RI3r9qvzjasEhukI51JH7I8qjuRIREmFk6nI0zfysfjEU1hqGq_9jv2", detail: "Sportzfy Premium HD Feed", badge: "fhd" },
-  { name: "Sportzfy FAST 1", url: "https://pullsgp.yyzb456.top/live/stream-698168_lhd.m3u8", detail: "Sportzfy High Speed Routing 1", badge: "hd" },
-  { name: "Sportzfy FAST 2", url: "https://pulltx.jdnzrgm.com/live/hd-en-6MvZ6BDhJ2nQTAy3UJ.m3u8?txSecret=5a733c6d2b5b557345bb398060dad1cb&txTime=6A3EEF59", detail: "Sportzfy High Speed Routing 2", badge: "hd" },
-  { name: "Sportzfy Arabic", url: "https://za.teworld.online/mooott1.m3u8", detail: "Sportzfy Arabic Language Feed", badge: "hd" },
-  { name: "Sportzfy CCTV 5", url: "https://live.666666.zip/stream/20233432.m3u8", detail: "CCTV Sports Broadcast Channel", badge: "hd" },
-  { name: "Sportzfy SP - 2", url: "https://live.666666.zip/migu/1.m3u8", detail: "Migu Live Broadcast Server", badge: "hd" },
-  { name: "Sportzfy SP - 3", url: "https://tdlive.yarncdn.live/live/tdtv_blv_taovannghe/playlist.m3u8", detail: "TDTV Live Sports Feed", badge: "hd" },
-
-  // Public Broadcaster Fallbacks
-  { name: "Fox Sports 1 US", url: "http://tv.nkiri.com:8080/live/606555/606555/129759.m3u8", detail: "Fox Sports US", badge: "hd" },
-  { name: "Telemundo Deportes", url: "http://iptv.cricfree.io:8080/live/test/test/1.m3u8", detail: "Telemundo Deportes Spanish", badge: "hd" },
-  { name: "beIN Sports Qatar", url: "http://premium.cricfree.io:8080/live/test/test/2.m3u8", detail: "beIN Sports Premium Qatar", badge: "fhd" },
-  { name: "TUDN Mexico", url: "http://premium.cricfree.io:8080/live/test/test/3.m3u8", detail: "TUDN Sports Mexico", badge: "hd" },
-  { name: "BBC One UK", url: "http://premium.cricfree.io:8080/live/test/test/4.m3u8", detail: "BBC One Live Broadcast", badge: "hd" },
-  { name: "ITV 1 UK", url: "http://premium.cricfree.io:8080/live/test/test/5.m3u8", detail: "ITV 1 Sports Broadcast", badge: "hd" }
-];
-
 export default function SeamlessPlayer() {
-  const [servers, setServers] = useState([]);
+  const [streamUrl, setStreamUrl] = useState('https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8');
   const [messiIndex, setMessiIndex] = useState(0);
   const [messiFade, setMessiFade] = useState(false);
   const handleSetMessiIndex = (idx) => {
@@ -84,7 +38,6 @@ export default function SeamlessPlayer() {
       setMessiFade(false);
     }, 150);
   };
-  const [currentIdx, setCurrentIdx] = useState(-1); // -1 means placeholder/sweeping active
   const [activePlayer, setActivePlayer] = useState('A'); // 'A' or 'B'
   const [isLoading, setIsLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -94,7 +47,6 @@ export default function SeamlessPlayer() {
   const [progress, setProgress] = useState(0);
   const [buffer, setBuffer] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('feeds'); // 'feeds' or 'chat'
   const [chatMessages, setChatMessages] = useState([]);
   const [localUsername, setLocalUsername] = useState(() => {
     return localStorage.getItem('zid_chat_username') || 'Viewer_' + Math.floor(1000 + Math.random() * 9000);
@@ -106,7 +58,6 @@ export default function SeamlessPlayer() {
   const [systemTime, setSystemTime] = useState('00:00:00');
   const [timezoneLabel, setTimezoneLabel] = useState('UTC');
   const [showControls, setShowControls] = useState(true);
-  const [isSweeping, setIsSweeping] = useState(true);
 
   const videoRefA = useRef(null);
   const videoRefB = useRef(null);
@@ -147,94 +98,8 @@ export default function SeamlessPlayer() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch and parse streams dynamically
-  useEffect(() => {
-    async function checkHealth(url) {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
-      const start = performance.now();
-      try {
-        await fetch(url, { method: 'GET', mode: 'no-cors', signal: controller.signal });
-        const latency = performance.now() - start;
-        clearTimeout(timeoutId);
-        return { online: true, latency };
-      } catch {
-        clearTimeout(timeoutId);
-        return { online: false, latency: 9999 };
-      }
-    }
-
-    async function loadStreams() {
-      setIsSweeping(true);
-      
-      let channels = [];
-      try {
-        const res = await fetch('./compiled_channels.json?t=' + Date.now());
-        if (res.ok) {
-          channels = await res.json();
-        } else {
-          channels = STATIC_CHANNELS;
-        }
-      } catch (e) {
-        console.warn('Failed to load compiled_channels.json, using fallback:', e);
-        channels = STATIC_CHANNELS;
-      }
-
-      const mapped = channels.map(ch => ({
-        name: ch.name,
-        url: ch.url,
-        detail: ch.detail,
-        badge: ch.badge,
-        category: "Sports Channels",
-        status: 'online',
-        latency: 0
-      }));
-
-      setServers(mapped);
-      setIsSweeping(false);
-      
-      if (mapped.length > 0) {
-        setCurrentIdx(0);
-      }
-    }
-
-    loadStreams();
-  }, []);
-
-  // Periodic health checking
-  useEffect(() => {
-    async function checkHealth(url) {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
-      try {
-        await fetch(url, { method: 'GET', mode: 'no-cors', signal: controller.signal });
-        clearTimeout(timeoutId);
-        return true;
-      } catch {
-        clearTimeout(timeoutId);
-        return false;
-      }
-    }
-
-    async function runHealthCheck() {
-      console.log('🔄 Telemetry Sweep: Performing background check...');
-      const checked = await Promise.all(
-        servers.map(async (s) => {
-          const online = await checkHealth(s.url);
-          return {
-            ...s,
-            status: online ? 'online' : 'offline'
-          };
-        })
-      );
-
-      // Do NOT filter out offline servers! Keep them all in place.
-      setServers(checked);
-    }
-
-    const interval = setInterval(runHealthCheck, 35000);
-    return () => clearInterval(interval);
-  }, [servers, isSweeping]);
+  // Empty hook since feeds load loop is deleted
+  useEffect(() => {}, []);
 
   // Live Chat Subscription & Simulator
   useEffect(() => {
@@ -427,60 +292,14 @@ export default function SeamlessPlayer() {
     }
   };
 
-  const getBackupIndex = (currIdx) => {
-    if (servers.length <= 1) return null;
-    const startIndex = currIdx === -1 ? 0 : currIdx;
-    for (let i = 1; i < servers.length; i++) {
-      const nextIdx = (startIndex + i) % servers.length;
-      if (servers[nextIdx] && servers[nextIdx].status !== 'offline') {
-        return nextIdx;
-      }
-    }
-    return null;
-  };
-
   const handleFailover = () => {
-    failoverCountRef.current++;
-    const backupIndex = getBackupIndex(currentIdx);
-
-    if (backupIndex !== null && failoverCountRef.current < servers.length) {
-      const backupServer = servers[backupIndex];
-      const isTargetA = activePlayer === 'B';
-      const targetVideo = isTargetA ? videoRefA.current : videoRefB.current;
-      const currentVideo = isTargetA ? videoRefB.current : videoRefA.current;
-
-      console.warn(`[Failover] Routing hot-switch to backup: ${backupServer.name}`);
-
-      targetVideo.volume = volume;
-      targetVideo.muted = isMuted;
-      targetVideo.play().catch(() => {});
-
-      targetVideo.style.opacity = '1';
-      targetVideo.style.zIndex = '20';
-      currentVideo.style.opacity = '0';
-      currentVideo.style.zIndex = '10';
-
-      setActivePlayer(isTargetA ? 'A' : 'B');
-      setCurrentIdx(backupIndex);
-
-      if (fadeTimeoutRef.current) clearTimeout(fadeTimeoutRef.current);
-      fadeTimeoutRef.current = setTimeout(() => {
-        currentVideo.pause();
-        cleanupPlayer(isTargetA ? 'B' : 'A');
-        preloadBackup(backupIndex);
-      }, 350);
-    } else {
-      setErrorMessage('ALL BROADCAST FEEDS ARE CURRENTLY OFFLINE.');
-      setIsLoading(false);
-      failoverCountRef.current = 0;
-    }
+    setErrorMessage('ALL BROADCAST FEEDS ARE CURRENTLY OFFLINE.');
+    setIsLoading(false);
   };
 
   // Primary stream loader
   useEffect(() => {
-    if (currentIdx === -1 || servers.length === 0) return;
-    const url = servers[currentIdx]?.url;
-    if (!url) return;
+    if (!streamUrl) return;
 
     setIsLoading(true);
     setErrorMessage('');
@@ -517,17 +336,15 @@ export default function SeamlessPlayer() {
       targetVideo.style.zIndex = '20';
       currentVideo.style.opacity = '0';
       currentVideo.style.zIndex = '10';
-
-      preloadBackup(currentIdx);
     }
 
-    if (Hls.isSupported() && url.includes('.m3u8')) {
+    if (Hls.isSupported() && streamUrl.includes('.m3u8')) {
       hlsInstance = new Hls({
         maxMaxBufferLength: 10,
-        enableWorker: false, // Turn off web workers to fix mobile video decoding black screens
+        enableWorker: false,
         lowLatencyMode: true,
-        capLevelToPlayerSize: true, // Auto-scale resolution to player dimensions to prevent GPU stalls
-        maxBufferHole: 2 // Automatically skip small gaps in segment streams to avoid freezes
+        capLevelToPlayerSize: true,
+        maxBufferHole: 2
       });
 
       if (isTargetA) {
@@ -536,7 +353,7 @@ export default function SeamlessPlayer() {
         hlsRefB.current = hlsInstance;
       }
 
-      hlsInstance.loadSource(url);
+      hlsInstance.loadSource(streamUrl);
       hlsInstance.attachMedia(targetVideo);
 
       const handleNativeReady = () => {
@@ -559,8 +376,8 @@ export default function SeamlessPlayer() {
           }
         }
       });
-    } else if (targetVideo.canPlayType('application/vnd.apple.mpegurl') || !url.includes('.m3u8')) {
-      targetVideo.src = url;
+    } else if (targetVideo.canPlayType('application/vnd.apple.mpegurl') || !streamUrl.includes('.m3u8')) {
+      targetVideo.src = streamUrl;
       const metadataHandler = () => {
         onReady();
         targetVideo.removeEventListener('loadedmetadata', metadataHandler);
@@ -579,46 +396,7 @@ export default function SeamlessPlayer() {
     return () => {
       clearStallTimer();
     };
-  }, [currentIdx]);
-
-  // Preload secondary backup
-  const preloadBackup = (activeIdx) => {
-    const backupIndex = getBackupIndex(activeIdx);
-    if (backupIndex === null) return;
-
-    const backupServer = servers[backupIndex];
-    const isIdleA = activePlayer === 'B';
-    const idleVideo = isIdleA ? videoRefA.current : videoRefB.current;
-
-    cleanupPlayer(isIdleA ? 'A' : 'B');
-
-    idleVideo.muted = true;
-    idleVideo.style.opacity = '0';
-    idleVideo.style.zIndex = '10';
-
-    if (Hls.isSupported() && backupServer.url.includes('.m3u8')) {
-      const tempHls = new Hls({
-        maxMaxBufferLength: 5,
-        enableWorker: false, // Turn off web workers to fix mobile video decoding black screens
-        lowLatencyMode: true,
-        autoStartLoad: true,
-        capLevelToPlayerSize: true,
-        maxBufferHole: 2
-      });
-
-      if (isIdleA) {
-        hlsRefA.current = tempHls;
-      } else {
-        hlsRefB.current = tempHls;
-      }
-
-      tempHls.loadSource(backupServer.url);
-      tempHls.attachMedia(idleVideo);
-    } else if (idleVideo.canPlayType('application/vnd.apple.mpegurl') || !backupServer.url.includes('.m3u8')) {
-      idleVideo.src = backupServer.url;
-      idleVideo.load();
-    }
-  };
+  }, [streamUrl]);
 
   const cleanupPlayer = (player) => {
     if (player === 'A') {
@@ -731,9 +509,8 @@ export default function SeamlessPlayer() {
     }, 3000);
   };
 
-  const currentServer = currentIdx >= 0 ? servers[currentIdx] : null;
-  const backupIdx = getBackupIndex(currentIdx);
-  const backupServer = backupIdx !== null ? servers[backupIdx] : null;
+  const currentServer = { name: "World Cup Live Feed", detail: "Primary Broadcast Server", url: streamUrl };
+  const backupServer = null;
 
   return (
     <div className={styles.bodyWrapper}>
@@ -837,35 +614,23 @@ export default function SeamlessPlayer() {
                 <div className={styles.spinner} />
                 <span className={styles.loaderText}>BUFFERING STREAM...</span>
               </div>
-            )}
-
-            {/* Error Overlay */}
+            )}             {/* Error Overlay */}
             {errorMessage && (
               <div className={styles.errorOverlay}>
                 <i className={`fa-solid fa-circle-exclamation ${styles.errorIcon}`}></i>
                 <h4 className={styles.errorTitle}>Broadcast Disrupted</h4>
                 <p className={styles.errorText}>{errorMessage}</p>
-                <button onClick={() => setCurrentIdx(currentIdx === -1 ? 0 : currentIdx)} className={styles.retryBtn}>Retry Feed</button>
+                <button onClick={() => setStreamUrl('https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8')} className={styles.retryBtn}>Retry Feed</button>
               </div>
             )}
-
-            {/* Placeholder Screen / Sweeping Loader */}
-            {isSweeping && (
+            {/* Connecting Placeholder Overlay */}
+            {!isPlaying && !errorMessage && (
               <div className={styles.placeholderOverlay}>
-                <div className={styles.spinner} />
-                <h3 className={styles.placeholderTitle}>SWEEPING BROADCAST FEEDS</h3>
-                <p className={styles.placeholderText}>Testing latencies and auto-finding active channels. Please hold...</p>
-              </div>
-            )}
-
-            {/* Select Match Placeholder */}
-            {!isSweeping && currentIdx === -1 && !errorMessage && (
-              <div className={styles.placeholderOverlay}>
-                <div className={styles.placeholderPlayBtn} onClick={() => setCurrentIdx(0)}>
-                  <i className="fa-solid fa-play"></i>
+                <div className={styles.placeholderPlayBtn} onClick={() => setIsPlaying(true)}>
+                  <i className="fa-solid fa-circle-notch animate-spin text-[#ff7a00]"></i>
                 </div>
-                <h3 className={styles.placeholderTitle}>SELECT MATCH FEED</h3>
-                <p className={styles.placeholderText}>Pick one of the live broadcast servers in the sidebar console to begin streaming.</p>
+                <h3 className={styles.placeholderTitle}>CONNECTING TO LIVE FEED...</h3>
+                <p className={styles.placeholderText}>Tuning in to the live broadcast matches. Please wait.</p>
               </div>
             )}
 
@@ -919,109 +684,42 @@ export default function SeamlessPlayer() {
         {/* Right Column: Tabbed Sidebar */}
         <div className={styles.sidebarColumn}>
           <div className={styles.sidebarConsole}>
-            {/* Tabs */}
-            <div className={styles.tabHeaders}>
-              <button 
-                className={`${styles.tabBtn} ${activeTab === 'feeds' ? styles.tabBtnActive : ''}`}
-                onClick={() => setActiveTab('feeds')}
-              >
-                Live Feeds
-              </button>
-              <button 
-                className={`${styles.tabBtn} ${activeTab === 'chat' ? styles.tabBtnActive : ''}`}
-                onClick={() => setActiveTab('chat')}
-              >
-                Live Chat
-              </button>
-            </div>
-
             {/* Tab Panels */}
             <div className={styles.tabContentPanel}>
-              
-              {/* Feeds Panel */}
-              {activeTab === 'feeds' && (
-                <div className={styles.feedsPanel}>
-                  {isSweeping && (
-                    <div className="flex flex-col items-center justify-center p-8 text-center text-xs text-white/50 h-full">
-                      <div className={styles.spinner} />
-                      <span className="mt-2">Sweeping active feeds...</span>
-                    </div>
-                  )}
-
-                  {!isSweeping && servers.length === 0 && (
-                    <div className="flex flex-col items-center justify-center p-8 text-center text-xs text-white/50 h-full gap-2">
-                      <i className="fa-solid fa-triangle-exclamation text-[#ff7a00] text-xl" />
-                      <span>No active streams found.</span>
-                    </div>
-                  )}
-
-                  {!isSweeping && servers.map((srv, idx) => {
-                    const isActive = currentIdx === idx;
-                    let statusColor = styles.statusGreen;
-                    if (srv.status === 'amber') statusColor = styles.statusAmber;
-                    else if (srv.status === 'offline') statusColor = styles.statusRed;
-
-                    return (
-                      <div
-                        key={srv.url + '-' + idx}
-                        className={`${styles.serverCard} ${isActive ? styles.serverCardActive : ''} ${styles.glossyShine}`}
-                        onClick={() => setCurrentIdx(idx)}
-                      >
-                        <div className={styles.serverThumb}>
-                          {srv.badge.toUpperCase()}
-                        </div>
-                        <div className={styles.serverCardDetails}>
-                          <span className={styles.serverCardName}>{`[${idx + 1}] ${srv.name}`}</span>
-                          <span className={styles.serverCardDesc}>{srv.detail}</span>
-                        </div>
-                        <div className={styles.serverCardStatus}>
-                          <span className={styles.latencyValue}>
-                            {srv.status === 'offline' ? 'offline' : (srv.latency ? `${Math.round(srv.latency)}ms` : 'online')}
-                          </span>
-                          <span className={`${styles.statusDot} ${statusColor}`} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
               {/* Chat Panel */}
-              {activeTab === 'chat' && (
-                <div className={styles.chatPanel}>
-                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '0.5rem 0.75rem 0 0.75rem', boxSizing: 'border-box' }}>
-                    <span>Global Chat Room</span>
-                    <span>Your Name: <span style={{ fontWeight: 700, color: '#ff7a00', cursor: 'pointer', textDecoration: 'underline' }} onClick={changeUsername}>{localUsername}</span></span>
-                  </div>
-                  <div ref={chatContainerRef} className={styles.chatMessagesContainer}>
-                    {chatMessages.map((msg) => (
-                      <div key={msg.id} className={styles.chatBubble}>
-                        {msg.system ? (
-                          <span style={{ color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', fontSize: '10px' }}>{msg.text}</span>
-                        ) : (
-                          <>
-                            <span className={styles.chatUsername} style={{ color: msg.color }}>{msg.user}:</span>
-                            <span className={styles.chatMessageText}>{msg.text}</span>
-                          </>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <div className={styles.chatInputBar}>
-                    <input 
-                      type="text" 
-                      placeholder="Send a message..." 
-                      className={styles.chatInputField} 
-                      value={inputText}
-                      onChange={e => setInputText(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                    />
-                    <button className={styles.chatSendBtn} style={{ opacity: 1, cursor: 'pointer' }} onClick={handleSendMessage}>
-                      <i className="fa-solid fa-paper-plane"></i>
-                    </button>
-                  </div>
+              <div className={styles.chatPanel}>
+                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '0.5rem 0.75rem 0 0.75rem', boxSizing: 'border-box' }}>
+                  <span>Global Chat Room</span>
+                  <span>Your Name: <span style={{ fontWeight: 700, color: '#ff7a00', cursor: 'pointer', textDecoration: 'underline' }} onClick={changeUsername}>{localUsername}</span></span>
                 </div>
-              )}
+                <div ref={chatContainerRef} className={styles.chatMessagesContainer}>
+                  {chatMessages.map((msg) => (
+                    <div key={msg.id} className={styles.chatBubble}>
+                      {msg.system ? (
+                        <span style={{ color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', fontSize: '10px' }}>{msg.text}</span>
+                      ) : (
+                        <>
+                          <span className={styles.chatUsername} style={{ color: msg.color }}>{msg.user}:</span>
+                          <span className={styles.chatMessageText}>{msg.text}</span>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className={styles.chatInputBar}>
+                  <input 
+                    type="text" 
+                    placeholder="Send a message..." 
+                    className={styles.chatInputField} 
+                    value={inputText}
+                    onChange={e => setInputText(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+                  />
+                  <button className={styles.chatSendBtn} style={{ opacity: 1, cursor: 'pointer' }} onClick={handleSendMessage}>
+                    <i className="fa-solid fa-paper-plane"></i>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

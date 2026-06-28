@@ -4,238 +4,9 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // 1. Dynamic Server Loading and Parsing Logic
-    const SERVERS = [];
+    // 1. Live Feed Stream URL Configuration
+    const DEFAULT_STREAM_URL = 'https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8';
     let hls = null;
-    let currentServerIndex = null;
-
-    const STATIC_CHANNELS = [
-        // Toffee Live Match Feeds
-        { name: "Norway vs France (WC)", url: "https://sm-monirul.top/tof/live/toffee6/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
-        { name: "Cabo Verde vs South Africa (WC)", url: "https://sm-monirul.top/tof/live/toffee5/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
-        { name: "Egypt vs Iran (WC)", url: "https://sm-monirul.top/tof/live/toffee1/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
-        { name: "New Zealand vs Belgium (WC)", url: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", detail: "Live Match Broadcast", badge: "live" },
-        { name: "Senegal vs Iraq (WC)", url: "https://sm-monirul.top/tof/live/toffee3/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
-        { name: "Uruguay vs Spain (WC)", url: "https://sm-monirul.top/tof/live/toffee4/index.m3u8", detail: "Live Match Broadcast", badge: "live" },
-
-        // Toffee FIFA Channels
-        { name: "Toffee FIFA 1 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8", detail: "FIFA World Cup Feed 1", badge: "fhd" },
-        { name: "Toffee FIFA 2 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-2.m3u8", detail: "FIFA World Cup Feed 2", badge: "fhd" },
-        { name: "Toffee FIFA 3 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-3.m3u8", detail: "FIFA World Cup Feed 3", badge: "fhd" },
-        { name: "Toffee FIFA 4 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-4.m3u8", detail: "FIFA World Cup Feed 4", badge: "fhd" },
-        { name: "Toffee FIFA 5 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", detail: "FIFA World Cup Feed 5", badge: "fhd" },
-        { name: "Toffee FIFA 6 HD", url: "https://sm-monirul.top/toffee/play/FIFA-2026-6.m3u8", detail: "FIFA World Cup Feed 6", badge: "fhd" },
-
-        // Premium Local & Sports Channels
-        { name: "BTV National", url: "https://sm-monirul.top/toffee/play/btv_national.m3u8", detail: "Bangladesh Television National", badge: "hd" },
-        { name: "BTV Chattogram", url: "https://bozztv.com/rongo/rongo-BTVChattagram/index.m3u8", detail: "Bangladesh Television Chattogram", badge: "hd" },
-        { name: "Somoy TV", url: "https://sm-monirul.top/toffee/play/somoy_tv.m3u8", detail: "Somoy News Live Stream", badge: "hd" },
-        { name: "SONY SPORTS TEN 1 HD", url: "https://sm-monirul.top/toffee/play/sony_sports_1_hd.m3u8", detail: "Sony Sports Network", badge: "hd" },
-        { name: "SONY SPORTS TEN 2 HD", url: "https://sm-monirul.top/toffee/play/sony_sports_2_hd.m3u8", detail: "Sony Sports Network", badge: "hd" },
-        { name: "SONY SPORTS TEN 5 HD", url: "https://sm-monirul.top/toffee/play/sony_sports_5_hd.m3u8", detail: "Sony Sports Network", badge: "hd" },
-        { name: "SONY TEN Cricket", url: "https://sm-monirul.top/toffee/play/ten_cricket.m3u8", detail: "Sony Ten Cricket Live", badge: "hd" },
-        { name: "TOFFEE Sports VIP", url: "https://sm-monirul.top/toffee/play/sports_highlights.m3u8", detail: "Toffee Sports VIP Channel", badge: "fhd" },
-        { name: "Euro Sport HD", url: "https://sm-monirul.top/toffee/play/euro_sports_hd.m3u8", detail: "Eurosport HD Stream", badge: "hd" },
-
-        // Sportzfy streams
-        { name: "Sportzfy SP - HD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OuvO9_v1Oak4MYmokrJdsHJokrJdkABFhNcE0zKLw&headers=3OvT47zfFUzf75IJq1aTL768EAv3ERq3qMu840zmHSo3osynd_anIGo3qMBh4RI3r9qvzjasEhukI51JH7I8qjuRIREmFk6nI0zfysfjEU1hqGq_9jv2", detail: "Sportzfy Premium HD Feed", badge: "fhd" },
-        { name: "Sportzfy FAST 1", url: "https://pullsgp.yyzb456.top/live/stream-698168_lhd.m3u8", detail: "Sportzfy High Speed Routing 1", badge: "hd" },
-        { name: "Sportzfy FAST 2", url: "https://pulltx.jdnzrgm.com/live/hd-en-6MvZ6BDhJ2nQTAy3UJ.m3u8?txSecret=5a733c6d2b5b557345bb398060dad1cb&txTime=6A3EEF59", detail: "Sportzfy High Speed Routing 2", badge: "hd" },
-        { name: "Sportzfy Arabic", url: "https://za.teworld.online/mooott1.m3u8", detail: "Sportzfy Arabic Language Feed", badge: "hd" },
-        { name: "Sportzfy CCTV 5", url: "https://live.666666.zip/stream/20233432.m3u8", detail: "CCTV Sports Broadcast Channel", badge: "hd" },
-        { name: "Sportzfy SP - 2", url: "https://live.666666.zip/migu/1.m3u8", detail: "Migu Live Broadcast Server", badge: "hd" },
-        { name: "Sportzfy SP - 3", url: "https://tdlive.yarncdn.live/live/tdtv_blv_taovannghe/playlist.m3u8", detail: "TDTV Live Sports Feed", badge: "hd" },
-
-        // Public Broadcaster Fallbacks
-        { name: "Fox Sports 1 US", url: "http://tv.nkiri.com:8080/live/606555/606555/129759.m3u8", detail: "Fox Sports US", badge: "hd" },
-        { name: "Telemundo Deportes", url: "http://iptv.cricfree.io:8080/live/test/test/1.m3u8", detail: "Telemundo Deportes Spanish", badge: "hd" },
-        { name: "beIN Sports Qatar", url: "http://premium.cricfree.io:8080/live/test/test/2.m3u8", detail: "beIN Sports Premium Qatar", badge: "fhd" },
-        { name: "TUDN Mexico", url: "http://premium.cricfree.io:8080/live/test/test/3.m3u8", detail: "TUDN Sports Mexico", badge: "hd" },
-        { name: "BBC One UK", url: "http://premium.cricfree.io:8080/live/test/test/4.m3u8", detail: "BBC One Live Broadcast", badge: "hd" },
-        { name: "ITV 1 UK", url: "http://premium.cricfree.io:8080/live/test/test/5.m3u8", detail: "ITV 1 Sports Broadcast", badge: "hd" }
-    ];
-
-    function getFallbackChannels() {
-        return STATIC_CHANNELS;
-    }
-
-    async function loadDynamicStreams() {
-        if (serversContainer) {
-            serversContainer.innerHTML = `
-                <div class="flex flex-col items-center justify-center p-8 text-center text-xs text-white/50">
-                    <div class="spinner-modern mb-2"></div>
-                    <span>LOADING MASTER CHANNELS...</span>
-                </div>
-            `;
-        }
-
-        let channels = [];
-        try {
-            const res = await fetch('./compiled_channels.json?t=' + Date.now());
-            if (res.ok) {
-                channels = await res.json();
-            } else {
-                channels = getFallbackChannels();
-            }
-        } catch (e) {
-            console.warn('Failed to load compiled_channels.json, using fallback:', e);
-            channels = getFallbackChannels();
-        }
-
-        // Populate SERVERS in-place
-        SERVERS.length = 0;
-        channels.forEach(ch => {
-            SERVERS.push({
-                name: ch.name,
-                url: ch.url,
-                detail: ch.detail,
-                category: "Sports Channels",
-                badge: ch.badge,
-                status: 'online',
-                latency: 0,
-                isDead: false
-            });
-        });
-
-        // Render channels immediately to make them interactive
-        renderServersGrid(SERVERS);
-
-        // Auto-play the first channel initially
-        if (SERVERS.length > 0) {
-            window.changeServer(SERVERS[0].url, 0);
-        }
-
-        // Run health check once immediately to update online/offline indicators
-        runHealthCheck();
-
-        // Start background health checking interval (every 30s)
-        setInterval(runHealthCheck, 30000);
-    }
-
-    function renderServersGrid(serversList) {
-        if (!serversContainer) return;
-        serversContainer.innerHTML = '';
-        
-        serversList.forEach((srv, index) => {
-            const card = document.createElement('div');
-            const isActive = currentServerIndex !== null && SERVERS[currentServerIndex]?.url === srv.url;
-            card.className = `server-card ${isActive ? 'active' : ''} glossy-shine`;
-            card.dataset.index = index;
-            
-            let statusDotClass = 'status-green';
-            let statusText = srv.latency ? `${Math.round(srv.latency)}ms` : 'online';
-            if (srv.status === 'amber') {
-                statusDotClass = 'status-amber';
-            } else if (srv.status === 'offline') {
-                statusDotClass = 'status-red';
-                statusText = 'offline';
-            }
-            
-            const qualityBadge = srv.badge ? srv.badge.toUpperCase() : 'HD';
-
-            card.innerHTML = `
-                <div class="server-thumb">${qualityBadge}</div>
-                <div class="flex-grow flex flex-col overflow-hidden text-left">
-                    <span class="server-card-name font-bold text-xs truncate text-white" title="${srv.name}">[${index + 1}] ${srv.name}</span>
-                    <span class="text-[10px] text-white/40 truncate">${srv.detail || 'Live Broadcast Feed'}</span>
-                </div>
-                <div class="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
-                    <span>${statusText}</span>
-                    <span class="status-dot ${statusDotClass}"></span>
-                </div>
-            `;
-            
-            card.addEventListener('click', () => {
-                window.changeServer(srv.url, index);
-            });
-            
-            serversContainer.appendChild(card);
-        });
-
-        if (serversList.length === 0) {
-            serversContainer.innerHTML = `
-                <div class="flex flex-col items-center justify-center p-8 text-center gap-2">
-                    <i class="fa-solid fa-triangle-exclamation text-[#ff7a00] text-xl animate-bounce"></i>
-                    <span class="text-xs text-white/60">No active feeds found.</span>
-                    <button id="btn-force-scan" class="mt-2 bg-[#ff7a00] text-white text-[10px] font-bold px-3 py-1.5 rounded-lg border-0 cursor-pointer">
-                        Force Scan
-                    </button>
-                </div>
-            `;
-            const btnForceScan = document.getElementById('btn-force-scan');
-            if (btnForceScan) {
-                btnForceScan.addEventListener('click', () => {
-                    loadDynamicStreams();
-                });
-            }
-        }
-
-        const activeCount = serversList.filter(s => s.status !== 'offline').length;
-        const serverCountBadge = document.getElementById('server-count-badge');
-        if (serverCountBadge) {
-            serverCountBadge.textContent = `${activeCount}/${serversList.length} ONLINE`;
-        }
-    }
-
-    async function checkServerHealth(url) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-        const start = performance.now();
-        try {
-            await fetch(url, { method: 'GET', mode: 'no-cors', signal: controller.signal });
-            const latency = performance.now() - start;
-            clearTimeout(timeoutId);
-            return { online: true, latency: latency };
-        } catch (e) {
-            clearTimeout(timeoutId);
-            return { online: false, latency: 9999 };
-        }
-    }
-
-    async function runHealthCheck() {
-        console.log('🔄 Telemetry Sweep: Performing background ping check on all server terminals...');
-        
-        // Save current active server URL to maintain selection highlight after sorting
-        const currentActiveUrl = currentServerIndex !== null ? SERVERS[currentServerIndex]?.url : null;
-
-        const healthPromises = SERVERS.map(async (server) => {
-            const result = await checkServerHealth(server.url);
-            if (result.online) {
-                server.latency = result.latency;
-                server.status = result.latency < 1000 ? 'online' : 'amber';
-                server.isDead = false;
-            } else {
-                server.latency = 9999;
-                server.status = 'offline';
-                server.isDead = true;
-            }
-        });
-
-        await Promise.all(healthPromises);
-
-        // Sort: Active/Amber at top, Offline at bottom. Keep relative order.
-        const activeGroup = SERVERS.filter(s => s.status !== 'offline');
-        const offlineGroup = SERVERS.filter(s => s.status === 'offline');
-        
-        const sortedServers = [...activeGroup, ...offlineGroup];
-        
-        // Update SERVERS in-place
-        SERVERS.length = 0;
-        sortedServers.forEach(s => SERVERS.push(s));
-
-        // Restore active index pointer
-        if (currentActiveUrl) {
-            const newActiveIndex = SERVERS.findIndex(s => s.url === currentActiveUrl);
-            if (newActiveIndex !== -1) {
-                currentServerIndex = newActiveIndex;
-            }
-        }
-
-        // Re-render dashboard console
-        renderServersGrid(SERVERS);
-        updateTelemetry();
-        console.log('✅ Telemetry Sweep completed. Server stack updated.');
-    }
 
     // Player State
 
@@ -416,11 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
         player.load();
     }
 
-    function playStream(index) {
-        const server = SERVERS[index];
-        if (!server) return;
-
-        const url = server.url;
+    function playStream() {
+        const url = DEFAULT_STREAM_URL;
 
         // If placeholder is not hidden, show full loader. Otherwise, load silently in background.
         const isInitialLoad = !playerPlaceholder.classList.contains('hidden') || !playerError.classList.contains('hidden');
@@ -435,8 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
         startStallTimer();
 
         // Update titles and info
-        if (currentServerTitle) currentServerTitle.textContent = server.name;
-        if (currentServerDesc) currentServerDesc.textContent = server.detail || 'Live Stream Feed';
+        if (currentServerTitle) currentServerTitle.textContent = "World Cup Live Feed";
+        if (currentServerDesc) currentServerDesc.textContent = "Primary Broadcast Server";
         playerSourceUrl.textContent = url;
 
         // Clean up any stale load on the active player
@@ -482,9 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
             backupPlayer.style.zIndex = '10';
 
             updateTelemetry();
-
-            // Trigger background preloading of backup stream
-            preloadBackupStream();
         }
 
         // Initialize HLS.js
@@ -566,68 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function preloadBackupStream() {
-        const backupIndex = getBackupIndex(currentServerIndex);
-        if (backupIndex === null) {
-            console.log('[Preload] No backup stream available.');
-            return;
-        }
-
-        const backupServer = SERVERS[backupIndex];
-        const backupUrl = backupServer.url;
-        console.log(`[Preload] Loading secondary backup stream in background: ${backupServer.name} (${backupUrl})`);
-
-        // Clean up any stale loading on the idle player
-        cleanupPlayer(idlePlayer);
-
-        // Preload settings: muted, preloading manifest
-        idlePlayer.muted = true;
-        idlePlayer.style.opacity = '0';
-        idlePlayer.style.zIndex = '10';
-
-        if (Hls.isSupported() && backupUrl.includes('.m3u8')) {
-            const tempHls = new Hls({
-                maxMaxBufferLength: 5, // only pre-buffer 5 seconds to conserve bandwidth
-                enableWorker: false, // Turn off web workers to fix mobile video decoding black screens
-                lowLatencyMode: true,
-                autoStartLoad: true,
-                capLevelToPlayerSize: true,
-                maxBufferHole: 2
-            });
-
-            if (idlePlayer === videoA) {
-                hlsA = tempHls;
-            } else {
-                hlsB = tempHls;
-            }
-
-            tempHls.loadSource(backupUrl);
-            tempHls.attachMedia(idlePlayer);
-            
-            tempHls.on(Hls.Events.MANIFEST_PARSED, () => {
-                console.log(`[Preload] Backup stream ${backupServer.name} pre-buffered and standby.`);
-            });
-            tempHls.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) {
-                    console.warn('[Preload] Secondary backup stream failed during background load:', data);
-                }
-            });
-        } else if (idlePlayer.canPlayType('application/vnd.apple.mpegurl') || !backupUrl.includes('.m3u8')) {
-            idlePlayer.src = backupUrl;
-            idlePlayer.load();
-        }
-    }
-
-    function getBackupIndex(currentIndex) {
-        if (SERVERS.length <= 1) return null;
-        for (let i = 1; i < SERVERS.length; i++) {
-            const nextIdx = (currentIndex + i) % SERVERS.length;
-            if (SERVERS[nextIdx] && SERVERS[nextIdx].status !== 'offline') {
-                return nextIdx;
-            }
-        }
-        return null;
-    }
+    window.playStream = playStream;
 
     function updateTelemetry() {
         const sentimentVal = Math.round(70 + Math.random() * 20);
@@ -644,26 +348,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const telemetryLatency = document.getElementById('telemetry-latency');
-        if (telemetryLatency && currentServerIndex !== null) {
-            const srv = SERVERS[currentServerIndex];
-            const lat = srv?.latency ? `${Math.round(srv.latency)}ms` : 'direct';
-            telemetryLatency.textContent = `PRIMARY LATENCY: ${lat} / STABLE`;
+        if (telemetryLatency) {
+            telemetryLatency.textContent = `PRIMARY LATENCY: 5ms / STABLE`;
         }
 
         const telemetryPreloaded = document.getElementById('telemetry-preloaded');
         const backupEngineStatus = document.getElementById('backup-engine-status');
         if (telemetryPreloaded && backupEngineStatus) {
-            const backupIndex = getBackupIndex(currentServerIndex);
-            if (backupIndex !== null && SERVERS[backupIndex]) {
-                const bSrv = SERVERS[backupIndex];
-                telemetryPreloaded.textContent = `PRELOAD QUEUE: ${bSrv.name}`;
-                backupEngineStatus.textContent = 'STANDBY READY';
-                backupEngineStatus.className = 'text-[#39ff14] font-bold';
-            } else {
-                telemetryPreloaded.textContent = 'PRELOAD QUEUE: EMPTY';
-                backupEngineStatus.textContent = 'UNAVAILABLE';
-                backupEngineStatus.className = 'text-[#ff2d55] font-bold';
-            }
+            telemetryPreloaded.textContent = 'PRELOAD QUEUE: EMPTY';
+            backupEngineStatus.textContent = 'UNAVAILABLE';
+            backupEngineStatus.className = 'text-[#ff2d55] font-bold';
         }
     }
 
@@ -1003,10 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Retry button on error overlay
     if (btnRetry) {
         btnRetry.addEventListener('click', () => {
-            if (currentServerIndex !== null) {
-                const server = SERVERS[currentServerIndex];
-                window.changeServer(server.url, currentServerIndex);
-            }
+            playStream();
         });
     }
 
@@ -1030,12 +721,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Placeholder click triggers Server 1 (index 0)
+    // Placeholder click triggers playback
     if (playerPlaceholder) {
         playerPlaceholder.addEventListener('click', () => {
-            if (SERVERS.length > 0) {
-                window.changeServer(SERVERS[0].url, 0);
-            }
+            playStream();
         });
     }
 
@@ -1063,55 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleStreamError(errorMsg) {
-        failoverCount++;
-        
-        const backupIndex = getBackupIndex(currentServerIndex);
-        if (backupIndex !== null && failoverCount < SERVERS.length) {
-            const backupServer = SERVERS[backupIndex];
-            
-            console.warn(`[Failover] Primary feed disruption. Hot-switching to preloaded backup server: ${backupServer.name}...`);
-            showToast(`FEED DISRUPTION. AUTO-SWITCHING TO ${backupServer.name}...`);
-            
-            // Execute the zero-lag cross-fade swap
-            // 1. Match volume/mute state on the idle player
-            idlePlayer.volume = activePlayer.volume;
-            idlePlayer.muted = activePlayer.muted;
-
-            // 2. Play the idle player
-            idlePlayer.play().catch(e => console.log('Failover play block:', e));
-
-            // 3. Swap opacity and z-index (cross-fade transition)
-            idlePlayer.style.opacity = '1';
-            idlePlayer.style.zIndex = '20';
-
-            activePlayer.style.opacity = '0';
-            activePlayer.style.zIndex = '10';
-
-            // 4. Swap variables
-            const tempPlayer = activePlayer;
-            activePlayer = idlePlayer;
-            idlePlayer = tempPlayer;
-
-            // 5. Update index pointer
-            currentServerIndex = backupIndex;
-
-            // 6. Highlight new active row in dashboard
-            renderServersGrid(SERVERS);
-
-            // 7. Cleanup the previous active player (now idle) after transition (350ms)
-            setTimeout(() => {
-                tempPlayer.pause();
-                cleanupPlayer(tempPlayer);
-                
-                // 8. Preload the NEXT backup stream on the newly freed idle player
-                preloadBackupStream();
-            }, 350);
-
-            updateTelemetry();
-        } else {
-            handlePlayerError('ALL INCOMING BROADCAST FEEDS DISRUPTED. PLEASE MONITOR CONSOLE FOR REBOOT CORRECTION.');
-            failoverCount = 0; // Reset loop
-        }
+        handlePlayerError('ALL INCOMING BROADCAST FEEDS DISRUPTED. PLEASE MONITOR CONSOLE FOR REBOOT CORRECTION.');
     }
 
     // ---------------------------------------------------------
@@ -1609,49 +1250,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Set placeholder description dynamically
-     const placeholderDesc = playerPlaceholder.querySelector('p');
-     if (placeholderDesc) {
-         placeholderDesc.textContent = "Select one of the live servers below to start streaming matches instantly.";
-     }
- 
-     // Start fetching match fixtures
-     fetchMatches();
- 
-     // ---------------------------------------------------------
-     // 7. DEFAULT BROADCAST LOADING
-     // ---------------------------------------------------------
-     // Default stream is loaded dynamically inside loadDynamicStreams()
-
-
-    // ---------------------------------------------------------
-    // 9. SIDEBAR TABS & LIVE CHAT SIMULATION
-    // ---------------------------------------------------------
-    const tabBtnServers = document.getElementById('tab-btn-servers');
-    const tabBtnChat = document.getElementById('tab-btn-chat');
-    const panelServers = document.getElementById('sidebar-servers-panel');
-    const panelChat = document.getElementById('sidebar-chat-panel');
-
-    if (tabBtnServers && tabBtnChat && panelServers && panelChat) {
-        tabBtnServers.addEventListener('click', () => {
-            tabBtnServers.classList.add('active');
-            tabBtnChat.classList.remove('active');
-            panelServers.classList.remove('hidden');
-            panelChat.classList.add('hidden');
-        });
-
-        tabBtnChat.addEventListener('click', () => {
-            tabBtnChat.classList.add('active');
-            tabBtnServers.classList.remove('active');
-            panelChat.classList.remove('hidden');
-            panelServers.classList.add('hidden');
-            
-            // Auto scroll to bottom when opening chat
-            const chatContainer = document.getElementById('chat-messages-container');
-            if (chatContainer) {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }
-        });
+    const placeholderDesc = playerPlaceholder.querySelector('p');
+    if (placeholderDesc) {
+        placeholderDesc.textContent = "Tuning in to the live broadcast matches. Please wait.";
     }
+
+    // Start fetching match fixtures
+    fetchMatches();
+
+    // ---------------------------------------------------------
+    // 7. DEFAULT BROADCAST LOADING
+    // ---------------------------------------------------------
+    playStream();
+
+
 
     function initLiveChatSimulation() {
         const chatContainer = document.getElementById('chat-messages-container');

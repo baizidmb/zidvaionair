@@ -106,10 +106,10 @@
                         <!-- Player Placeholder Overlay -->
                         <div id="player-placeholder" class="absolute inset-0 z-30 bg-gradient-to-br from-[#0c0d12] to-[#040406] flex flex-col items-center justify-center gap-3 cursor-pointer text-center px-6">
                             <div class="w-14 h-14 rounded-full bg-[#ff7a00]/20 border border-[#ff7a00]/40 flex items-center justify-center text-white/80 hover:text-white hover:scale-105 transition-all duration-300 shadow-lg">
-                                <i class="fa-solid fa-play text-lg ml-1"></i>
+                                <i class="fa-solid fa-circle-notch text-lg animate-spin text-[#ff7a00]"></i>
                             </div>
-                            <h3 class="text-sm font-extrabold tracking-wider text-white/90">SELECT MATCH FEED</h3>
-                            <p class="text-xs text-white/40 max-w-xs font-light">Pick one of the live broadcast servers in the sidebar console to begin streaming the Copa matches.</p>
+                            <h3 class="text-sm font-extrabold tracking-wider text-white/90">CONNECTING TO LIVE FEED...</h3>
+                            <p class="text-xs text-white/40 max-w-xs font-light">Tuning in to the live broadcast matches. Please wait.</p>
                         </div>
 
                         <!-- Video Custom Controls (Twitch-Style) -->
@@ -141,32 +141,17 @@
                     </div>
                 </div>
 
-
             </div>
 
-            <!-- Right Column: Sidebar (1/4 Grid - Tabs: Server Feeds & Live Chat) -->
+            <!-- Right Column: Sidebar (1/4 Grid - Live Chat Only) -->
             <div class="lg:col-span-1 flex flex-col">
                 <div class="bg-[#0f0f13]/85 border border-white/8 shadow-2xl rounded-2xl flex flex-col h-[450px] lg:h-full overflow-hidden">
                     
-                    <!-- Sidebar Tab Header -->
-                    <div class="flex border-b border-white/5 bg-black/20 text-xs font-bold tracking-wider relative">
-                        <button id="tab-btn-servers" class="tab-btn active flex-1 py-3 text-center border-b-2 border-transparent transition-all uppercase cursor-pointer">Live Feeds</button>
-                        <button id="tab-btn-chat" class="tab-btn flex-1 py-3 text-center border-b-2 border-transparent transition-all uppercase cursor-pointer">Live Chat</button>
-                    </div>
-
                     <!-- Sidebar content panels -->
                     <div class="flex-grow flex flex-col overflow-hidden relative">
                         
-                        <!-- Panel A: Alternative Servers List -->
-                        <div id="sidebar-servers-panel" class="absolute inset-0 flex flex-col overflow-y-auto p-3 gap-2 scrollbar-style">
-                            <!-- Dynamically loaded servers as modern cards -->
-                            <div id="servers-container" class="flex flex-col gap-2">
-                                <!-- Cards injected dynamically by app.js -->
-                            </div>
-                        </div>
-
-                        <!-- Panel B: Simulated Live Chat (Hidden by default) -->
-                        <div id="sidebar-chat-panel" class="absolute inset-0 flex flex-col bg-black/10 hidden">
+                        <!-- Panel: Simulated Live Chat -->
+                        <div id="sidebar-chat-panel" class="absolute inset-0 flex flex-col bg-black/10">
                             <!-- Scrolling Chat Messages -->
                             <div id="chat-messages-container" class="flex-grow overflow-y-auto p-4 flex flex-col gap-3 scrollbar-style text-xs font-light">
                                 <!-- Chat messages injected by app.js interval -->
