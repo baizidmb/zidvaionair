@@ -11,28 +11,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getFallbackChannels() {
         return [
-            { name: "Norway vs France", link: "https://sm-monirul.top/tof/live/toffee6/index.m3u8", category_name: "Sports Channels" },
-            { name: "Cabo Verde vs South Africa", link: "https://sm-monirul.top/tof/live/toffee5/index.m3u8", category_name: "Sports Channels" },
-            { name: "Egypt vs Iran", link: "https://sm-monirul.top/tof/live/toffee1/index.m3u8", category_name: "Sports Channels" },
-            { name: "New Zealand vs Belgium", link: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", category_name: "Sports Channels" },
-            { name: "Senegal vs Iraq", link: "https://sm-monirul.top/tof/live/toffee3/index.m3u8", category_name: "Sports Channels" },
-            { name: "Uruguay vs Spain", link: "https://sm-monirul.top/tof/live/toffee4/index.m3u8", category_name: "Sports Channels" },
+            { name: "Norway vs France (WC)", link: "https://sm-monirul.top/tof/live/toffee6/index.m3u8", category_name: "Sports Channels" },
+            { name: "Cabo Verde vs South Africa (WC)", link: "https://sm-monirul.top/tof/live/toffee5/index.m3u8", category_name: "Sports Channels" },
+            { name: "Egypt vs Iran (WC)", link: "https://sm-monirul.top/tof/live/toffee1/index.m3u8", category_name: "Sports Channels" },
+            { name: "New Zealand vs Belgium (WC)", link: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", category_name: "Sports Channels" },
+            { name: "Senegal vs Iraq (WC)", link: "https://sm-monirul.top/tof/live/toffee3/index.m3u8", category_name: "Sports Channels" },
+            { name: "Uruguay vs Spain (WC)", link: "https://sm-monirul.top/tof/live/toffee4/index.m3u8", category_name: "Sports Channels" },
             
-            { name: "Toffee FIFA 1", link: "https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8", category_name: "Sports Channels" },
-            { name: "Toffee FIFA 2", link: "https://sm-monirul.top/toffee/play/FIFA-2026-2.m3u8", category_name: "Sports Channels" },
-            { name: "Toffee FIFA 3", link: "https://sm-monirul.top/toffee/play/FIFA-2026-3.m3u8", category_name: "Sports Channels" },
-            { name: "Toffee FIFA 4", link: "https://sm-monirul.top/toffee/play/FIFA-2026-4.m3u8", category_name: "Sports Channels" },
-            { name: "Toffee FIFA 5", link: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", category_name: "Sports Channels" },
-            { name: "Toffee FIFA 6", link: "https://sm-monirul.top/toffee/play/FIFA-2026-6.m3u8", category_name: "Sports Channels" },
-            
-            { name: "SONY SPORTS TEN 1 HD", link: "https://sm-monirul.top/toffee/play/sony_sports_1_hd.m3u8", category_name: "LIVE" },
-            { name: "SONY SPORTS TEN 2 HD", link: "https://sm-monirul.top/toffee/play/sony_sports_2_hd.m3u8", category_name: "LIVE" },
-            { name: "SONY SPORTS TEN 5 HD", link: "https://sm-monirul.top/toffee/play/sony_sports_5_hd.m3u8", category_name: "LIVE" },
-            { name: "SONY TEN Cricket", link: "https://sm-monirul.top/toffee/play/ten_cricket.m3u8", category_name: "LIVE" },
-            { name: "TOFFEE Sports VIP", link: "https://sm-monirul.top/toffee/play/sports_highlights.m3u8", category_name: "LIVE" },
-            { name: "Euro Sport HD", link: "https://sm-monirul.top/toffee/play/euro_sports_hd.m3u8", category_name: "LIVE" },
-            { name: "BTV National", link: "https://sm-monirul.top/toffee/play/btv_national.m3u8", category_name: "LIVE" },
-            { name: "Somoy TV", link: "https://sm-monirul.top/toffee/play/somoy_tv.m3u8", category_name: "LIVE" }
+            { name: "Toffee FIFA 1 HD", link: "https://sm-monirul.top/toffee/play/FIFA-2026-1.m3u8", category_name: "Sports Channels" },
+            { name: "Toffee FIFA 2 HD", link: "https://sm-monirul.top/toffee/play/FIFA-2026-2.m3u8", category_name: "Sports Channels" },
+            { name: "Toffee FIFA 3 HD", link: "https://sm-monirul.top/toffee/play/FIFA-2026-3.m3u8", category_name: "Sports Channels" },
+            { name: "Toffee FIFA 4 HD", link: "https://sm-monirul.top/toffee/play/FIFA-2026-4.m3u8", category_name: "Sports Channels" },
+            { name: "Toffee FIFA 5 HD", link: "https://sm-monirul.top/toffee/play/FIFA-2026-5.m3u8", category_name: "Sports Channels" },
+            { name: "Toffee FIFA 6 HD", link: "https://sm-monirul.top/toffee/play/FIFA-2026-6.m3u8", category_name: "Sports Channels" },
+            { name: "BTV National (WC Broadcaster)", link: "https://sm-monirul.top/toffee/play/btv_national.m3u8", category_name: "Sports Channels" }
         ];
     }
 
@@ -79,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const text = await res.text();
                 const lines = text.split('\n');
                 let currentName = null;
-                const KEYWORDS = ['fifa', 'world cup', 'worldcup', 'sony', 'ten', 'espn', 'fox', 'sky', 'bein', 'tsport', 'gtv', 'gazi', 'btv', 'fussball', 'football', 'soccer', 'supersport', 'arena', 'dazn', 'star sports', 'premier', 'cctv'];
+                const KEYWORDS = ['fifa', 'world cup', 'worldcup', 'wc 2026', 'wc2026', 'worldcup2026'];
                 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
@@ -95,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 iptvOrgChannels.push({
                                     name: currentName,
                                     url: line,
-                                    detail: 'Global Live Sports Broadcast Feed',
+                                    detail: 'Global World Cup Broadcast Feed',
                                     badge: nameLower.includes('1080p') ? 'fhd' : 'hd'
                                 });
                             }
@@ -110,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const matchStreams = [];
         const genericFifaStreams = [];
-        const sportsNetworkStreams = [];
         const sportzfyMatchStreams = [];
 
         // Parse Toffee channels
@@ -147,8 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     badge: 'live'
                 });
             }
-            // 2. Generic FIFA channels
-            else if (nameLower.includes('fifa')) {
+            // 2. Generic FIFA / BTV National World Cup channels
+            else if (nameLower.includes('fifa') || nameLower.includes('world cup') || nameLower.includes('worldcup')) {
                 genericFifaStreams.push({
                     name: name,
                     url: url,
@@ -156,13 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     badge: 'hd'
                 });
             }
-            // 3. Premium Sports channels / Channels broadcasting World Cup
-            else if (nameLower.includes('sport') || nameLower.includes('ten') || nameLower.includes('cricket') || nameLower.includes('highlights') || nameLower.includes('btv') || nameLower.includes('somoy')) {
-                sportsNetworkStreams.push({
-                    name: name,
+            else if (nameLower.includes('btv national') || nameLower.includes('btv-national') || (nameLower === 'btv' && category.includes('Sports'))) {
+                genericFifaStreams.push({
+                    name: 'BTV National (WC Broadcaster)',
                     url: url,
-                    detail: `Live Sports Network Feed`,
-                    badge: nameLower.includes('vip') ? 'fhd' : 'hd'
+                    detail: `BTV National World Cup Live Broadcast`,
+                    badge: 'hd'
                 });
             }
         });
@@ -178,32 +168,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Ensure BTV National is always present in the sports network streams
-        const hasBTV = sportsNetworkStreams.some(srv => srv.name.toLowerCase().includes('btv'));
+        // Ensure BTV National fallback is present under FIFA World Cup Live Feeds if not loaded dynamically
+        const hasBTV = genericFifaStreams.some(srv => srv.name.toLowerCase().includes('btv'));
         if (!hasBTV) {
-            sportsNetworkStreams.push({
-                name: 'BTV National',
+            genericFifaStreams.push({
+                name: 'BTV National (WC Broadcaster)',
                 url: 'https://sm-monirul.top/toffee/play/btv_national.m3u8',
-                detail: 'Bangladesh Television Live Broadcast',
-                badge: 'hd'
-            });
-        }
-
-        // Add working BTV Chattogram Bozztv alternative stream
-        sportsNetworkStreams.push({
-            name: 'BTV Chattogram',
-            url: 'https://bozztv.com/rongo/rongo-BTVChattagram/index.m3u8',
-            detail: 'BTV Chattogram Live Broadcast (Bozztv CDN)',
-            badge: 'hd'
-        });
-        
-        // Ensure Somoy TV is always present in the sports network streams
-        const hasSomoy = sportsNetworkStreams.some(srv => srv.name.toLowerCase().includes('somoy'));
-        if (!hasSomoy) {
-            sportsNetworkStreams.push({
-                name: 'Somoy TV',
-                url: 'https://sm-monirul.top/toffee/play/somoy_tv.m3u8',
-                detail: 'Somoy TV Live Broadcast',
+                detail: 'Bangladesh Television World Cup Broadcast',
                 badge: 'hd'
             });
         }
@@ -239,14 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (iptvOrgChannels.length > 0) {
             categories.push({
-                category: 'Global IPTV Sports Feeds',
+                category: 'Global World Cup Channels',
                 servers: iptvOrgChannels
-            });
-        }
-        if (sportsNetworkStreams.length > 0) {
-            categories.push({
-                category: 'Premium Sports Networks',
-                servers: sportsNetworkStreams
             });
         }
 
