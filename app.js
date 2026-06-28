@@ -71,7 +71,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 const text = await res.text();
                 const lines = text.split('\n');
                 let currentName = null;
-                const KEYWORDS = ['fifa', 'world cup', 'worldcup', 'wc 2026', 'wc2026', 'worldcup2026'];
+                const KEYWORDS = [
+                    'fifa', 'world cup', 'worldcup', 'wc 2026', 'wc2026', 'worldcup2026',
+                    'fox sports', 'fs1', 'telemundo', 'universo', 'peacock', 'fox one',
+                    'tsn', 'ctv', 'rds', 'televisauvision', 'tudn', 'vix', 'tv azteca',
+                    'bein sports', 'alkass', 'entv', 'snrt', 'sports18', 'jiocinema', 'doordarshan',
+                    'btv', 't sports', 'somoy tv', 'toffee', 'bioscope', 'ptv sports', 'tapmad',
+                    'sbs', 'tvnz', 'cmg', 'migu', 'nhk', 'nippon tv', 'fuji tv', 'dazn',
+                    'jtbc', 'kbs', 'naver sports', 'chzzk', 'tvri', 'maxstream', 'rtm', 'unifi tv',
+                    'mediacorp', 'pccw', 'elta sports', 'ebc', 'ttv', 'monomax', 'bbc', 'itv', 'stv', 'rté',
+                    'm6', 'ard', 'zdf', 'magenta sport', 'rai', 'rtve', 'mediapro', 'rtp', 'sic', 'tvi',
+                    'sport tv', 'livemodetv', 'nos', 'vrt', 'rtbf', 'srg ssr', 'orf', 'servustv',
+                    'svt', 'tv4', 'nrk', 'tv2', 'dr', 'yle', 'mtv3', 'tvp', 'trt', 'megogo',
+                    'arena sport', 'hrt', 'rts', 'rtvfbih', 'telefe', 'tv pública', 'tv publica', 'tyc sports',
+                    'dsports', 'grupo globo', 'globo', 'cazétv', 'cazetv', 'sbt', 'n sports',
+                    'caracol', 'canal rcn', 'win sports', 'chilevisión', 'chilevision', 'teleamazonas',
+                    'américa televisión', 'america television', 'canal 5', 'antel tv', 'televen',
+                    'red uno', 'unitel', 'entel', 'tigo sports', 'teletica', 'rpc', 'tvn',
+                    'supersport', 'new world tv', 'sabc', 'sportytv', 'startimes', 'kbc', 'tbc',
+                    'azam tv', 'gbc', 'multimedia group', 'utv', 'tpa', 'z sports', 'fifa+', 'sport24'
+                ];
                 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
