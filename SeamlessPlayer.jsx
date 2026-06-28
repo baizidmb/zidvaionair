@@ -829,6 +829,22 @@ export default function SeamlessPlayer() {
           <a href="#" className={styles.logoGroup}>
             <span className={styles.liveIndicatorDot} />
             <span className={styles.logoText}>ZID VAI ON AIR <span className={styles.logoAccent}>X WC 2026</span></span>
+            <span style={{
+              fontSize: '8px',
+              fontWeight: 700,
+              letterSpacing: '0.1em',
+              background: 'linear-gradient(to right, #ff5500, #ffaa00)',
+              color: '#ffffff',
+              padding: '0.1rem 0.5rem',
+              borderRadius: '9999px',
+              boxShadow: '0 0 8px rgba(255,85,0,0.4)',
+              textTransform: 'uppercase',
+              userSelect: 'none',
+              fontFamily: 'monospace',
+              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+            }}>
+              Experimental
+            </span>
           </a>
           <nav className={styles.navLinks}>
             <a href="#" className={`${styles.navLink} ${styles.navLinkActive}`}>LIVE MATCHES</a>

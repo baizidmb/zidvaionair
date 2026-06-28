@@ -398,7 +398,17 @@ html, body {
    GLOW STYLING FOR LOGOS
    --------------------------------------------------------- */
 .header-title-glow {
-    text-shadow: 0 0 12px rgba(255, 122, 0, 0.4);
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    text-shadow: 0 0 16px rgba(255, 85, 0, 0.6);
+}
+
+header nav a, 
+.tab-btn, 
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif !important;
+    letter-spacing: -0.02em;
 }
 
 /* ---------------------------------------------------------
