@@ -1791,6 +1791,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const chatContainer = document.getElementById('chat-messages-container');
         if (!chatContainer) return;
 
+        const chatInput = document.getElementById('chat-input-field');
+        const chatSendBtn = document.getElementById('chat-send-btn');
+
         const USERNAMES = ['GamerPro2026', 'CopaViewer', 'FifaFanatic', 'MonirulFan', 'ZidLiveStream', 'GoalGetter', 'FootyBuff', 'MessiGOAT', 'Cr7Legacy', 'SambaMagic'];
         const MESSAGES = [
             "LET'S GOOOO! WHAT A MATCH!",
@@ -1808,34 +1811,150 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#ff9f0a', '#a855f7', '#ec4899', '#ff7a00'];
 
-        function generateMessage() {
-            const user = USERNAMES[Math.floor(Math.random() * USERNAMES.length)];
-            const msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
-            const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+        // Persistent local user setup
+        let localUsername = localStorage.getItem('zid_chat_username');
+        if (!localUsername) {
+            localUsername = 'Viewer_' + Math.floor(1000 + Math.random() * 9000);
+            localStorage.setItem('zid_chat_username', localUsername);
+        }
+        let localUserColor = localStorage.getItem('zid_chat_color');
+        if (!localUserColor) {
+            localUserColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+            localStorage.setItem('zid_chat_color', localUserColor);
+        }
 
+        // Add header with username edit capability
+        const infoHeader = document.createElement('div');
+        infoHeader.className = 'text-[10px] text-white/30 pb-2 border-b border-white/5 mb-2 flex justify-between items-center w-full';
+        infoHeader.innerHTML = `
+            <span>Global Chat Room</span>
+            <span>Your Name: <span id="local-username-display" class="font-bold text-[#ff7a00] cursor-pointer underline hover:text-[#ff7a00]/80" onclick="changeChatUsername()">${localUsername}</span></span>
+        `;
+        chatContainer.appendChild(infoHeader);
+
+        window.changeChatUsername = () => {
+            const currentName = localStorage.getItem('zid_chat_username') || 'Viewer';
+            const newName = prompt('Enter your new username (max 15 chars):', currentName);
+            if (newName && newName.trim()) {
+                const cleaned = newName.trim().substring(0, 15);
+                localStorage.setItem('zid_chat_username', cleaned);
+                const display = document.getElementById('local-username-display');
+                if (display) display.textContent = cleaned;
+                
+                // Alert chat room of username change
+                sendSystemNotice(`${currentName} changed their name to ${cleaned}`);
+            }
+        };
+
+        function appendMessage(user, text, color, isSystem = false) {
             const div = document.createElement('div');
             div.className = 'chat-bubble';
-            div.innerHTML = `
-                <span class="chat-username" style="color: ${color}">${user}:</span>
-                <span class="text-white/80">${msg}</span>
-            `;
+            if (isSystem) {
+                div.innerHTML = `<span class="text-white/40 italic text-[10px]">${text}</span>`;
+            } else {
+                div.innerHTML = `
+                    <span class="chat-username" style="color: ${color}">${user}:</span>
+                    <span class="text-white/80">${text}</span>
+                `;
+            }
             chatContainer.appendChild(div);
-
-            // Auto scroll to bottom
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
-            if (chatContainer.children.length > 50) {
-                chatContainer.children[0].remove();
+            if (chatContainer.children.length > 80) {
+                // Keep the header infoNode (index 0) intact, remove index 1
+                if (chatContainer.children[1]) chatContainer.children[1].remove();
             }
         }
 
-        // Generate initial messages
-        for (let i = 0; i < 5; i++) {
-            generateMessage();
+        function sendSystemNotice(noticeText) {
+            fetch('https://ntfy.sh/zidvaionair_chat_2026', {
+                method: 'POST',
+                body: JSON.stringify({
+                    system: true,
+                    text: noticeText
+                })
+            }).catch(e => {});
         }
 
-        // Add periodic messages
-        setInterval(generateMessage, 3000 + Math.random() * 2000);
+        function generateSimulatedMessage() {
+            const user = USERNAMES[Math.floor(Math.random() * USERNAMES.length)];
+            const msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
+            const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+            appendMessage(user, msg, color);
+        }
+
+        function sendMessage() {
+            if (!chatInput) return;
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            const payload = {
+                user: localStorage.getItem('zid_chat_username') || 'Viewer',
+                text: text,
+                color: localStorage.getItem('zid_chat_color') || '#ff7a00'
+            };
+
+            fetch('https://ntfy.sh/zidvaionair_chat_2026', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            }).catch(err => {
+                console.error('Failed to publish message:', err);
+                appendMessage('System', 'Failed to deliver message. Check internet.', '#ef4444');
+            });
+
+            chatInput.value = '';
+        }
+
+        // Setup input key listeners
+        if (chatInput) {
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+        if (chatSendBtn) {
+            chatSendBtn.addEventListener('click', sendMessage);
+        }
+
+        // Generate initial simulated items to make chat look alive
+        for (let i = 0; i < 5; i++) {
+            generateSimulatedMessage();
+        }
+
+        // Add a simulator check: only inject simulated comments every 18 seconds to keep chat warm
+        setInterval(generateSimulatedMessage, 18000);
+
+        // Connect to public realtime broadcast topic
+        try {
+            const eventSource = new EventSource('https://ntfy.sh/zidvaionair_chat_2026/sse');
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.event === 'message' && data.message) {
+                        const payload = JSON.parse(data.message);
+                        if (payload.system) {
+                            appendMessage(null, payload.text, null, true);
+                        } else {
+                            appendMessage(payload.user, payload.text, payload.color);
+                        }
+                    }
+                } catch (e) {
+                    // Fallback to text messages from external clients
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.event === 'message' && data.message) {
+                            appendMessage('Viewer', data.message, '#ff7a00');
+                        }
+                    } catch (err) {}
+                }
+            };
+            eventSource.onerror = () => {
+                console.warn('Realtime chat disconnected. Retrying...');
+            };
+        } catch (e) {
+            console.error('Realtime chat connection failed:', e);
+        }
     }
 
     initLiveChatSimulation();

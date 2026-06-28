@@ -41,6 +41,13 @@ export default function SeamlessPlayer() {
   const [errorMessage, setErrorMessage] = useState('');
   const [activeTab, setActiveTab] = useState('feeds'); // 'feeds' or 'chat'
   const [chatMessages, setChatMessages] = useState([]);
+  const [localUsername, setLocalUsername] = useState(() => {
+    return localStorage.getItem('zid_chat_username') || 'Viewer_' + Math.floor(1000 + Math.random() * 9000);
+  });
+  const [localUserColor, setLocalUserColor] = useState(() => {
+    return localStorage.getItem('zid_chat_color') || MOCK_CHAT_COLORS[Math.floor(Math.random() * MOCK_CHAT_COLORS.length)];
+  });
+  const [inputText, setInputText] = useState('');
   const [systemTime, setSystemTime] = useState('00:00:00');
   const [timezoneLabel, setTimezoneLabel] = useState('UTC');
   const [showControls, setShowControls] = useState(true);
@@ -55,6 +62,11 @@ export default function SeamlessPlayer() {
   const failoverCountRef = useRef(0);
   const chatContainerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    localStorage.setItem('zid_chat_username', localUsername);
+    localStorage.setItem('zid_chat_color', localUserColor);
+  }, [localUsername, localUserColor]);
 
   // Region-aware Clock sync
   useEffect(() => {
@@ -304,10 +316,10 @@ export default function SeamlessPlayer() {
     return () => clearInterval(interval);
   }, [servers, currentIdx, isSweeping]);
 
-  // Live Chat Simulator
+  // Live Chat Subscription & Simulator
   useEffect(() => {
     const initialMsgs = [];
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 5; i++) {
       initialMsgs.push({
         id: Math.random().toString(36).substr(2, 9),
         user: MOCK_CHAT_USERNAMES[Math.floor(Math.random() * MOCK_CHAT_USERNAMES.length)],
@@ -317,7 +329,7 @@ export default function SeamlessPlayer() {
     }
     setChatMessages(initialMsgs);
 
-    const interval = setInterval(() => {
+    const simInterval = setInterval(() => {
       setChatMessages((prev) => {
         const next = [
           ...prev,
@@ -328,14 +340,70 @@ export default function SeamlessPlayer() {
             color: MOCK_CHAT_COLORS[Math.floor(Math.random() * MOCK_CHAT_COLORS.length)]
           }
         ];
-        if (next.length > 50) {
-          next.shift();
-        }
+        if (next.length > 80) next.shift();
         return next;
       });
-    }, 3000);
+    }, 18000);
 
-    return () => clearInterval(interval);
+    let eventSource;
+    try {
+      eventSource = new EventSource('https://ntfy.sh/zidvaionair_chat_2026/sse');
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.event === 'message' && data.message) {
+            const payload = JSON.parse(data.message);
+            if (payload.system) {
+              setChatMessages((prev) => {
+                const next = [...prev, { id: data.id || Math.random().toString(), system: true, text: payload.text }];
+                if (next.length > 80) next.shift();
+                return next;
+              });
+            } else {
+              setChatMessages((prev) => {
+                const next = [
+                  ...prev,
+                  {
+                    id: data.id || Math.random().toString(),
+                    user: payload.user,
+                    text: payload.text,
+                    color: payload.color
+                  }
+                ];
+                if (next.length > 80) next.shift();
+                return next;
+              });
+            }
+          }
+        } catch (e) {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.event === 'message' && data.message) {
+              setChatMessages((prev) => {
+                const next = [
+                  ...prev,
+                  {
+                    id: data.id || Math.random().toString(),
+                    user: 'Viewer',
+                    text: data.message,
+                    color: '#ff7a00'
+                  }
+                ];
+                if (next.length > 80) next.shift();
+                return next;
+              });
+            }
+          } catch(err) {}
+        }
+      };
+    } catch (err) {
+      console.error(err);
+    }
+
+    return () => {
+      clearInterval(simInterval);
+      if (eventSource) eventSource.close();
+    };
   }, []);
 
   // Auto-scroll chat
@@ -346,6 +414,35 @@ export default function SeamlessPlayer() {
   }, [chatMessages, activeTab]);
 
   // Stall detector & failover switcher
+  const handleSendMessage = () => {
+    if (!inputText.trim()) return;
+    const payload = {
+      user: localUsername,
+      text: inputText.trim(),
+      color: localUserColor
+    };
+    fetch('https://ntfy.sh/zidvaionair_chat_2026', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }).catch(e => console.error('React Chat Send Failed:', e));
+    setInputText('');
+  };
+
+  const changeUsername = () => {
+    const newName = prompt('Enter your new username (max 15 chars):', localUsername);
+    if (newName && newName.trim()) {
+      const cleaned = newName.trim().substring(0, 15);
+      fetch('https://ntfy.sh/zidvaionair_chat_2026', {
+        method: 'POST',
+        body: JSON.stringify({
+          system: true,
+          text: `${localUsername} changed their name to ${cleaned}`
+        })
+      }).catch(() => {});
+      setLocalUsername(cleaned);
+    }
+  };
+
   const startStallTimer = () => {
     clearStallTimer();
     stallTimerRef.current = setTimeout(() => {
@@ -934,11 +1031,21 @@ export default function SeamlessPlayer() {
               {/* Chat Panel */}
               {activeTab === 'chat' && (
                 <div className={styles.chatPanel}>
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '0.5rem 0.75rem 0 0.75rem', boxSizing: 'border-box' }}>
+                    <span>Global Chat Room</span>
+                    <span>Your Name: <span style={{ fontWeight: 700, color: '#ff7a00', cursor: 'pointer', textDecoration: 'underline' }} onClick={changeUsername}>{localUsername}</span></span>
+                  </div>
                   <div ref={chatContainerRef} className={styles.chatMessagesContainer}>
                     {chatMessages.map((msg) => (
                       <div key={msg.id} className={styles.chatBubble}>
-                        <span className={styles.chatUsername} style={{ color: msg.color }}>{msg.user}:</span>
-                        <span className={styles.chatMessageText}>{msg.text}</span>
+                        {msg.system ? (
+                          <span style={{ color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', fontSize: '10px' }}>{msg.text}</span>
+                        ) : (
+                          <>
+                            <span className={styles.chatUsername} style={{ color: msg.color }}>{msg.user}:</span>
+                            <span className={styles.chatMessageText}>{msg.text}</span>
+                          </>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -947,9 +1054,11 @@ export default function SeamlessPlayer() {
                       type="text" 
                       placeholder="Send a message..." 
                       className={styles.chatInputField} 
-                      disabled 
+                      value={inputText}
+                      onChange={e => setInputText(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
                     />
-                    <button className={styles.chatSendBtn} disabled>
+                    <button className={styles.chatSendBtn} style={{ opacity: 1, cursor: 'pointer' }} onClick={handleSendMessage}>
                       <i className="fa-solid fa-paper-plane"></i>
                     </button>
                   </div>
