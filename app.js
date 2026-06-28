@@ -1937,7 +1937,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Connect to public realtime broadcast topic
         try {
             const eventSource = new EventSource('https://ntfy.sh/zidvaionair_chat_2026/sse');
-            eventSource.onmessage = (event) => {
+            
+            const handleMessageEvent = (event) => {
                 try {
                     const data = JSON.parse(event.data);
                     if (data.event === 'message' && data.message) {
@@ -1958,6 +1959,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     } catch (err) {}
                 }
             };
+
+            eventSource.onmessage = handleMessageEvent;
+            eventSource.addEventListener('message', handleMessageEvent);
+
             eventSource.onerror = () => {
                 console.warn('Realtime chat disconnected. Retrying...');
             };
