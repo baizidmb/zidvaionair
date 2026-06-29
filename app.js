@@ -1408,11 +1408,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchMatches() {
+        let rawMatches = [];
         try {
             const res = await fetch('https://ajkerkhela.vercel.app/api/schedule');
-            if (!res.ok) throw new Error('Failed to load live match data from ajkerkhela');
-            const rawMatches = await res.json();
-            
+            if (!res.ok) throw new Error('Failed to fetch live API schedule');
+            rawMatches = await res.json();
+        } catch (e) {
+            console.warn('Vercel API fetch failed or blocked by CORS. Loading local schedule.json cache...', e);
+            try {
+                const res = await fetch('schedule.json');
+                if (!res.ok) throw new Error('Failed to fetch local schedule.json');
+                rawMatches = await res.json();
+            } catch (localErr) {
+                console.warn('Local schedule.json cache failed. Loading static backup fallbacks...', localErr);
+            }
+        }
+
+        if (rawMatches && rawMatches.length > 0) {
             allMatches = rawMatches.map((m) => {
                 const kickoff = new Date(m.rawDate);
                 return {
@@ -1432,8 +1444,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     liveMinute: m.state === 'live' ? 45 : null
                 };
             });
-        } catch (e) {
-            console.warn('Failed to load fixtures from ajkerkhela, loading local fallbacks:', e);
+        } else {
             allMatches = getLocalFallbackMatches().map((m, idx) => ({
                 id: m.matchNumber || idx + 1,
                 round: m.stage || '',

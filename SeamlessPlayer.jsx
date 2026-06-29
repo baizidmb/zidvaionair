@@ -172,10 +172,23 @@ export default function SeamlessPlayer() {
 
   useEffect(() => {
     async function loadMatches() {
+      let raw = [];
       try {
         const res = await fetch('https://ajkerkhela.vercel.app/api/schedule');
-        if (!res.ok) throw new Error('Failed to load schedule');
-        const raw = await res.json();
+        if (!res.ok) throw new Error('Failed to fetch live API schedule');
+        raw = await res.json();
+      } catch (e) {
+        console.warn('Vercel API fetch failed or blocked by CORS in React. Loading local schedule.json cache...', e);
+        try {
+          const res = await fetch('schedule.json');
+          if (!res.ok) throw new Error('Failed to fetch local schedule.json');
+          raw = await res.json();
+        } catch (localErr) {
+          console.error('Local schedule.json cache failed in React.', localErr);
+        }
+      }
+
+      if (raw && raw.length > 0) {
         const mapped = raw.map(m => {
           const kickoff = new Date(m.rawDate);
           return {
@@ -194,8 +207,6 @@ export default function SeamlessPlayer() {
           };
         });
         setMatches(mapped);
-      } catch (e) {
-        console.error("Error loading React schedule:", e);
       }
     }
     loadMatches();
