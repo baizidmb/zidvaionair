@@ -63,43 +63,18 @@ export default function SeamlessPlayer() {
   useEffect(() => {
     async function loadM3u() {
       try {
-        const res = await fetch('https://iptv-org.github.io/iptv/categories/sports.m3u');
-        if (!res.ok) throw new Error('Failed to load M3U');
-        const text = await res.text();
+        const res = await fetch('verified_channels.json');
+        if (!res.ok) throw new Error('Failed to load verified channels');
+        const parsed = await res.json();
         
-        const lines = text.split(/\r?\n/);
-        const parsed = [];
-        let currentChannel = null;
-
-        for (let line of lines) {
-          line = line.trim();
-          if (!line) continue;
-
-          if (line.startsWith('#EXTINF:')) {
-            let logo = '';
-            if (line.includes('tvg-logo="')) {
-              logo = line.split('tvg-logo="')[1].split('"')[0];
-            }
-
-            const nameParts = line.split(',');
-            let name = nameParts[nameParts.length - 1].trim();
-
-            currentChannel = {
-              name: name,
-              logo: logo,
-              badge: 'IPTV',
-              detail: 'IPTV Sports Channel',
-              status: 'checking'
-            };
-          } else if (line.startsWith('http') && currentChannel) {
-            currentChannel.url = line;
-            parsed.push(currentChannel);
-            currentChannel = null;
-          }
-        }
-        setDynamicChannels(prev => [...prev, ...parsed]);
+        // Map and set status to checking initially
+        const formatted = parsed.map(ch => ({
+          ...ch,
+          status: 'checking'
+        }));
+        setDynamicChannels(prev => [...prev, ...formatted]);
       } catch (e) {
-        console.error('Failed to load M3U playlist in React:', e);
+        console.error('Failed to load verified playlist in React:', e);
       }
     }
     loadM3u();

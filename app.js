@@ -474,15 +474,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadM3uChannels() {
         try {
-            const res = await fetch('https://iptv-org.github.io/iptv/categories/sports.m3u');
-            if (!res.ok) throw new Error('Failed to load M3U file');
-            const text = await res.text();
-            const parsed = parseM3u(text);
+            const res = await fetch('verified_channels.json');
+            if (!res.ok) throw new Error('Failed to load verified channels file');
+            const parsed = await res.json();
             
             const startIdx = CHANNELS.length;
             CHANNELS = [...CHANNELS, ...parsed];
             renderChannelsGrid();
-
+ 
             // Enqueue all channels for verification (both Sportzfy and newly loaded ones)
             for (let i = 0; i < CHANNELS.length; i++) {
                 if (i < startIdx) {
@@ -493,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 enqueueHealthCheck(i);
             }
         } catch (e) {
-            console.error('Error fetching M3U channels:', e);
+            console.error('Error fetching verified channels:', e);
         }
     }
 

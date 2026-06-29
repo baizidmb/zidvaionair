@@ -3,7 +3,7 @@
    ========================================================= */
 
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@600;700&family=Noto+Sans+Bengali:wght@800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@600;700&family=Noto+Sans+Bengali:wght@800;900&family=Outfit:wght@300;400;600;800&display=swap');
 
 @theme {
   --color-cosmic-orange: #ff7a00;
@@ -411,19 +411,15 @@ html, body {
    GLOW STYLING FOR LOGOS
    --------------------------------------------------------- */
 .header-title-glow {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
     font-size: 11px;
-    letter-spacing: -0.04em;
-    background: linear-gradient(-45deg, #ff7a00, #ff007f, #a855f7, #ff7a00);
-    background-size: 300% 300%;
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    animation: logoShift 6s ease-in-out infinite, textGradientShift 6s ease infinite, logoBreath 4s ease-in-out infinite;
-    filter: drop-shadow(0 0 12px rgba(255, 122, 0, 0.15));
+    letter-spacing: 0.12em;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
     display: inline-block;
     white-space: nowrap;
+    text-transform: uppercase;
 }
 
 @media (min-width: 360px) {
@@ -434,7 +430,8 @@ html, body {
 
 @media (min-width: 640px) {
     .header-title-glow {
-        font-size: 1.55rem;
+        font-size: 1.45rem;
+        letter-spacing: 0.15em;
     }
 }
 
