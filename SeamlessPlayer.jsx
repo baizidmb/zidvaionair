@@ -58,6 +58,7 @@ export default function SeamlessPlayer() {
   const [activeTab, setActiveTab] = useState('feeds');
   const [funnyIndex, setFunnyIndex] = useState(0);
   const [toastMessage, setToastMessage] = useState(null);
+  const [clickedIndex, setClickedIndex] = useState(null);
 
   useEffect(() => {
     async function loadM3u() {
@@ -1010,6 +1011,8 @@ export default function SeamlessPlayer() {
                         <div 
                           key={idx}
                           onClick={() => {
+                            setClickedIndex(idx);
+                            setTimeout(() => setClickedIndex(null), 500);
                             if (ch.url.includes('.mpd')) {
                               setErrorMessage('DASH / Widevine DRM channels require a Germany VPN and specialized player components. Please select an HLS stream.');
                             } else {
@@ -1018,26 +1021,9 @@ export default function SeamlessPlayer() {
                             }
                             setCurrentChannel(ch);
                           }}
-                          className={`${styles.serverCard} ${isActive ? styles.serverCardActive : ''}`}
+                          className={`${styles.serverCard} ${isActive ? styles.serverCardActive : ''} ${clickedIndex === idx ? styles.clickedWave : ''}`}
                         >
-                          <div 
-                            className={styles.serverThumb}
-                            style={{
-                              width: '42px',
-                              height: '28px',
-                              background: 'linear-gradient(135deg, #ff7a00 0%, #ff3c00 100%)',
-                              borderRadius: '6px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justify-content: 'center',
-                              fontSize: '9px',
-                              fontWeight: 800,
-                              color: '#ffffff',
-                              flexShrink: 0,
-                              border: '1px solid rgba(255, 255, 255, 0.15)',
-                              overflow: 'hidden'
-                            }}
-                          >
+                          <div className={styles.serverThumb}>
                             {ch.logo && ch.logo.startsWith('http') ? (
                               <img 
                                 src={ch.logo} 
@@ -1054,6 +1040,13 @@ export default function SeamlessPlayer() {
                             <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.detail}</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontFamily: 'monospace' }}>
+                            {isActive && (
+                              <div style={{ display: 'flex', alignItems: 'end', gap: '2px', width: '11px', height: '10px', marginRight: '4px' }}>
+                                <span className={`${styles.eqBar1}`} style={{ width: '2.5px', height: '100%', borderRadius: '99px', backgroundColor: '#ff7a00' }}></span>
+                                <span className={`${styles.eqBar2}`} style={{ width: '2.5px', height: '100%', borderRadius: '99px', backgroundColor: '#ff7a00' }}></span>
+                                <span className={`${styles.eqBar3}`} style={{ width: '2.5px', height: '100%', borderRadius: '99px', backgroundColor: '#ff7a00' }}></span>
+                              </div>
+                            )}
                             <span>{statusLabel}</span>
                             <span className={styles.statusDot} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: dotColor, boxShadow: dotShadow }} />
                           </div>

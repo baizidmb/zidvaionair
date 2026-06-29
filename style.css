@@ -520,3 +520,54 @@ h1, h2, h3, h4, h5, h6 {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
+
+/* Click and playing animations */
+@keyframes clickGlowWave {
+    0% {
+        box-shadow: 0 0 0px rgba(255, 122, 0, 0), inset 0 0 0px rgba(255, 255, 255, 0);
+        background: rgba(255, 255, 255, 0.02);
+    }
+    15% {
+        box-shadow: 0 0 15px rgba(255, 122, 0, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.08);
+    }
+    100% {
+        box-shadow: 0 0 0px rgba(255, 122, 0, 0), inset 0 0 0px rgba(255, 255, 255, 0);
+        background: rgba(255, 255, 255, 0.02);
+    }
+}
+.server-card.clicked-wave {
+    animation: clickGlowWave 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes playingGlow {
+    0%, 100% {
+        border-color: #ff7a00;
+        box-shadow: 0 0 15px rgba(255, 122, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.15);
+        background: linear-gradient(135deg, rgba(255, 122, 0, 0.14) 0%, rgba(255, 60, 0, 0.04) 100%);
+    }
+    50% {
+        border-color: #ffaa00;
+        box-shadow: 0 0 25px rgba(255, 122, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.25);
+        background: linear-gradient(135deg, rgba(255, 122, 0, 0.22) 0%, rgba(255, 60, 0, 0.06) 100%);
+    }
+}
+.server-card.active {
+    animation: playingGlow 2.5s infinite ease-in-out !important;
+}
+
+@keyframes eqBounce1 {
+    0%, 100% { height: 3px; }
+    50% { height: 10px; }
+}
+@keyframes eqBounce2 {
+    0%, 100% { height: 10px; }
+    50% { height: 4px; }
+}
+@keyframes eqBounce3 {
+    0%, 100% { height: 6px; }
+    50% { height: 10px; }
+}
+.eq-bar.bar1 { animation: eqBounce1 0.8s ease-in-out infinite; }
+.eq-bar.bar2 { animation: eqBounce2 0.7s ease-in-out infinite; }
+.eq-bar.bar3 { animation: eqBounce3 0.9s ease-in-out infinite; }

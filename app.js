@@ -406,6 +406,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const statusClass = channel.status === 'online' ? 'green' : (channel.status === 'checking' ? 'amber' : 'red');
             const statusLabel = channel.status || 'checking';
 
+            const activeEq = isActive ? `
+                <div class="playing-equalizer flex items-end gap-[2px] w-[11px] h-[10px] mr-1">
+                    <span class="eq-bar bar1 bg-[#ff7a00] w-[2.5px] h-full rounded-full"></span>
+                    <span class="eq-bar bar2 bg-[#ff7a00] w-[2.5px] h-full rounded-full"></span>
+                    <span class="eq-bar bar3 bg-[#ff7a00] w-[2.5px] h-full rounded-full"></span>
+                </div>
+            ` : '';
+
             card.innerHTML = `
                 <div class="server-thumb flex items-center justify-center">${thumbContent}</div>
                 <div class="flex-grow flex flex-col overflow-hidden text-left">
@@ -413,12 +421,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="text-[10px] text-white/40 truncate">${channel.detail || 'Live Broadcast Feed'}</span>
                 </div>
                 <div class="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
+                    ${activeEq}
                     <span class="status-text">${statusLabel}</span>
                     <span class="status-dot status-${statusClass}"></span>
                 </div>
             `;
 
             card.addEventListener('click', () => {
+                card.classList.add('clicked-wave');
+                setTimeout(() => card.classList.remove('clicked-wave'), 500);
                 playStream(index);
                 renderChannelsGrid();
             });
