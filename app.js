@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'sbs', 'tvnz', 'cctv', 'migu', 'nhk', 'fuji', 'dazn', 'kbs', 'mbc', 'tvri', 'mediacorp', 
         'viutv', 'elta', 'bbc', 'itv', 'stv', 'rte', 'tf1', 'm6', 'ard', 'zdf', 'magenta', 'rai', 
         'rtve', 'sport tv', 'caze', 'globo', 'sportv', 'tyc', 'publica', 'dsports', 'caracol', 
-        'rcn', 'btv', 'somoy', 'toffee', 'ptv', 'tapmad', 'sports18', 'jiocinema', 'fussball', 'arena sports'
+        'rcn', 'btv', 'somoy', 'toffee', 'ptv', 'tapmad', 'sports18', 'jiocinema', 'fussball', 'arena'
     ];
 
     // Health Verification Queue
@@ -417,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div class="server-thumb flex items-center justify-center">${thumbContent}</div>
                 <div class="flex-grow flex flex-col overflow-hidden text-left">
-                    <span class="server-card-name font-bold text-xs truncate text-white" title="${channel.name}">[${index + 1}] ${channel.name}</span>
+                    <span class="server-card-name font-bold text-xs truncate text-white" title="${channel.name}">${channel.name}</span>
                     <span class="text-[10px] text-white/40 truncate">${channel.detail || 'Live Broadcast Feed'}</span>
                 </div>
                 <div class="flex items-center gap-1.5 text-[10px] font-mono text-white/50">

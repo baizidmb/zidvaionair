@@ -45,7 +45,7 @@ const WC_KEYWORDS = [
   'sbs', 'tvnz', 'cctv', 'migu', 'nhk', 'fuji', 'dazn', 'kbs', 'mbc', 'tvri', 'mediacorp', 
   'viutv', 'elta', 'bbc', 'itv', 'stv', 'rte', 'tf1', 'm6', 'ard', 'zdf', 'magenta', 'rai', 
   'rtve', 'sport tv', 'caze', 'globo', 'sportv', 'tyc', 'publica', 'dsports', 'caracol', 
-  'rcn', 'btv', 'somoy', 'toffee', 'ptv', 'tapmad', 'sports18', 'jiocinema', 'fussball', 'arena sports'
+  'rcn', 'btv', 'somoy', 'toffee', 'ptv', 'tapmad', 'sports18', 'jiocinema', 'fussball', 'arena'
 ];
 
 export default function SeamlessPlayer() {
@@ -1060,7 +1060,7 @@ export default function SeamlessPlayer() {
                             )}
                           </div>
                           <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', textAlign: 'left' }}>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>[{idx + 1}] {ch.name}</span>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.name}</span>
                             <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.detail}</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontFamily: 'monospace' }}>
