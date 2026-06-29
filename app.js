@@ -6,28 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Live Feed Stream URL Configuration
     let CHANNELS = [
-        { name: "SP - SD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OukERocFRoTLpNhopWhojWRopWkQVbmFk6nI0zf&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy SD Clean Feed", badge: "sd" },
-        { name: "SP - HD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OuzERokijak4MYmoV9JdsHJokrJdkABFhNcE0zKLw&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy HD Clean Feed", badge: "fhd" },
-        { name: "FAST 1", url: "https://pullsgp.yyzb456.top/live/stream-698168_lhd.m3u8", detail: "High Speed Routing 1", badge: "hd" },
-        { name: "FAST 2", url: "https://pul-tenm.nbs3g.com/live/hd-en-1-4459717.m3u8?txSecret=cb546b67173ce18b5d6e9c15e9ec6b4b&txTime=6A42BDE0", detail: "High Speed Routing 2", badge: "hd" },
-        { name: "Arabic", url: "https://em.golatooa.site/Canads1.m3u8", detail: "Arabic Broadcast Feed", badge: "sd" },
-        { name: "CCTV 5", url: "https://live.666666.zip/cctv/5.m3u8", detail: "CCTV Sports Broadcast", badge: "hd" },
-        { name: "SP - 2", url: "https://live.666666.zip/migu/1.m3u8", detail: "Migu Live Broadcast", badge: "hd" },
-        { name: "SP - 3", url: "https://hqlive.yarncdn.live/live/hqtv_blv_phanma/playlist.m3u8", detail: "HQTV Live Feed", badge: "hd" },
-        { name: "FUSSBALL (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_hd/DASH/index.mpd", detail: "Fussball TV HD (DASH/DRM)", badge: "fhd" },
-        { name: "FUSSBALL 4K (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd", detail: "Fussball TV 4K (DASH/DRM)", badge: "4k" },
-        { name: "Somoy TV", url: "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8", detail: "Somoy TV Live Broadcast", badge: "hd" },
-        { name: "Win Sports", url: "https://1nyaler.streamhostingcdn.top/stream/32/index.m3u8", detail: "Win Sports Broadcast", badge: "hd" },
         { name: "beIN Sports 1", url: "https://ua102.online24.pm:8443/1101/video.m3u8?token=350B326FB34F4B8", detail: "beIN 1 Broadcast Feed", badge: "hd" },
         { name: "Fox Sports", url: "http://84.17.50.102/fox/index.m3u8", detail: "Fox Sports Live Feed", badge: "hd" },
-        { name: "Peace TV English", url: "https://dzkyvlfyge.erbvr.com/PeaceTvEnglish/index.m3u8?sid=Z44HMm4XiUygzqBGwjL4gA", detail: "Peace TV English Broadcast", badge: "sd" },
-        { name: "BTV", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1709/output/index.m3u8", detail: "BTV National Feed", badge: "hd" },
-        { name: "DAZN Directo", url: "https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8", detail: "DAZN Live Feed", badge: "hd" },
-        { name: "D Sports", url: "https://1nyaler.streamhostingcdn.top/stream/106/index.m3u8", detail: "D Sports Live Feed", badge: "hd" },
-        { name: "beIN Sports 2", url: "https://1nyaler.streamhostingcdn.top/stream/23/index.m3u8", detail: "beIN 2 Broadcast Feed", badge: "hd" }
+        { name: "Somoy TV", url: "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8", detail: "Somoy TV Live Broadcast", badge: "hd" },
+        { name: "Peace TV English", url: "https://dzkyvlfyge.erbvr.com/PeaceTvEnglish/index.m3u8?sid=Z44HMm4XiUygzqBGwjL4gA", detail: "Peace TV English Broadcast", badge: "sd" }
     ];
 
-    let currentChannelIndex = 1; // Play SP - HD by default
+    let currentChannelIndex = 0; // Play beIN Sports 1 by default
     let searchQuery = '';
     let hideOffline = true;
     let activeFolder = 'fifa'; // 'fifa' or 'others'
