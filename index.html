@@ -17,11 +17,15 @@
     <!-- Custom styling stylesheet link -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#050508] bg-gradient-to-b from-[#050508] via-[#0b0a10] to-[#020204] text-white/90 min-h-screen font-outfit flex flex-col overflow-x-hidden relative select-none">
+<body class="bg-[#030305] text-white/90 min-h-screen font-outfit flex flex-col overflow-x-hidden relative select-none">
 
-    <!-- Ambient cosmic glowing lights behind content -->
-    <div class="ambient-glow pointer-events-none absolute top-[-10%] left-[10%] w-[600px] h-[600px] rounded-full bg-[#ff5500]/5 blur-[160px] animate-pulse"></div>
-    <div class="ambient-glow pointer-events-none absolute bottom-[10%] right-[5%] w-[500px] h-[500px] rounded-full bg-[#ffaa00]/5 blur-[140px]"></div>
+    <!-- iOS 27 Morphing Liquid Fluid Orbs Background -->
+    <div class="background-orbs-container">
+        <div class="fluid-orb orb-cyan"></div>
+        <div class="fluid-orb orb-magenta"></div>
+        <div class="fluid-orb orb-violet"></div>
+        <div class="fluid-orb orb-amber"></div>
+    </div>
 
     <!-- Toast container for failover notices -->
     <div id="toast-container"></div>
@@ -85,7 +89,7 @@
     </header>
 
     <!-- Main Content Container -->
-    <div class="max-w-[1600px] mx-auto w-full flex-grow flex flex-col p-4 md:p-6 gap-6 relative z-10 box-border">
+    <div class="max-w-[1600px] mx-auto w-full flex-grow flex flex-col p-4 md:p-6 pt-28 md:pt-32 gap-6 relative z-10 box-border">
         
         <!-- Video Hero & Sidebar Grid -->
         <main class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-stretch">
@@ -198,6 +202,15 @@
                                 <button id="folder-btn-others" class="flex-grow py-1.5 rounded-lg text-[10px] font-bold tracking-wider text-center cursor-pointer transition-all duration-200 bg-white/5 text-white/50 border border-white/5 hover:text-white hover:bg-white/10">
                                     ⚽ OTHER SPORTS
                                 </button>
+                            </div>
+                            <!-- Favorites Glass Hub -->
+                            <div id="favorites-glass-hub" class="favorites-glass-hub border-b border-white/5 bg-black/15 p-3 flex flex-col gap-1.5">
+                                <div class="text-[9px] font-extrabold uppercase tracking-wider text-white/40 flex items-center gap-1">
+                                    <i class="fa-solid fa-heart text-[#ff3c00] animate-pulse"></i> My Favorites
+                                </div>
+                                <div id="favorites-list-scroll" class="favorites-list-scroll flex items-center gap-2 overflow-x-auto scrollbar-style pb-1">
+                                    <span class="text-[9px] text-white/30 italic">Tap the heart on any channel to save it here for quick access.</span>
+                                </div>
                             </div>
                             <!-- Scrollable Container -->
                             <div id="servers-container" class="flex-grow overflow-y-auto p-3 scrollbar-style grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 auto-rows-max">
