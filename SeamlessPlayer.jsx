@@ -52,7 +52,6 @@ export default function SeamlessPlayer() {
   const [currentDateIdx, setCurrentDateIdx] = useState(0);
   const [activeFolder, setActiveFolder] = useState('fifa');
   const [activeTab, setActiveTab] = useState('feeds');
-  const [funnyIndex, setFunnyIndex] = useState(0);
   const [toastMessage, setToastMessage] = useState(null);
   const [clickedIndex, setClickedIndex] = useState(null);
 
@@ -160,12 +159,7 @@ export default function SeamlessPlayer() {
     }, 3000);
   };
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setFunnyIndex(prev => (prev + 1) % 13);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, []);
+
 
   useEffect(() => {
     async function loadMatches() {
@@ -1251,157 +1245,7 @@ export default function SeamlessPlayer() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Fan Zone: Funny Portfolio Slider Section */}
-      <section className={styles.trollZoneSection}>
-        <h2 style={{
-          fontSize: '0.875rem',
-          fontWeight: 800,
-          letterSpacing: '0.05em',
-          color: 'rgba(255, 255, 255, 0.8)',
-          textTransform: 'uppercase',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          fontFamily: "'Space Grotesk', sans-serif"
-        }}>
-          <i className="fa-solid fa-face-laugh-beam" style={{ color: '#ff7a00' }}></i> Zid Vai's Funny Troll Zone 🤪
-        </h2>
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '1rem',
-          padding: '0.5rem 0',
-          width: '100%',
-          position: 'relative'
-        }}>
-          {/* Modern Slider Container */}
-          <div className="modern-slider-wrap" style={{
-            position: 'relative',
-            width: '100%',
-            maxWidth: '28rem',
-            aspectRatio: '4/3',
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            borderRadius: '1rem',
-            border: '1px solid rgba(255, 255, 255, 0.05)',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
-          }}>
-            <div style={{
-              display: 'flex',
-              width: '100%',
-              height: '100%',
-              transform: `translateX(-${funnyIndex * 100}%)`,
-              transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}>
-              {Array.from({ length: 13 }, (_, i) => (
-                <div key={i} style={{
-                  width: '100%',
-                  height: '100%',
-                  flexShrink: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '0.5rem',
-                  boxSizing: 'border-box'
-                }}>
-                  <img 
-                    src={`funny-images/img_${i + 1}.jpg`} 
-                    alt={`Funny Slide ${i + 1}`}
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '100%',
-                      objectFit: 'contain',
-                      borderRadius: '0.75rem',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-            
-            {/* Arrows */}
-            <button 
-              onClick={() => setFunnyIndex(prev => (prev - 1 + 13) % 13)}
-              style={{
-                position: 'absolute',
-                left: '12px',
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                zIndex: 20,
-                outline: 'none'
-              }}
-            >
-              <i className="fa-solid fa-chevron-left" style={{ fontSize: '10px' }}></i>
-            </button>
-            <button 
-              onClick={() => setFunnyIndex(prev => (prev + 1) % 13)}
-              style={{
-                position: 'absolute',
-                right: '12px',
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                zIndex: 20,
-                outline: 'none'
-              }}
-            >
-              <i className="fa-solid fa-chevron-right" style={{ fontSize: '10px' }}></i>
-            </button>
-          </div>
-
-          {/* Dots Indicator */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '0.5rem', maxWidth: '20rem' }}>
-            {Array.from({ length: 13 }, (_, i) => (
-              <span 
-                key={i}
-                onClick={() => setFunnyIndex(i)}
-                style={{
-                  width: i === funnyIndex ? '16px' : '8px',
-                  height: '8px',
-                  borderRadius: '9999px',
-                  backgroundColor: i === funnyIndex ? '#ff7a00' : 'rgba(255, 255, 255, 0.2)',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Big Stylish Bangla Font text */}
-        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-          <div 
-            className="bangla-stylish-text"
-            style={{
-              fontSize: '2.5rem',
-              fontWeight: 800,
-              userSelect: 'none'
-            }}
-          >
-            রাগ করলা?
-          </div>
-        </div>
+       </div>
       </section>
 
       {/* Live Matches & Upcoming Schedule Section */}

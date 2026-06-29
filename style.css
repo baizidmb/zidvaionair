@@ -972,10 +972,21 @@ main {
     overflow: visible !important;
 }
 
-.lg\:col-span-3,
+.lg\:col-span-3 {
+    height: auto !important;
+    overflow: visible !important;
+}
+
 .lg\:col-span-1 {
     height: auto !important;
     overflow: visible !important;
+}
+
+@media (min-width: 1024px) {
+    .lg\:col-span-1 {
+        height: 750px !important;
+        overflow: visible !important;
+    }
 }
 
 /* Perfect Sticky Video Player Container */

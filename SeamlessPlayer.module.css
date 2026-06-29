@@ -905,7 +905,7 @@
 
 @media (min-width: 1024px) {
   .sidebarColumn {
-    height: auto;
+    height: 750px !important;
   }
 }
 
