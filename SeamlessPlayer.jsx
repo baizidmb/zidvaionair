@@ -727,11 +727,48 @@ export default function SeamlessPlayer() {
         </div>
 
         <div className={styles.headerRight}>
-          {/* Facebook Developer Profile Badge */}
-          <a href="https://www.facebook.com/shahidulislam.bayzid.37" target="_blank" rel="noopener noreferrer" className={styles.devBadge}>
-            <i className="fa-brands fa-facebook text-blue-400 animate-pulse text-[11px] sm:text-xs"></i>
-            <span className={styles.devBadgeText} style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em', color: '#bfdbfe' }}>DEVELOPER</span>
-          </a>
+          {/* Unified Badge Group */}
+          <div className="unified-badge-wrap flex-shrink-0">
+            {/* Developer Icon Link */}
+            <a 
+              href="https://www.facebook.com/shahidulislam.bayzid.37" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                padding: '2px 8px',
+                borderRadius: '9999px',
+                fontSize: '9px',
+                fontWeight: 700,
+                color: '#ffffff',
+                textDecoration: 'none',
+                transition: 'background-color 0.2s'
+              }}
+            >
+              <i className="fa-brands fa-facebook text-blue-400" style={{ fontSize: '11px' }}></i>
+              <span className="hidden sm:inline">DEVELOPER</span>
+            </a>
+            {/* Experimental Icon Label */}
+            <span 
+              className={styles.experimentalBadge}
+              style={{
+                background: 'linear-gradient(to right, #ff5500, #ffaa00)',
+                color: '#ffffff',
+                padding: '2px 8px',
+                borderRadius: '9999px',
+                fontSize: '8px',
+                fontWeight: 700,
+                fontFamily: 'monospace',
+                letterSpacing: '0.1em'
+              }}
+            >
+              <span className="inline min-[360px]:hidden">EXP</span>
+              <span className="hidden min-[360px]:inline">EXPERIMENTAL</span>
+            </span>
+          </div>
           <div className={styles.headerStats} style={{ display: 'none' /* hidden by default, shown on desktop override in CSS */ }}>
             <span className={styles.statsIcon}><i className="fa-solid fa-users"></i></span>
             <span className={styles.statsCount}>24.5K</span> online
