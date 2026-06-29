@@ -40,12 +40,21 @@ const STATIC_CHANNELS = [
   { name: "FUSSBALL 4K (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd", detail: "Fussball TV 4K (DASH/DRM)", badge: "4k", status: 'online' }
 ];
 
+const WC_KEYWORDS = [
+  'fox', 'telemundo', 'peacock', 'tsn', 'rds', 'tudn', 'vix', 'azteca', 'bein', 'alkass', 
+  'sbs', 'tvnz', 'cctv', 'migu', 'nhk', 'fuji', 'dazn', 'kbs', 'mbc', 'tvri', 'mediacorp', 
+  'viutv', 'elta', 'bbc', 'itv', 'stv', 'rte', 'tf1', 'm6', 'ard', 'zdf', 'magenta', 'rai', 
+  'rtve', 'sport tv', 'caze', 'globo', 'sportv', 'tyc', 'publica', 'dsports', 'caracol', 
+  'rcn', 'btv', 'somoy', 'toffee', 'ptv', 'tapmad', 'sports18', 'jiocinema', 'fussball'
+];
+
 export default function SeamlessPlayer() {
   const [dynamicChannels, setDynamicChannels] = useState(STATIC_CHANNELS);
   const [currentChannel, setCurrentChannel] = useState(STATIC_CHANNELS[1]);
   const [streamUrl, setStreamUrl] = useState(STATIC_CHANNELS[1].url);
   const [searchQuery, setSearchQuery] = useState('');
   const [hideOffline, setHideOffline] = useState(true);
+  const [activeFolder, setActiveFolder] = useState('fifa');
   const [activeTab, setActiveTab] = useState('feeds');
   const [messiIndex, setMessiIndex] = useState(0);
   const [messiFade, setMessiFade] = useState(false);
@@ -876,11 +885,60 @@ export default function SeamlessPlayer() {
                     </div>
                   </div>
                   
+                  {/* Folders Selector */}
+                  <div style={{ padding: '0 0.75rem 0.5rem 0.75rem', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: 'rgba(0, 0, 0, 0.1)', display: 'flex', gap: '8px', boxSizing: 'border-box' }}>
+                    <button 
+                      onClick={() => setActiveFolder('fifa')}
+                      style={{ 
+                        flexGrow: 1, 
+                        padding: '6px 0', 
+                        borderRadius: '8px', 
+                        fontSize: '10px', 
+                        fontWeight: 'bold', 
+                        letterSpacing: '0.05em', 
+                        textAlign: 'center', 
+                        cursor: 'pointer', 
+                        transition: 'all 0.2s',
+                        background: activeFolder === 'fifa' ? '#ff7a00' : 'rgba(255, 255, 255, 0.05)',
+                        color: activeFolder === 'fifa' ? '#ffffff' : 'rgba(255, 255, 255, 0.5)',
+                        border: activeFolder === 'fifa' ? '1px solid #ff7a00' : '1px solid rgba(255, 255, 255, 0.05)'
+                      }}
+                    >
+                      🏆 FIFA LIVE
+                    </button>
+                    <button 
+                      onClick={() => setActiveFolder('others')}
+                      style={{ 
+                        flexGrow: 1, 
+                        padding: '6px 0', 
+                        borderRadius: '8px', 
+                        fontSize: '10px', 
+                        fontWeight: 'bold', 
+                        letterSpacing: '0.05em', 
+                        textAlign: 'center', 
+                        cursor: 'pointer', 
+                        transition: 'all 0.2s',
+                        background: activeFolder === 'others' ? '#ff7a00' : 'rgba(255, 255, 255, 0.05)',
+                        color: activeFolder === 'others' ? '#ffffff' : 'rgba(255, 255, 255, 0.5)',
+                        border: activeFolder === 'others' ? '1px solid #ff7a00' : '1px solid rgba(255, 255, 255, 0.05)'
+                      }}
+                    >
+                      ⚽ OTHER SPORTS
+                    </button>
+                  </div>
+                  
                   {/* Scrollable Container */}
                   <div className="scrollbar-style" style={{ flexGrow: 1, overflowY: 'auto', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.625rem', boxSizing: 'border-box' }}>
                     {dynamicChannels.map((ch, idx) => {
                       const query = searchQuery.trim().toLowerCase();
                       if (query && !ch.name.toLowerCase().includes(query) && !(ch.detail || '').toLowerCase().includes(query)) {
+                        return null;
+                      }
+                      const isFifa = (idx < STATIC_CHANNELS.length) || WC_KEYWORDS.some(kw => ch.name.toLowerCase().includes(kw));
+                      if (activeFolder === 'fifa' && !isFifa) {
+                        return null;
+                      }
+                      if (activeFolder === 'others' && isFifa) {
                         return null;
                       }
                       if (hideOffline && ch.status === 'offline') {

@@ -21,7 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentChannelIndex = 1; // Play SP - HD by default
     let searchQuery = '';
     let hideOffline = true;
+    let activeFolder = 'fifa'; // 'fifa' or 'others'
     let hls = null;
+
+    const WC_KEYWORDS = [
+        'fox', 'telemundo', 'peacock', 'tsn', 'rds', 'tudn', 'vix', 'azteca', 'bein', 'alkass', 
+        'sbs', 'tvnz', 'cctv', 'migu', 'nhk', 'fuji', 'dazn', 'kbs', 'mbc', 'tvri', 'mediacorp', 
+        'viutv', 'elta', 'bbc', 'itv', 'stv', 'rte', 'tf1', 'm6', 'ard', 'zdf', 'magenta', 'rai', 
+        'rtve', 'sport tv', 'caze', 'globo', 'sportv', 'tyc', 'publica', 'dsports', 'caracol', 
+        'rcn', 'btv', 'somoy', 'toffee', 'ptv', 'tapmad', 'sports18', 'jiocinema', 'fussball'
+    ];
 
     // Health Verification Queue
     let healthQueue = [];
@@ -369,6 +378,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         CHANNELS.forEach((channel, index) => {
             if (query && !channel.name.toLowerCase().includes(query) && !(channel.detail || '').toLowerCase().includes(query)) {
+                return;
+            }
+
+            const isFifa = (index < 10) || WC_KEYWORDS.some(kw => channel.name.toLowerCase().includes(kw));
+            if (activeFolder === 'fifa' && !isFifa) {
+                return;
+            }
+            if (activeFolder === 'others' && isFifa) {
                 return;
             }
 
@@ -1486,6 +1503,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hideOfflineToggle) {
         hideOfflineToggle.addEventListener('change', (e) => {
             hideOffline = e.target.checked;
+            renderChannelsGrid();
+        });
+    }
+
+    const folderBtnFifa = document.getElementById('folder-btn-fifa');
+    const folderBtnOthers = document.getElementById('folder-btn-others');
+    if (folderBtnFifa && folderBtnOthers) {
+        folderBtnFifa.addEventListener('click', () => {
+            activeFolder = 'fifa';
+            folderBtnFifa.className = "flex-grow py-1.5 rounded-lg text-[10px] font-bold tracking-wider text-center cursor-pointer transition-all duration-200 bg-[#ff7a00] text-white border border-[#ff7a00]";
+            folderBtnOthers.className = "flex-grow py-1.5 rounded-lg text-[10px] font-bold tracking-wider text-center cursor-pointer transition-all duration-200 bg-white/5 text-white/50 border border-white/5 hover:text-white hover:bg-white/10";
+            renderChannelsGrid();
+        });
+
+        folderBtnOthers.addEventListener('click', () => {
+            activeFolder = 'others';
+            folderBtnOthers.className = "flex-grow py-1.5 rounded-lg text-[10px] font-bold tracking-wider text-center cursor-pointer transition-all duration-200 bg-[#ff7a00] text-white border border-[#ff7a00]";
+            folderBtnFifa.className = "flex-grow py-1.5 rounded-lg text-[10px] font-bold tracking-wider text-center cursor-pointer transition-all duration-200 bg-white/5 text-white/50 border border-white/5 hover:text-white hover:bg-white/10";
             renderChannelsGrid();
         });
     }
