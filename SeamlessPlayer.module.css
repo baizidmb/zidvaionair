@@ -188,7 +188,7 @@
 .logoText {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 11px;
   letter-spacing: -0.04em;
   background: linear-gradient(-45deg, #ff7a00, #ff007f, #a855f7, #ff7a00);
   background-size: 300% 300%;
@@ -198,7 +198,12 @@
   filter: drop-shadow(0 0 12px rgba(255, 122, 0, 0.15));
   white-space: nowrap;
 }
-@media (min-width: 480px) {
+@media (min-width: 360px) {
+  .logoText {
+    font-size: 12px;
+  }
+}
+@media (min-width: 640px) {
   .logoText {
     font-size: 1.35rem;
   }

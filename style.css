@@ -413,7 +413,7 @@ html, body {
 .header-title-glow {
     font-family: 'Syne', sans-serif;
     font-weight: 800;
-    font-size: 1.55rem;
+    font-size: 11px;
     letter-spacing: -0.04em;
     background: linear-gradient(-45deg, #ff7a00, #ff007f, #a855f7, #ff7a00);
     background-size: 300% 300%;
@@ -423,6 +423,19 @@ html, body {
     animation: logoShift 6s ease-in-out infinite, textGradientShift 6s ease infinite, logoBreath 4s ease-in-out infinite;
     filter: drop-shadow(0 0 12px rgba(255, 122, 0, 0.15));
     display: inline-block;
+    white-space: nowrap;
+}
+
+@media (min-width: 360px) {
+    .header-title-glow {
+        font-size: 12px;
+    }
+}
+
+@media (min-width: 640px) {
+    .header-title-glow {
+        font-size: 1.55rem;
+    }
 }
 
 header nav a, 
