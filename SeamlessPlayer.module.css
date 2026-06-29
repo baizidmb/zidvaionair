@@ -1506,3 +1506,271 @@
   gap: 1rem;
   margin-top: 1.5rem;
 }
+
+/* iOS 27 Liquid Glass Theme System Module */
+.bodyWrapper {
+  background-color: #030305 !important;
+  background-image: none !important;
+}
+
+.backgroundOrbsContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  background-color: #030305;
+}
+
+.fluidOrb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.45;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.orbCyan {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.4) 0%, rgba(79, 172, 254, 0) 70%);
+  top: -10%;
+  left: 5%;
+  animation: orbMorph1 25s ease-in-out infinite alternate;
+}
+
+.orbMagenta {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255, 0, 127, 0.35) 0%, rgba(255, 0, 127, 0) 70%);
+  bottom: -15%;
+  right: 5%;
+  animation: orbMorph2 30s ease-in-out infinite alternate;
+}
+
+.orbViolet {
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, rgba(126, 34, 206, 0.4) 0%, rgba(126, 34, 206, 0) 70%);
+  top: 30%;
+  right: -10%;
+  animation: orbMorph3 28s ease-in-out infinite alternate;
+}
+
+.orbAmber {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(255, 122, 0, 0.3) 0%, rgba(255, 122, 0, 0) 70%);
+  bottom: 25%;
+  left: -10%;
+  animation: orbMorph1 22s ease-in-out infinite alternate;
+}
+
+@keyframes orbMorph1 {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); border-radius: 50%; }
+  33% { transform: translate(50px, -60px) scale(1.1) rotate(60deg); border-radius: 40% 60% 50% 50%; }
+  66% { transform: translate(-30px, 40px) scale(0.95) rotate(-45deg); border-radius: 60% 40% 60% 40%; }
+  100% { transform: translate(0, 0) scale(1) rotate(0deg); border-radius: 50%; }
+}
+
+@keyframes orbMorph2 {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); border-radius: 50%; }
+  50% { transform: translate(-70px, 50px) scale(1.15) rotate(120deg); border-radius: 45% 55% 45% 55%; }
+  100% { transform: translate(0, 0) scale(1) rotate(0deg); border-radius: 50%; }
+}
+
+@keyframes orbMorph3 {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); border-radius: 50%; }
+  50% { transform: translate(60px, 80px) scale(0.9) rotate(-90deg); border-radius: 55% 45% 55% 45%; }
+  100% { transform: translate(0, 0) scale(1) rotate(0deg); border-radius: 50%; }
+}
+
+/* Floating Sticky Header Module */
+.header {
+  position: fixed !important;
+  top: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 90% !important;
+  max-width: 1560px !important;
+  margin: 0 auto !important;
+  border-radius: 24px !important;
+  z-index: 100 !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+.navLink {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.navLink::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 122, 0, 0.15) 0%, transparent 80%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 8px;
+  z-index: -1;
+}
+
+.navLink:hover::before {
+  opacity: 1;
+}
+
+/* Apple Squircle Panels Module */
+.trollZoneSection,
+.chatPanel,
+.serverCard {
+  border-radius: 32px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+.serverCard {
+  border-radius: 16px !important; /* Inner elements scaled */
+}
+
+/* Detached Custom Controls Module */
+.customControls {
+  position: absolute !important;
+  bottom: 24px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 90% !important;
+  max-width: 680px !important;
+  background: rgba(15, 15, 19, 0.45) !important;
+  backdrop-filter: blur(28px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(210%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 20px !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 16px 36px rgba(0, 0, 0, 0.5) !important;
+  padding: 12px 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  z-index: 30 !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.controlsHidden {
+  opacity: 0 !important;
+  transform: translate(-50%, 15px) scale(0.97) !important;
+  pointer-events: none !important;
+}
+
+/* Glowing Neon Liquid Tube Progress Bars Module */
+.timelineContainer {
+  height: 6px !important;
+  border-radius: 9999px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  transition: height 0.2s ease !important;
+}
+
+.timelineContainer:hover {
+  height: 8px !important;
+}
+
+.timelineProgress {
+  background: linear-gradient(90deg, #ff7a00, #ffaa00) !important;
+  box-shadow: 0 0 12px rgba(255, 122, 0, 0.7), 0 0 4px rgba(255, 122, 0, 0.4) !important;
+  border-radius: 9999px !important;
+}
+
+.timelineBuffer {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-radius: 9999px !important;
+}
+
+/* Volume Slider Module */
+.volumeSlider {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  height: 6px !important;
+  border-radius: 9999px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  outline: none !important;
+  transition: opacity .2s !important;
+}
+
+.volumeSlider::-webkit-slider-runnable-track {
+  height: 6px !important;
+  border-radius: 9999px !important;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  background: #ff7a00 !important;
+  cursor: pointer !important;
+  box-shadow: 0 0 8px rgba(255, 122, 0, 0.8) !important;
+  transition: transform 0.2s ease !important;
+  margin-top: -3px !important;
+}
+
+.volumeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.3) !important;
+}
+
+/* Pulsing Status Badges Module */
+.liveBadge {
+  animation: livePulseGlow 2s infinite ease-in-out !important;
+}
+
+@keyframes livePulseGlow {
+  0%, 100% {
+    text-shadow: 0 0 4px rgba(239, 68, 68, 0.4);
+    opacity: 0.85;
+  }
+  50% {
+    text-shadow: 0 0 16px rgba(239, 68, 68, 0.95), 0 0 24px rgba(239, 68, 68, 0.6);
+    opacity: 1;
+  }
+}
+
+/* Favorites and Liquid Heart buttons */
+.favoritesGlassHub {
+  border-radius: 18px !important;
+}
+
+.favHeartBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease !important;
+}
+
+.favHeartBtn:hover {
+  transform: scale(1.2) !important;
+}
+
+.favHeartBtn:active {
+  transform: scale(0.9) !important;
+}
+
+.favMiniCard {
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.favMiniCard:hover {
+  transform: translateY(-2px) scale(1.05) !important;
+}

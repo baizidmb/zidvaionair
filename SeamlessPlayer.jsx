@@ -56,6 +56,18 @@ export default function SeamlessPlayer() {
   const [toastMessage, setToastMessage] = useState(null);
   const [clickedIndex, setClickedIndex] = useState(null);
 
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('zid_favorites') || '[]');
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('zid_favorites', JSON.stringify(favorites));
+  }, [favorites]);
+
   useEffect(() => {
     async function loadM3u() {
       try {
@@ -731,9 +743,13 @@ export default function SeamlessPlayer() {
 
   return (
     <div className={styles.bodyWrapper}>
-      {/* Ambient background glows */}
-      <div className={styles.ambientGlow1} />
-      <div className={styles.ambientGlow2} />
+      {/* iOS 27 Morphing Liquid Fluid Orbs Background */}
+      <div className={styles.backgroundOrbsContainer}>
+        <div className={`${styles.fluidOrb} ${styles.orbCyan}`} />
+        <div className={`${styles.fluidOrb} ${styles.orbMagenta}`} />
+        <div className={`${styles.fluidOrb} ${styles.orbViolet}`} />
+        <div className={`${styles.fluidOrb} ${styles.orbAmber}`} />
+      </div>
 
       {/* Main Header */}
       <header className={styles.header} style={{ position: 'relative', overflow: 'hidden' }}>
@@ -1037,21 +1053,76 @@ export default function SeamlessPlayer() {
                     </button>
                   </div>
                   
+                  {/* Favorites Glass Hub */}
+                  <div className={styles.favoritesGlassHub} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: 'rgba(0, 0, 0, 0.15)', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                    <div style={{ fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255, 255, 255, 0.4)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <i className="fa-solid fa-heart animate-pulse" style={{ color: '#ff3c00' }}></i> My Favorites
+                    </div>
+                    <div className="scrollbar-style" style={{ display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+                      {dynamicChannels.filter(ch => ch.status !== 'offline' && favorites.includes(ch.name)).length === 0 ? (
+                        <span style={{ fontSize: '9px', color: 'rgba(255, 255, 255, 0.3)', fontStyle: 'italic' }}>
+                          Tap the heart on any channel to save it here for quick access.
+                        </span>
+                      ) : (
+                        dynamicChannels.filter(ch => ch.status !== 'offline' && favorites.includes(ch.name)).map((ch, fIdx) => {
+                          const originalIdx = dynamicChannels.indexOf(ch);
+                          const isActive = currentChannel.url === ch.url;
+                          return (
+                            <div
+                              key={fIdx}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (ch.url.includes('.mpd')) {
+                                  setErrorMessage('DASH / Widevine DRM channels require a Germany VPN and specialized player components. Please select an HLS stream.');
+                                } else {
+                                  setErrorMessage('');
+                                  setStreamUrl(ch.url);
+                                }
+                                setCurrentChannel(ch);
+                              }}
+                              className={styles.favMiniCard}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                border: isActive ? '1px solid #ff7a00' : '1px solid rgba(255, 255, 255, 0.05)',
+                                padding: '4px 12px 4px 8px',
+                                borderRadius: '999px',
+                                fontSize: '10px',
+                                fontWeight: 'bold',
+                                color: isActive ? '#ff7a00' : 'rgba(255, 255, 255, 0.8)',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {ch.logo && ch.logo.startsWith('http') ? (
+                                <img src={ch.logo} alt="" style={{ width: '14px', height: '14px', objectFit: 'contain', borderRadius: '50%' }} />
+                              ) : (
+                                <i className="fa-solid fa-satellite-dish" style={{ fontSize: '9px', color: isActive ? '#ff7a00' : 'rgba(255, 255, 255, 0.4)' }}></i>
+                              )}
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80px' }}>{ch.name}</span>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+
                   {/* Scrollable Container */}
                   <div className="scrollbar-style" style={{ flexGrow: 1, overflowY: 'auto', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.625rem', boxSizing: 'border-box' }}>
-                    {dynamicChannels.map((ch, idx) => {
+                    {dynamicChannels.filter(ch => ch.status !== 'offline').map((ch, idx) => {
+                      const originalIdx = dynamicChannels.indexOf(ch);
                       const query = searchQuery.trim().toLowerCase();
                       if (query && !ch.name.toLowerCase().includes(query) && !(ch.detail || '').toLowerCase().includes(query)) {
                         return null;
                       }
-                      const isFifa = (idx < STATIC_CHANNELS.length) || WC_KEYWORDS.some(kw => ch.name.toLowerCase().includes(kw));
+                      const isFifa = (originalIdx < STATIC_CHANNELS.length) || WC_KEYWORDS.some(kw => ch.name.toLowerCase().includes(kw));
                       if (activeFolder === 'fifa' && !isFifa) {
                         return null;
                       }
                       if (activeFolder === 'others' && isFifa) {
-                        return null;
-                      }
-                      if (hideOffline && ch.status === 'offline') {
                         return null;
                       }
                       const isActive = currentChannel.url === ch.url;
@@ -1065,9 +1136,9 @@ export default function SeamlessPlayer() {
 
                       return (
                         <div 
-                          key={idx}
+                          key={originalIdx}
                           onClick={() => {
-                            setClickedIndex(idx);
+                            setClickedIndex(originalIdx);
                             setTimeout(() => setClickedIndex(null), 500);
                             if (ch.url.includes('.mpd')) {
                               setErrorMessage('DASH / Widevine DRM channels require a Germany VPN and specialized player components. Please select an HLS stream.');
@@ -1077,7 +1148,7 @@ export default function SeamlessPlayer() {
                             }
                             setCurrentChannel(ch);
                           }}
-                          className={`${styles.serverCard} ${isActive ? styles.serverCardActive : ''} ${clickedIndex === idx ? styles.clickedWave : ''}`}
+                          className={`${styles.serverCard} ${isActive ? styles.serverCardActive : ''} ${clickedIndex === originalIdx ? styles.clickedWave : ''}`}
                         >
                           <div className={styles.serverThumb}>
                             {ch.logo && ch.logo.startsWith('http') ? (
@@ -1103,6 +1174,34 @@ export default function SeamlessPlayer() {
                                 <span className={`${styles.eqBar3}`} style={{ width: '2.5px', height: '100%', borderRadius: '99px', backgroundColor: '#ff7a00' }}></span>
                               </div>
                             )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const isFav = favorites.includes(ch.name);
+                                if (isFav) {
+                                  setFavorites(prev => prev.filter(n => n !== ch.name));
+                                } else {
+                                  setFavorites(prev => [...prev, ch.name]);
+                                }
+                              }}
+                              className={styles.favHeartBtn}
+                              style={{
+                                border: 'none',
+                                background: 'transparent',
+                                cursor: 'pointer',
+                                padding: '4px',
+                                outline: 'none',
+                                transition: 'all 0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              <i 
+                                className={`${favorites.includes(ch.name) ? 'fa-solid' : 'fa-regular'} fa-heart`} 
+                                style={{ color: favorites.includes(ch.name) ? '#ef4444' : 'rgba(255, 255, 255, 0.4)', fontSize: '12px' }}
+                              />
+                            </button>
                             <span>{statusLabel}</span>
                             <span className={styles.statusDot} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: dotColor, boxShadow: dotShadow }} />
                           </div>

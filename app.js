@@ -364,13 +364,82 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Favorites System Functions
+    function getFavorites() {
+        try {
+            return JSON.parse(localStorage.getItem('zid_favorites') || '[]');
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function isFavorited(name) {
+        return getFavorites().includes(name);
+    }
+
+    function toggleFavorite(name) {
+        let favs = getFavorites();
+        if (favs.includes(name)) {
+            favs = favs.filter(n => n !== name);
+        } else {
+            favs.push(name);
+        }
+        localStorage.setItem('zid_favorites', JSON.stringify(favs));
+        renderChannelsGrid();
+        renderFavoritesHub();
+    }
+
+    function renderFavoritesHub() {
+        const hub = document.getElementById('favorites-list-scroll');
+        if (!hub) return;
+
+        const favs = getFavorites();
+        const favoritedChannels = CHANNELS.filter(c => favs.includes(c.name) && c.status !== 'offline');
+
+        if (favoritedChannels.length === 0) {
+            hub.innerHTML = `<span class="text-[9px] text-white/30 italic">Tap the heart on any channel to save it here for quick access.</span>`;
+            return;
+        }
+
+        hub.innerHTML = '';
+        favoritedChannels.forEach(channel => {
+            const index = CHANNELS.indexOf(channel);
+            const isActive = currentChannelIndex === index;
+            const item = document.createElement('div');
+            item.className = `flex items-center gap-1.5 bg-white/5 border border-white/5 pl-2 pr-3 py-1 rounded-full text-[10px] font-bold cursor-pointer transition-all duration-300 hover:bg-white/10 ${isActive ? 'border-[#ff7a00] text-[#ff7a00]' : 'text-white/80'}`;
+            
+            const qualityBadge = channel.badge ? channel.badge.toUpperCase() : 'HD';
+            const iconHtml = (channel.logo && channel.logo.startsWith('http'))
+                ? `<img src="${channel.logo}" class="w-3.5 h-3.5 object-contain rounded-full">`
+                : `<i class="fa-solid fa-satellite-dish text-[9px] ${isActive ? 'text-[#ff7a00]' : 'text-white/40'}"></i>`;
+
+            item.innerHTML = `
+                ${iconHtml}
+                <span class="truncate max-w-[80px]">${channel.name}</span>
+            `;
+
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                playStream(index);
+                renderChannelsGrid();
+            });
+
+            hub.appendChild(item);
+        });
+    }
+
     function renderChannelsGrid() {
         if (!serversContainer) return;
         serversContainer.innerHTML = '';
 
         const query = searchQuery.trim().toLowerCase();
 
-        CHANNELS.forEach((channel, index) => {
+        // Drop offline/dead channels from the rendered grid list entirely
+        const activeChannels = CHANNELS.filter(channel => channel.status !== 'offline');
+
+        activeChannels.forEach((channel) => {
+            const index = CHANNELS.indexOf(channel);
+
             if (query && !channel.name.toLowerCase().includes(query) && !(channel.detail || '').toLowerCase().includes(query)) {
                 return;
             }
@@ -380,10 +449,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             if (activeFolder === 'others' && isFifa) {
-                return;
-            }
-
-            if (hideOffline && channel.status === 'offline') {
                 return;
             }
 
@@ -416,6 +481,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
                     ${activeEq}
+                    <button class="fav-heart-btn p-1 cursor-pointer transition-colors" data-channel-name="${channel.name}">
+                        <i class="${isFavorited(channel.name) ? 'fa-solid text-red-500' : 'fa-regular text-white/40'} fa-heart text-xs"></i>
+                    </button>
                     <span class="status-text">${statusLabel}</span>
                     <span class="status-dot status-${statusClass}"></span>
                 </div>
@@ -428,8 +496,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderChannelsGrid();
             });
 
+            const heartBtn = card.querySelector('.fav-heart-btn');
+            if (heartBtn) {
+                heartBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleFavorite(channel.name);
+                });
+            }
+
             serversContainer.appendChild(card);
         });
+
+        renderFavoritesHub();
     }
 
     function parseM3u(text) {
