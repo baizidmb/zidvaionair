@@ -109,6 +109,7 @@
   justify-content: center;
   width: 14px;
   height: 14px;
+  flex-shrink: 0;
 }
 
 .pingRing {
@@ -187,7 +188,7 @@
 .logoText {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: 1.35rem;
+  font-size: 1.1rem;
   letter-spacing: -0.04em;
   background: linear-gradient(-45deg, #ff7a00, #ff007f, #a855f7, #ff7a00);
   background-size: 300% 300%;
@@ -195,10 +196,47 @@
   -webkit-background-clip: text;
   color: transparent;
   filter: drop-shadow(0 0 12px rgba(255, 122, 0, 0.15));
+  white-space: nowrap;
+}
+@media (min-width: 480px) {
+  .logoText {
+    font-size: 1.35rem;
+  }
 }
 
 .logoAccent {
   color: #ff7a00;
+  display: none;
+}
+@media (min-width: 370px) {
+  .logoAccent {
+    display: inline;
+  }
+}
+
+.experimentalBadge {
+  display: none;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  background: linear-gradient(to right, #ff5500, #ffaa00);
+  color: #ffffff;
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  box-shadow: 0 0 8px rgba(255,85,0,0.4);
+  text-transform: uppercase;
+  user-select: none;
+  font-family: monospace;
+  animation: pulse-badge 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse-badge {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+@media (min-width: 430px) {
+  .experimentalBadge {
+    display: inline-block;
+  }
 }
 
 .navLinks {
