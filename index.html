@@ -17,7 +17,7 @@
     <!-- Custom styling stylesheet link -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#030305] text-white/90 min-h-screen font-outfit flex flex-col overflow-x-hidden relative select-none">
+<body class="bg-[#030305] text-white/90 min-h-screen font-outfit flex flex-col overflow-x-clip relative select-none">
 
     <!-- iOS 27 Morphing Liquid Fluid Orbs Background -->
     <div class="background-orbs-container">
@@ -98,7 +98,7 @@
             <div class="lg:col-span-3 flex flex-col gap-4">
                 
                 <!-- Video Player Box -->
-                <div class="overflow-hidden relative aspect-video w-full group liquid-glass-panel">
+                <div class="overflow-hidden relative aspect-video w-full group liquid-glass-panel sticky-player-container">
                     <div id="video-wrapper" class="relative w-full h-full bg-[#000000] overflow-hidden">
                         <!-- Dual Player Engines -->
                         <video id="video-player-a" class="w-full h-full object-contain absolute inset-0 transition-opacity duration-300 opacity-0 z-10" playsinline autoplay></video>

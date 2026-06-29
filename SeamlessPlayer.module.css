@@ -1774,3 +1774,63 @@
 .favMiniCard:hover {
   transform: translateY(-2px) scale(1.05) !important;
 }
+
+/* Mobile Blinking, GPU Acceleration & Sticky Video Player overrides */
+.backgroundOrbsContainer,
+.fluidOrb,
+.trollZoneSection,
+.chatPanel,
+.serverCard,
+.videoPlayerBox {
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  perspective: 1000px !important;
+  will-change: transform, filter !important;
+}
+
+.backgroundOrbsContainer {
+  height: 100dvh !important;
+}
+
+.bodyWrapper {
+  overflow-x: clip !important;
+}
+
+.videoPlayerBox {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  top: 96px !important;
+  z-index: 40 !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 32px !important;
+}
+
+/* Mobile Media Queries Overrides */
+@media (max-width: 768px) {
+  .trollZoneSection,
+  .chatPanel,
+  .videoPlayerBox {
+    border-radius: 20px !important;
+  }
+  
+  .header {
+    top: 12px !important;
+    border-radius: 16px !important;
+    width: 94% !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  .videoPlayerBox {
+    top: 76px !important;
+  }
+  
+  .serverCard {
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+}

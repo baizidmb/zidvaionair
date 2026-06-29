@@ -22,7 +22,7 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
+    overflow-x: clip;
     box-sizing: border-box;
 }
 
@@ -914,4 +914,58 @@ header nav a:hover::before {
 .favorites-list-scroll::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 99px;
+}
+
+/* ---------------------------------------------------------
+   MOBILE OPTIMIZATIONS & GPU ACCELERATION
+   --------------------------------------------------------- */
+/* Hardware Acceleration to prevent flickering/blinking */
+.background-orbs-container,
+.fluid-orb,
+.liquid-glass-panel {
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    perspective: 1000px !important;
+    will-change: transform, filter !important;
+}
+
+/* Dynamic Viewport Height to prevent resize flickers */
+.background-orbs-container {
+    height: 100dvh !important;
+}
+
+/* Sticky video player box positioned below the floating pill header */
+.sticky-player-container {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 96px !important;
+    z-index: 40 !important;
+    transform: translateZ(0); /* Force GPU render boundary */
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+    .liquid-glass-panel {
+        border-radius: 20px !important;
+    }
+    
+    header.liquid-glass-panel {
+        top: 12px !important;
+        border-radius: 16px !important;
+        width: 94% !important;
+        padding: 8px 12px !important;
+    }
+    
+    .sticky-player-container {
+        top: 76px !important;
+    }
+    
+    .server-card {
+        padding: 16px !important;
+        border-radius: 16px !important;
+    }
+    
+    .favorites-list-scroll {
+        -webkit-overflow-scrolling: touch !important;
+    }
 }
