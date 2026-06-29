@@ -132,11 +132,6 @@ export default function SeamlessPlayer() {
     const runNext = async () => {
       if (!active || queue.length === 0) return;
       const idx = queue.shift();
-      
-      if (idx < STATIC_CHANNELS.length) {
-        runNext();
-        return;
-      }
 
       running++;
       const channel = dynamicChannels[idx];
@@ -1010,7 +1005,7 @@ export default function SeamlessPlayer() {
                       if (query && !ch.name.toLowerCase().includes(query) && !(ch.detail || '').toLowerCase().includes(query)) {
                         return null;
                       }
-                      const isFifa = (idx < STATIC_CHANNELS.length) || WC_KEYWORDS.some(kw => ch.name.toLowerCase().includes(kw));
+                      const isFifa = WC_KEYWORDS.some(kw => ch.name.toLowerCase().includes(kw));
                       if (activeFolder === 'fifa' && !isFifa) {
                         return null;
                       }
@@ -1058,7 +1053,7 @@ export default function SeamlessPlayer() {
                             )}
                           </div>
                           <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', textAlign: 'left' }}>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>[{idx + 1}] {ch.name}</span>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.name}</span>
                             <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.detail}</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontFamily: 'monospace' }}>

@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const isFifa = (index < 10) || WC_KEYWORDS.some(kw => channel.name.toLowerCase().includes(kw));
+            const isFifa = WC_KEYWORDS.some(kw => channel.name.toLowerCase().includes(kw));
             if (activeFolder === 'fifa' && !isFifa) {
                 return;
             }
@@ -417,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div class="server-thumb flex items-center justify-center">${thumbContent}</div>
                 <div class="flex-grow flex flex-col overflow-hidden text-left">
-                    <span class="server-card-name font-bold text-xs truncate text-white" title="${channel.name}">[${index + 1}] ${channel.name}</span>
+                    <span class="server-card-name font-bold text-xs truncate text-white" title="${channel.name}">${channel.name}</span>
                     <span class="text-[10px] text-white/40 truncate">${channel.detail || 'Live Broadcast Feed'}</span>
                 </div>
                 <div class="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
