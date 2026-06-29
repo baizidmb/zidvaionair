@@ -1798,12 +1798,12 @@ document.addEventListener('DOMContentLoaded', () => {
             updateDots(index);
         }
 
-        // Auto scrolling every second
+        // Auto scrolling every 3 seconds
         function startAutoplay() {
             autoplayInterval = setInterval(() => {
                 currentIndex = (currentIndex + 1) % totalSlides;
                 scrollToSlide(currentIndex);
-            }, 1000);
+            }, 3000);
         }
 
         function resetAutoplay() {

@@ -180,7 +180,7 @@ export default function SeamlessPlayer() {
   useEffect(() => {
     const timer = setInterval(() => {
       setFunnyIndex(prev => (prev + 1) % 13);
-    }, 1000);
+    }, 3000);
     return () => clearInterval(timer);
   }, []);
 
@@ -1121,7 +1121,7 @@ export default function SeamlessPlayer() {
           gap: '0.5rem',
           fontFamily: "'Space Grotesk', sans-serif"
         }}>
-          <i className="fa-solid fa-face-laugh-beam" style={{ color: '#ff7a00' }}></i> Fan Zone: Funny Portfolio
+          <i className="fa-solid fa-face-laugh-beam" style={{ color: '#ff7a00' }}></i> Zid Vai's Funny Troll Zone 🤪
         </h2>
         <div style={{
           display: 'flex',
@@ -1133,7 +1133,7 @@ export default function SeamlessPlayer() {
           position: 'relative'
         }}>
           {/* Modern Slider Container */}
-          <div style={{
+          <div className="modern-slider-wrap" style={{
             position: 'relative',
             width: '100%',
             maxWidth: '28rem',

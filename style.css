@@ -3,7 +3,7 @@
    ========================================================= */
 
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Galada&family=Hind+Siliguri:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@600;700&family=Noto+Sans+Bengali:wght@800;900&display=swap');
 
 @theme {
   --color-cosmic-orange: #ff7a00;
@@ -505,12 +505,40 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bangla-stylish-text {
-    font-family: 'Galada', 'Hind Siliguri', cursive, sans-serif !important;
-    background: linear-gradient(135deg, #ff7a00 0%, #ff3c00 100%);
+    font-family: 'Noto Sans Bengali', 'Hind Siliguri', sans-serif !important;
+    font-weight: 900;
+    background: linear-gradient(135deg, #ff8c00 0%, #ff3c00 100%);
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
-    filter: drop-shadow(0 0 10px rgba(255, 122, 0, 0.25));
+    filter: drop-shadow(0 0 12px rgba(255, 122, 0, 0.35));
+    letter-spacing: -0.015em;
+}
+
+.modern-slider-wrap {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55), 0 0 30px rgba(255, 122, 0, 0.06);
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.modern-slider-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.1), rgba(255, 122, 0, 0.15), rgba(255, 255, 255, 0.02));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.modern-slider-wrap:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 122, 0, 0.35);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.65), 0 0 45px rgba(255, 122, 0, 0.18);
 }
 
 .scrollbar-none::-webkit-scrollbar {
