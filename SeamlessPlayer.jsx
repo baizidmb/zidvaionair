@@ -63,6 +63,8 @@ export default function SeamlessPlayer() {
   const [streamUrl, setStreamUrl] = useState(STATIC_CHANNELS[1].url);
   const [searchQuery, setSearchQuery] = useState('');
   const [hideOffline, setHideOffline] = useState(true);
+  const [matches, setMatches] = useState([]);
+  const [currentDateIdx, setCurrentDateIdx] = useState(0);
   const [activeFolder, setActiveFolder] = useState('fifa');
   const [activeTab, setActiveTab] = useState('feeds');
   const [funnyIndex, setFunnyIndex] = useState(0);
@@ -168,6 +170,37 @@ export default function SeamlessPlayer() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    async function loadMatches() {
+      try {
+        const res = await fetch('https://ajkerkhela.vercel.app/api/schedule');
+        if (!res.ok) throw new Error('Failed to load schedule');
+        const raw = await res.json();
+        const mapped = raw.map(m => {
+          const kickoff = new Date(m.rawDate);
+          return {
+            id: m.id,
+            round: m.group || '',
+            group: m.group || '',
+            homeTeam: m.teamA,
+            awayTeam: m.teamB,
+            homeLogo: m.teamALogo,
+            awayLogo: m.teamBLogo,
+            score1: (m.scoreA !== undefined && m.scoreA !== null && m.scoreA !== "") ? parseInt(m.scoreA) : null,
+            score2: (m.scoreB !== undefined && m.scoreB !== null && m.scoreB !== "") ? parseInt(m.scoreB) : null,
+            status: m.state === 'live' ? 'live' : (m.state === 'post' ? 'finished' : 'upcoming'),
+            statusText: m.statusText || '',
+            kickoffUtc: m.rawDate
+          };
+        });
+        setMatches(mapped);
+      } catch (e) {
+        console.error("Error loading React schedule:", e);
+      }
+    }
+    loadMatches();
+  }, []);
+
   const playRefereeWhistle = () => {
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -238,6 +271,25 @@ export default function SeamlessPlayer() {
   const chatContainerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
   const displayedMessageIdsRef = useRef(new Set());
+
+  const uniqueDates = Array.from(new Set(matches.map(m => {
+    const kickoff = new Date(m.kickoffUtc);
+    return kickoff.toISOString().split('T')[0];
+  }))).sort();
+
+  const selectedDateStr = uniqueDates[currentDateIdx];
+  const selectedMatches = matches.filter(m => {
+    const kickoff = new Date(m.kickoffUtc);
+    const localDate = kickoff.toISOString().split('T')[0];
+    return localDate === selectedDateStr;
+  });
+
+  let formattedDate = 'Loading Date...';
+  if (selectedDateStr) {
+    const parts = selectedDateStr.split('-');
+    const dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
 
   useEffect(() => {
     localStorage.setItem('zid_chat_username', localUsername);
@@ -1253,6 +1305,146 @@ export default function SeamlessPlayer() {
             }}
           >
             রাগ করলা?
+          </div>
+        </div>
+      </section>
+
+      {/* Live Matches & Upcoming Schedule Section */}
+      <section className={styles.trollZoneSection}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '0.75rem' }}>
+            <h2 style={{
+              fontSize: '0.875rem',
+              fontWeight: 800,
+              letterSpacing: '0.05em',
+              color: 'rgba(255, 255, 255, 0.8)',
+              textTransform: 'uppercase',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontFamily: "'Space Grotesk', sans-serif",
+              margin: 0
+            }}>
+              <i className="fa-solid fa-calendar-days" style={{ color: '#ff7a00' }}></i> Live Matches & Schedule
+            </h2>
+            
+            {uniqueDates.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '4px 12px', borderRadius: '12px', fontSize: '11px', userSelect: 'none' }}>
+                <button 
+                  onClick={() => currentDateIdx > 0 && setCurrentDateIdx(prev => prev - 1)}
+                  style={{ border: 'none', background: 'transparent', color: 'rgba(255, 255, 255, 0.6)', cursor: 'pointer', outline: 'none', padding: 0 }}
+                >
+                  <i className="fa-solid fa-chevron-left"></i>
+                </button>
+                <span style={{ fontWeight: 750, color: '#ffffff', minWidth: '110px', textAlign: 'center' }}>
+                  {formattedDate}
+                </span>
+                <button 
+                  onClick={() => currentDateIdx < uniqueDates.length - 1 && setCurrentDateIdx(prev => prev + 1)}
+                  style={{ border: 'none', background: 'transparent', color: 'rgba(255, 255, 255, 0.6)', cursor: 'pointer', outline: 'none', padding: 0 }}
+                >
+                  <i className="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+            )}
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
+            {selectedMatches.map((match) => {
+              const isLive = match.status === 'live';
+              const kickoff = new Date(match.kickoffUtc);
+              const timeStr = kickoff.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+              
+              let tzAbbr = 'UTC';
+              try {
+                const parts = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' }).formatToParts(kickoff);
+                const tzPart = parts.find(p => p.type === 'timeZoneName');
+                if (tzPart) tzAbbr = tzPart.value;
+              } catch (e) {}
+
+              return (
+                <div 
+                  key={match.id} 
+                  className={styles.serverCard}
+                  style={{
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                    gap: '12px',
+                    borderColor: isLive ? '#ff7a00' : 'rgba(255, 255, 255, 0.05)',
+                    background: isLive ? 'linear-gradient(135deg, rgba(255, 122, 0, 0.08) 0%, rgba(255, 60, 0, 0.02) 100%)' : 'rgba(255, 255, 255, 0.02)',
+                    animation: isLive ? 'playingGlow 2.5s infinite ease-in-out' : 'none'
+                  }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {/* Team A Row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {match.homeLogo ? (
+                          <img src={match.homeLogo} alt={match.homeTeam} style={{ width: '18px', height: '18px', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                        ) : (
+                          <span style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.3)' }}><i className="fa-solid fa-users"></i></span>
+                        )}
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff' }}>{match.homeTeam}</span>
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: 800, color: match.score1 !== null ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}>
+                        {match.score1 !== null ? match.score1 : '-'}
+                      </span>
+                    </div>
+
+                    {/* Team B Row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {match.awayLogo ? (
+                          <img src={match.awayLogo} alt={match.awayTeam} style={{ width: '18px', height: '18px', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                        ) : (
+                          <span style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.3)' }}><i className="fa-solid fa-users"></i></span>
+                        )}
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff' }}>{match.awayTeam}</span>
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: 800, color: match.score2 !== null ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}>
+                        {match.score2 !== null ? match.score2 : '-'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.03)' }}>
+                    <span style={{
+                      fontSize: '9px',
+                      fontWeight: 800,
+                      textTransform: 'uppercase',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      backgroundColor: isLive ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                      color: isLive ? '#ef4444' : 'rgba(255, 255, 255, 0.4)'
+                    }}>
+                      {isLive ? 'LIVE' : (match.status === 'finished' ? 'FT' : 'SCHED')}
+                    </span>
+
+                    {isLive ? (
+                      <button 
+                        onClick={() => handleSelectChannel(STATIC_CHANNELS[1], 1)}
+                        style={{
+                          backgroundColor: '#ff7a00',
+                          border: 'none',
+                          color: '#ffffff',
+                          fontWeight: 700,
+                          fontSize: '9px',
+                          padding: '3px 10px',
+                          borderRadius: '6px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Tune In
+                      </button>
+                    ) : (
+                      <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.4)', fontFamily: 'monospace' }}>
+                        {timeStr} {tzAbbr}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

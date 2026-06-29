@@ -1101,10 +1101,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
     }
 
-    function renderTeamRow(teamName, score) {
-        const isPlaceholder = teamName.startsWith('Winner') || teamName.startsWith('Loser') || teamName.includes('runners-up') || teamName.includes('winners') || teamName.includes('third place');
+    function renderTeamRow(teamName, score, logoUrl) {
+        const isPlaceholder = teamName.startsWith('Winner') || teamName.startsWith('Loser') || teamName.includes('runners-up') || teamName.includes('winners') || teamName.includes('third place') || teamName.includes('Winner');
         let logoHtml = '';
-        if (isPlaceholder) {
+        if (logoUrl) {
+            logoHtml = `<img class="team-flag" src="${logoUrl}" alt="${teamName}" onerror="this.outerHTML='<span class=\"team-placeholder-icon\"><i class=\"fa-solid fa-users\"></i></span>';">`;
+        } else if (isPlaceholder) {
             logoHtml = `<span class="team-placeholder-icon"><i class="fa-solid fa-users"></i></span>`;
         } else {
             const flagUrl = getTeamFlagUrl(teamName);
@@ -1137,6 +1139,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const parts = selectedDateStr.split('-');
         const dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
         const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        
+        const dateLabel = document.getElementById('sched-current-date-label');
+        if (dateLabel) {
+            dateLabel.textContent = formattedDate;
+        }
         
         const selectedMatches = allMatches.filter(m => m.localDate === selectedDateStr);
         let renderedHtml = '';
@@ -1211,8 +1218,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderedHtml += `
                 <div class="schedule-card ${isLive ? 'live-match-card' : ''}">
                     <div class="flex flex-col gap-2">
-                        ${renderTeamRow(match.homeTeam, score1)}
-                        ${renderTeamRow(match.awayTeam, score2)}
+                        ${renderTeamRow(match.homeTeam, score1, match.homeLogo)}
+                        ${renderTeamRow(match.awayTeam, score2, match.awayLogo)}
                     </div>
                     <div class="schedule-card-footer">
                         <span class="match-status-badge ${badgeClass}">${statusText}</span>
@@ -1402,29 +1409,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchMatches() {
         try {
-            const res = await fetch('https://raw.githubusercontent.com/salah23222/worldcup2026/main/data/worldcup_fallback.json');
-            if (!res.ok) throw new Error('Failed to load salah fallback fixtures');
-            const data = await res.json();
-            const rawMatches = data.matches || [];
+            const res = await fetch('https://ajkerkhela.vercel.app/api/schedule');
+            if (!res.ok) throw new Error('Failed to load live match data from ajkerkhela');
+            const rawMatches = await res.json();
             
-            allMatches = rawMatches.map((m, idx) => {
-                const kickoff = parseSalahTime(m.date, m.time);
+            allMatches = rawMatches.map((m) => {
+                const kickoff = new Date(m.rawDate);
                 return {
-                    id: idx + 1,
-                    round: m.round || '',
+                    id: m.id,
+                    round: m.group || '',
                     group: m.group || '',
-                    homeTeam: m.team1,
-                    awayTeam: m.team2,
-                    kickoffUtc: kickoff.toISOString(),
-                    stadium: m.ground || '',
-                    status: 'upcoming',
-                    score1: null,
-                    score2: null,
-                    liveMinute: null
+                    homeTeam: m.teamA,
+                    awayTeam: m.teamB,
+                    homeLogo: m.teamALogo,
+                    awayLogo: m.teamBLogo,
+                    score1: (m.scoreA !== undefined && m.scoreA !== null && m.scoreA !== "") ? parseInt(m.scoreA) : null,
+                    score2: (m.scoreB !== undefined && m.scoreB !== null && m.scoreB !== "") ? parseInt(m.scoreB) : null,
+                    status: m.state === 'live' ? 'live' : (m.state === 'post' ? 'finished' : 'upcoming'),
+                    statusText: m.statusText || '',
+                    kickoffUtc: m.rawDate,
+                    stadium: '',
+                    liveMinute: m.state === 'live' ? 45 : null
                 };
             });
         } catch (e) {
-            console.warn('Failed to load fallback fixtures from GitHub, loading local fallbacks:', e);
+            console.warn('Failed to load fixtures from ajkerkhela, loading local fallbacks:', e);
             allMatches = getLocalFallbackMatches().map((m, idx) => ({
                 id: m.matchNumber || idx + 1,
                 round: m.stage || '',
@@ -1440,7 +1449,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }));
         }
 
-        await updateRealtimeScores();
+        if (allMatches.some(m => m.homeLogo)) {
+            // Vercel data already contains real live scores
+        } else {
+            await updateRealtimeScores();
+        }
 
         const datesSet = new Set();
         allMatches.forEach(m => {

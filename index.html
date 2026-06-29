@@ -297,6 +297,24 @@
             </div>
         </section>
 
+        <!-- Live Matches & Upcoming Schedule Section -->
+        <section class="p-4 md:p-6 flex flex-col gap-4 mt-6 liquid-glass-panel">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-3">
+                <h2 class="text-sm font-extrabold tracking-wider text-white/80 uppercase flex items-center gap-2 font-space">
+                    <i class="fa-solid fa-calendar-days text-[#ff7a00]"></i> Live Matches & Schedule
+                </h2>
+                <!-- Date Navigation Bar -->
+                <div class="flex items-center gap-3 bg-white/5 border border-white/5 px-3 py-1 rounded-xl text-xs select-none">
+                    <button id="sched-prev-day" class="text-white/60 hover:text-white transition-colors cursor-pointer border-0 bg-transparent"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="sched-current-date-label" class="font-bold text-white tracking-wide min-w-[120px] text-center">Loading Date...</span>
+                    <button id="sched-next-day" class="text-white/60 hover:text-white transition-colors cursor-pointer border-0 bg-transparent"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div id="schedule-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Matches injected dynamically by app.js -->
+            </div>
+        </section>
+
         <!-- Footer -->
         <footer class="border-t border-white/5 pt-6 pb-4 mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold text-white/30 tracking-wider">
             <div class="uppercase">
