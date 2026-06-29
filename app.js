@@ -1168,8 +1168,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 timeLabel = kickoff.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
             }
             
-            let score1 = null;
-            let score2 = null;
+            let score1 = match.score1;
+            let score2 = match.score2;
             
             if (now < kickoff) {
                 status = 'upcoming';
@@ -1194,18 +1194,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     timeLabel = '90+';
                 }
                 
-                const liveScore = getLiveScore(match.matchNumber, elapsedMin);
-                score1 = liveScore.score1;
-                score2 = liveScore.score2;
+                if (score1 === null || score2 === null) {
+                    const liveScore = getLiveScore(match.id || match.matchNumber, elapsedMin);
+                    score1 = liveScore.score1;
+                    score2 = liveScore.score2;
+                }
             } else {
                 status = 'finished';
                 badgeClass = 'finished';
                 statusText = 'FT';
                 timeLabel = 'Full Time';
                 
-                const finalScore = getDeterministicScore(match.matchNumber);
-                score1 = finalScore.score1;
-                score2 = finalScore.score2;
+                if (score1 === null || score2 === null) {
+                    const finalScore = getDeterministicScore(match.id || match.matchNumber);
+                    score1 = finalScore.score1;
+                    score2 = finalScore.score2;
+                }
             }
             
             const isLive = status === 'live';
