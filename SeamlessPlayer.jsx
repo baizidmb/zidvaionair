@@ -965,19 +965,7 @@ export default function SeamlessPlayer() {
                             }
                             setCurrentChannel(ch);
                           }}
-                          className={`${styles.serverCard} ${isActive ? styles.activeServerCard : ''}`}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            background: isActive ? 'rgba(255, 122, 0, 0.12)' : 'rgba(255, 255, 255, 0.03)',
-                            border: isActive ? '1px solid #ff7a00' : '1px solid rgba(255, 255, 255, 0.08)',
-                            padding: '10px 12px',
-                            borderRadius: '14px',
-                            cursor: 'pointer',
-                            transition: 'all 0.25s ease',
-                            flexShrink: 0
-                          }}
+                          className={`${styles.serverCard} ${isActive ? styles.serverCardActive : ''}`}
                         >
                           <div 
                             className={styles.serverThumb}
