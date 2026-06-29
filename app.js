@@ -1734,62 +1734,188 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // Messi Memes Interactive Segmented Slider
-    const messiBtn0 = document.getElementById('messi-btn-0');
-    const messiBtn1 = document.getElementById('messi-btn-1');
-    const messiBtn2 = document.getElementById('messi-btn-2');
-    const messiTabIndicator = document.getElementById('messi-tab-indicator');
-    const messiMemeImg = document.getElementById('messi-meme-img');
-    const messiSliderLabel = document.getElementById('messi-slider-label');
+    initFunnySlider();
+    initWhistleButton();
 
-    if (messiMemeImg && messiSliderLabel && messiTabIndicator) {
-        const MESSI_MEMES = [
-            {
-                url: 'https://api.memegen.link/images/custom/WHEN_YOU_SWAP_SERVERS/AND_IT_TAKES_0.01_SECONDS.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png',
-                label: 'Reaction #1: Fast Server Swapping'
-            },
-            {
-                url: 'https://api.memegen.link/images/custom/CLOCK_FREEZES_AT_00~00/ANTIGRAVITY_FIXES_IT_INSTANTLY.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png',
-                label: 'Reaction #2: Freeze-Proof Clock'
-            },
-            {
-                url: 'https://api.memegen.link/images/custom/CHAT_SIMULATION_ACTIVE/24K_BOTS_TALKING_TO_THEMSELVES.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png',
-                label: 'Reaction #3: Simulating 24K Viewer Bots'
+    // ---------------------------------------------------------
+    // 8. FUNNY PORTFOLIO SLIDER & REF WHISTLE SOUND
+    // ---------------------------------------------------------
+    function initFunnySlider() {
+        const slider = document.getElementById('funny-slider-snap');
+        const prevBtn = document.getElementById('slider-prev-btn');
+        const nextBtn = document.getElementById('slider-next-btn');
+        const dotsContainer = document.getElementById('slider-dots');
+        if (!slider) return;
+
+        const totalSlides = 13;
+        let currentIndex = 0;
+        let autoplayInterval = null;
+
+        // Generate dots
+        if (dotsContainer) {
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('span');
+                dot.className = `w-2 h-2 rounded-full cursor-pointer transition-all duration-300 ${i === 0 ? 'bg-[#ff7a00] w-4' : 'bg-white/20'}`;
+                dot.addEventListener('click', () => {
+                    currentIndex = i;
+                    scrollToSlide(i);
+                    resetAutoplay();
+                });
+                dotsContainer.appendChild(dot);
             }
-        ];
+        }
 
-        const setMemeIndex = (idx) => {
-            const meme = MESSI_MEMES[idx];
-            
-            // Slide indicator
-            messiTabIndicator.style.transform = `translateX(${idx * 100}%)`;
-            
-            // Adjust buttons opacity/classes
-            const buttons = [messiBtn0, messiBtn1, messiBtn2];
-            buttons.forEach((btn, i) => {
-                if (btn) {
-                    if (i === idx) {
-                        btn.style.color = 'rgba(255,255,255,0.95)';
-                    } else {
-                        btn.style.color = 'rgba(255,255,255,0.4)';
-                    }
+        function updateDots(activeIdx) {
+            if (!dotsContainer) return;
+            const dots = dotsContainer.children;
+            for (let i = 0; i < dots.length; i++) {
+                if (i === activeIdx) {
+                    dots[i].className = 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-[#ff7a00] w-4';
+                } else {
+                    dots[i].className = 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-white/20';
                 }
+            }
+        }
+
+        function scrollToSlide(index) {
+            const slideWidth = slider.clientWidth;
+            slider.scrollTo({
+                left: index * slideWidth,
+                behavior: 'smooth'
             });
+            updateDots(index);
+        }
 
-            // Fade transition
-            messiMemeImg.style.opacity = '0';
-            messiMemeImg.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                messiMemeImg.src = meme.url;
-                messiSliderLabel.textContent = meme.label;
-                messiMemeImg.style.opacity = '1';
-                messiMemeImg.style.transform = 'scale(1)';
-            }, 150);
-        };
+        // Auto scrolling every second
+        function startAutoplay() {
+            autoplayInterval = setInterval(() => {
+                currentIndex = (currentIndex + 1) % totalSlides;
+                scrollToSlide(currentIndex);
+            }, 1000);
+        }
 
-        if (messiBtn0) messiBtn0.addEventListener('click', () => setMemeIndex(0));
-        if (messiBtn1) messiBtn1.addEventListener('click', () => setMemeIndex(1));
-        if (messiBtn2) messiBtn2.addEventListener('click', () => setMemeIndex(2));
+        function resetAutoplay() {
+            if (autoplayInterval) {
+                clearInterval(autoplayInterval);
+                startAutoplay();
+            }
+        }
+
+        startAutoplay();
+
+        // Control buttons
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                scrollToSlide(currentIndex);
+                resetAutoplay();
+            });
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                currentIndex = (currentIndex + 1) % totalSlides;
+                scrollToSlide(currentIndex);
+                resetAutoplay();
+            });
+        }
+
+        // Monitor scroll to update index (in case user swipes manually)
+        let isScrolling = null;
+        slider.addEventListener('scroll', () => {
+            clearTimeout(isScrolling);
+            isScrolling = setTimeout(() => {
+                const index = Math.round(slider.scrollLeft / slider.clientWidth);
+                if (index !== currentIndex && index >= 0 && index < totalSlides) {
+                    currentIndex = index;
+                    updateDots(currentIndex);
+                }
+            }, 100);
+        });
+
+        // Pause autoplay on mouse hover or touch start
+        slider.addEventListener('mouseenter', () => clearInterval(autoplayInterval));
+        slider.addEventListener('mouseleave', startAutoplay);
+        slider.addEventListener('touchstart', () => clearInterval(autoplayInterval));
+        slider.addEventListener('touchend', startAutoplay);
+    }
+
+    function initWhistleButton() {
+        const whistleBtn = document.getElementById('whistle-btn');
+        if (!whistleBtn) return;
+
+        whistleBtn.addEventListener('click', () => {
+            // Visual scale animation feedback
+            whistleBtn.classList.add('scale-95');
+            setTimeout(() => whistleBtn.classList.remove('scale-95'), 100);
+
+            // Synth Ref Whistle
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Double whistle warble synthesis
+                const playBeep = (delay) => {
+                    const osc1 = audioCtx.createOscillator();
+                    const osc2 = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(2200, audioCtx.currentTime + delay);
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(2280, audioCtx.currentTime + delay);
+                    
+                    // Frequency modulation (warble)
+                    const modulator = audioCtx.createOscillator();
+                    const modGain = audioCtx.createGain();
+                    modulator.frequency.value = 35;
+                    modGain.gain.value = 30;
+                    
+                    modulator.connect(modGain);
+                    modGain.connect(osc1.frequency);
+                    modGain.connect(osc2.frequency);
+                    
+                    gainNode.gain.setValueAtTime(0, audioCtx.currentTime + delay);
+                    gainNode.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + delay + 0.03);
+                    gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime + delay + 0.12);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + 0.35);
+                    
+                    osc1.connect(gainNode);
+                    osc2.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    
+                    modulator.start(audioCtx.currentTime + delay);
+                    osc1.start(audioCtx.currentTime + delay);
+                    osc2.start(audioCtx.currentTime + delay);
+                    
+                    modulator.stop(audioCtx.currentTime + delay + 0.36);
+                    osc1.stop(audioCtx.currentTime + delay + 0.36);
+                    osc2.stop(audioCtx.currentTime + delay + 0.36);
+                };
+
+                // Play referee double-blast
+                playBeep(0);
+                playBeep(0.18);
+                
+                // Trigger Toast notice
+                showToastNotification('📣 REFEREE WHISTLE BLOWN! PLAY ON!');
+            } catch (e) {
+                console.warn('Web Audio Whistle failed:', e);
+            }
+        });
+    }
+
+    // Toast utility helper
+    function showToastNotification(message) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification show';
+        toast.innerHTML = `<i class="fa-solid fa-bell toast-icon mr-2"></i> ${message}`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 
     console.log('✅ Zid Vai On Air x WC 2026 — Active');

@@ -3,6 +3,7 @@
    ========================================================= */
 
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Galada&family=Hind+Siliguri:wght@600;700&display=swap');
 
 @theme {
   --color-cosmic-orange: #ff7a00;
@@ -501,4 +502,21 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes logoBreath {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.03); }
+}
+
+.bangla-stylish-text {
+    font-family: 'Galada', 'Hind Siliguri', cursive, sans-serif !important;
+    background: linear-gradient(135deg, #ff7a00 0%, #ff3c00 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 10px rgba(255, 122, 0, 0.25));
+}
+
+.scrollbar-none::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+}
+.scrollbar-none {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }

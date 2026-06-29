@@ -56,8 +56,8 @@ export default function SeamlessPlayer() {
   const [hideOffline, setHideOffline] = useState(true);
   const [activeFolder, setActiveFolder] = useState('fifa');
   const [activeTab, setActiveTab] = useState('feeds');
-  const [messiIndex, setMessiIndex] = useState(0);
-  const [messiFade, setMessiFade] = useState(false);
+  const [funnyIndex, setFunnyIndex] = useState(0);
+  const [toastMessage, setToastMessage] = useState(null);
 
   useEffect(() => {
     async function loadM3u() {
@@ -169,12 +169,58 @@ export default function SeamlessPlayer() {
     };
   }, [dynamicChannels.length]);
   
-  const handleSetMessiIndex = (idx) => {
-    setMessiFade(true);
+  const triggerToast = (msg) => {
+    setToastMessage(msg);
     setTimeout(() => {
-      setMessiIndex(idx);
-      setMessiFade(false);
-    }, 150);
+      setToastMessage(null);
+    }, 3000);
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFunnyIndex(prev => (prev + 1) % 13);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const playRefereeWhistle = () => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const playBeep = (delay) => {
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(2200, audioCtx.currentTime + delay);
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(2280, audioCtx.currentTime + delay);
+        const modulator = audioCtx.createOscillator();
+        const modGain = audioCtx.createGain();
+        modulator.frequency.value = 35;
+        modGain.gain.value = 30;
+        modulator.connect(modGain);
+        modGain.connect(osc1.frequency);
+        modGain.connect(osc2.frequency);
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime + delay);
+        gainNode.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + delay + 0.03);
+        gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime + delay + 0.12);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + 0.35);
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        modulator.start(audioCtx.currentTime + delay);
+        osc1.start(audioCtx.currentTime + delay);
+        osc2.start(audioCtx.currentTime + delay);
+        modulator.stop(audioCtx.currentTime + delay + 0.36);
+        osc1.stop(audioCtx.currentTime + delay + 0.36);
+        osc2.stop(audioCtx.currentTime + delay + 0.36);
+      };
+      playBeep(0);
+      playBeep(0.18);
+      triggerToast('📣 REFEREE WHISTLE BLOWN! PLAY ON!');
+    } catch (e) {
+      console.warn('Web Audio Whistle failed:', e);
+    }
   };
   const [activePlayer, setActivePlayer] = useState('A'); // 'A' or 'B'
   const [isLoading, setIsLoading] = useState(false);
@@ -702,7 +748,14 @@ export default function SeamlessPlayer() {
             <span className={styles.statsIcon}><i className="fa-solid fa-users"></i></span>
             <span className={styles.statsCount}>24.5K</span> online
           </div>
-          <a href="https://www.facebook.com/shahidulislam.bayzid.37" target="_blank" rel="noopener noreferrer" className={styles.userProfile} style={{ textDecoration: 'none' }}>Z</a>
+          <button 
+            onClick={playRefereeWhistle}
+            className={styles.userProfile} 
+            style={{ textDecoration: 'none', border: 'none', cursor: 'pointer', outline: 'none' }}
+            title="Blow Referee Whistle!"
+          >
+            Z
+          </button>
         </div>
       </header>
 
@@ -1052,7 +1105,7 @@ export default function SeamlessPlayer() {
         </div>
       </div>
 
-      {/* Messi Funny Memes Slider Section */}
+      {/* Fan Zone: Funny Portfolio Slider Section */}
       <section style={{
         backgroundColor: 'rgba(15, 15, 19, 0.85)',
         border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -1075,174 +1128,141 @@ export default function SeamlessPlayer() {
           gap: '0.5rem',
           fontFamily: "'Space Grotesk', sans-serif"
         }}>
-          <i className="fa-solid fa-face-laugh-beam" style={{ color: '#ff7a00' }}></i> Fan Zone: Messi Reactions
+          <i className="fa-solid fa-face-laugh-beam" style={{ color: '#ff7a00' }}></i> Fan Zone: Funny Portfolio
         </h2>
         <div style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           gap: '1rem',
-          padding: '0.5rem 0'
+          padding: '0.5rem 0',
+          width: '100%',
+          position: 'relative'
         }}>
-          {/* Meme Display Box */}
+          {/* Modern Slider Container */}
           <div style={{
             position: 'relative',
             width: '100%',
             maxWidth: '28rem',
-            aspectRatio: '16/9',
+            aspectRatio: '4/3',
             backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            borderRadius: '0.75rem',
+            borderRadius: '1rem',
             border: '1px solid rgba(255, 255, 255, 0.05)',
             overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
           }}>
-            <img 
-              src={
-                messiIndex === 0 
-                  ? 'https://api.memegen.link/images/custom/WHEN_YOU_SWAP_SERVERS/AND_IT_TAKES_0.01_SECONDS.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png'
-                  : messiIndex === 1
-                  ? 'https://api.memegen.link/images/custom/CLOCK_FREEZES_AT_00~00/ANTIGRAVITY_FIXES_IT_INSTANTLY.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png'
-                  : 'https://api.memegen.link/images/custom/CHAT_SIMULATION_ACTIVE/24K_BOTS_TALKING_TO_THEMSELVES.png?background=https://www.pngmart.com/files/22/Lionel-Messi-PNG-Isolated-HD-Transparent.png'
-              } 
-              alt="Messi Funny Meme" 
-              style={{
-                height: '100%',
-                objectFit: 'contain',
-                transition: 'all 0.3s ease'
-              }}
-            />
-          </div>
-          {/* Interactive Segmented Selector */}
-          <div style={{
-            width: '100%',
-            maxWidth: '24rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.75rem',
-            alignItems: 'center',
-            marginTop: '0.5rem'
-          }}>
-            <span style={{
-              fontSize: '0.75rem',
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontWeight: 500,
-              fontFamily: "'Space Grotesk', sans-serif"
-            }}>
-              {
-                messiIndex === 0 
-                  ? 'Reaction #1: Fast Server Swapping' 
-                  : messiIndex === 1 
-                  ? 'Reaction #2: Freeze-Proof Clock' 
-                  : 'Reaction #3: Simulating 24K Viewer Bots'
-              }
-            </span>
             <div style={{
               display: 'flex',
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              borderRadius: '0.75rem',
-              padding: '0.25rem',
               width: '100%',
-              position: 'relative',
-              userSelect: 'none'
+              height: '100%',
+              transform: `translateX(-${funnyIndex * 100}%)`,
+              transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }}>
-              <button 
-                onClick={() => handleSetMessiIndex(0)} 
-                style={{
-                  flexGrow: 1,
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  letterSpacing: '0.05em',
-                  padding: '0.5rem 0',
-                  textAlign: 'center',
-                  color: messiIndex === 0 ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
-                  borderRadius: '0.5rem',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                  zIndex: 10,
-                  border: 0,
-                  backgroundColor: 'transparent'
-                }}
-              >
-                Fast Swap
-              </button>
-              <button 
-                onClick={() => handleSetMessiIndex(1)} 
-                style={{
-                  flexGrow: 1,
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  letterSpacing: '0.05em',
-                  padding: '0.5rem 0',
-                  textAlign: 'center',
-                  color: messiIndex === 1 ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
-                  borderRadius: '0.5rem',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                  zIndex: 10,
-                  border: 0,
-                  backgroundColor: 'transparent'
-                }}
-              >
-                Time Fix
-              </button>
-              <button 
-                onClick={() => handleSetMessiIndex(2)} 
-                style={{
-                  flexGrow: 1,
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  letterSpacing: '0.05em',
-                  padding: '0.5rem 0',
-                  textAlign: 'center',
-                  color: messiIndex === 2 ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
-                  borderRadius: '0.5rem',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                  zIndex: 10,
-                  border: 0,
-                  backgroundColor: 'transparent'
-                }}
-              >
-                Bot Army
-              </button>
-              {/* Slide highlight background */}
-              <div style={{
-                position: 'absolute',
-                top: '0.25rem',
-                bottom: '0.25rem',
-                left: '0.25rem',
-                backgroundColor: 'rgba(255, 85, 0, 0.2)',
-                border: '1px solid rgba(255, 122, 0, 0.3)',
-                borderRadius: '0.5rem',
-                transition: 'all 0.3s ease',
-                width: 'calc(33.333% - 0.333rem)',
-                transform: `translateX(${messiIndex * 100}%)`,
-                pointerEvents: 'none'
-              }} />
+              {Array.from({ length: 13 }, (_, i) => (
+                <div key={i} style={{
+                  width: '100%',
+                  height: '100%',
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0.5rem',
+                  boxSizing: 'border-box'
+                }}>
+                  <img 
+                    src={`funny-images/img_${i + 1}.jpg`} 
+                    alt={`Funny Slide ${i + 1}`}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      objectFit: 'contain',
+                      borderRadius: '0.75rem',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                    }}
+                  />
+                </div>
+              ))}
             </div>
+            
+            {/* Arrows */}
+            <button 
+              onClick={() => setFunnyIndex(prev => (prev - 1 + 13) % 13)}
+              style={{
+                position: 'absolute',
+                left: '12px',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 20,
+                outline: 'none'
+              }}
+            >
+              <i className="fa-solid fa-chevron-left" style={{ fontSize: '10px' }}></i>
+            </button>
+            <button 
+              onClick={() => setFunnyIndex(prev => (prev + 1) % 13)}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 20,
+                outline: 'none'
+              }}
+            >
+              <i className="fa-solid fa-chevron-right" style={{ fontSize: '10px' }}></i>
+            </button>
+          </div>
+
+          {/* Dots Indicator */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '0.5rem', maxWidth: '20rem' }}>
+            {Array.from({ length: 13 }, (_, i) => (
+              <span 
+                key={i}
+                onClick={() => setFunnyIndex(i)}
+                style={{
+                  width: i === funnyIndex ? '16px' : '8px',
+                  height: '8px',
+                  borderRadius: '9999px',
+                  backgroundColor: i === funnyIndex ? '#ff7a00' : 'rgba(255, 255, 255, 0.2)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+            ))}
           </div>
         </div>
-        {/* Bengali fun label */}
-        <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-          <span style={{
-            fontSize: '10px',
-            fontWeight: 700,
-            letterSpacing: '0.25em',
-            color: 'rgba(255, 255, 255, 0.15)',
-            textTransform: 'uppercase',
-            fontFamily: "'Space Grotesk', sans-serif",
-            transition: 'color 0.3s ease',
-            cursor: 'default',
-            userSelect: 'none'
-          }}
-          onMouseEnter={(e) => e.target.style.color = '#ff7a00'}
-          onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.15)'}
+
+        {/* Big Stylish Bangla Font text */}
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          <div 
+            className="bangla-stylish-text"
+            style={{
+              fontSize: '2.5rem',
+              fontWeight: 800,
+              userSelect: 'none'
+            }}
           >
-            RAG KORLA?
-          </span>
+            রাগ করলা?
+          </div>
         </div>
       </section>
 
@@ -1253,6 +1273,30 @@ export default function SeamlessPlayer() {
           DEVELOPED BY <span className={styles.footerAuthor}>SHAHIDUL ISLAM BAIZID</span>
         </div>
       </footer>
+
+      {/* Toast banner overlay */}
+      {toastMessage && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          backgroundColor: 'rgba(15, 15, 19, 0.95)',
+          border: '1px solid #ff7a00',
+          borderRadius: '12px',
+          padding: '12px 18px',
+          color: '#ffffff',
+          fontSize: '12px',
+          fontWeight: 700,
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 122, 0, 0.2)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <i className="fa-solid fa-bell" style={{ color: '#ff7a00' }}></i>
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
