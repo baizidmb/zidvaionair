@@ -5,7 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Live Feed Stream URL Configuration
-    const CHANNELS = [
+    let CHANNELS = [
         { name: "SP - SD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OukERocFRoTLpNhopWhojWRopWkQVbmFk6nI0zf&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy SD Clean Feed", badge: "sd" },
         { name: "SP - HD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OuzERokijak4MYmoV9JdsHJokrJdkABFhNcE0zKLw&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy HD Clean Feed", badge: "fhd" },
         { name: "FAST 1", url: "https://pullsgp.yyzb456.top/live/stream-698168_lhd.m3u8", detail: "High Speed Routing 1", badge: "hd" },
@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     let currentChannelIndex = 1; // Play SP - HD by default
+    let searchQuery = '';
     let hls = null;
 
     // Player State
@@ -358,16 +359,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!serversContainer) return;
         serversContainer.innerHTML = '';
 
+        const query = searchQuery.trim().toLowerCase();
+
         CHANNELS.forEach((channel, index) => {
+            if (query && !channel.name.toLowerCase().includes(query) && !(channel.detail || '').toLowerCase().includes(query)) {
+                return;
+            }
+
             const card = document.createElement('div');
             const isActive = currentChannelIndex === index;
             card.className = `server-card ${isActive ? 'active' : ''} glossy-shine`;
             card.dataset.index = index;
 
             const qualityBadge = channel.badge ? channel.badge.toUpperCase() : 'HD';
+            const thumbContent = (channel.logo && channel.logo.startsWith('http'))
+                ? `<img src="${channel.logo}" class="w-full h-full object-contain rounded-md" onerror="this.outerHTML='<span class=\\'text-[9px] font-bold\\'>${qualityBadge}</span>'">`
+                : `<span class="text-[9px] font-bold">${qualityBadge}</span>`;
 
             card.innerHTML = `
-                <div class="server-thumb">${qualityBadge}</div>
+                <div class="server-thumb flex items-center justify-center">${thumbContent}</div>
                 <div class="flex-grow flex flex-col overflow-hidden text-left">
                     <span class="server-card-name font-bold text-xs truncate text-white" title="${channel.name}">[${index + 1}] ${channel.name}</span>
                     <span class="text-[10px] text-white/40 truncate">${channel.detail || 'Live Broadcast Feed'}</span>
@@ -385,6 +395,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
             serversContainer.appendChild(card);
         });
+    }
+
+    function parseM3u(text) {
+        const lines = text.split(/\r?\n/);
+        const parsed = [];
+        let currentChannel = null;
+
+        for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+
+            if (line.startsWith('#EXTINF:')) {
+                let logo = '';
+                if (line.includes('tvg-logo="')) {
+                    logo = line.split('tvg-logo="')[1].split('"')[0];
+                }
+
+                const nameParts = line.split(',');
+                let name = nameParts[nameParts.length - 1].trim();
+
+                currentChannel = {
+                    name: name,
+                    logo: logo,
+                    badge: 'IPTV',
+                    detail: 'IPTV Sports Channel'
+                };
+            } else if (line.startsWith('http') && currentChannel) {
+                currentChannel.url = line;
+                parsed.push(currentChannel);
+                currentChannel = null;
+            }
+        }
+        return parsed;
+    }
+
+    async function loadM3uChannels() {
+        try {
+            const res = await fetch('https://iptv-org.github.io/iptv/categories/sports.m3u');
+            if (!res.ok) throw new Error('Failed to load M3U file');
+            const text = await res.text();
+            const parsed = parseM3u(text);
+            CHANNELS = [...CHANNELS, ...parsed];
+            renderChannelsGrid();
+        } catch (e) {
+            console.error('Error fetching M3U channels:', e);
+        }
     }
 
     window.playStream = playStream;
@@ -1326,8 +1382,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const channelSearchInput = document.getElementById('channel-search');
+    if (channelSearchInput) {
+        channelSearchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderChannelsGrid();
+        });
+    }
+
     renderChannelsGrid();
     playStream(1);
+    loadM3uChannels();
 
 
 

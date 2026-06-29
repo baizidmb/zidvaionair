@@ -27,7 +27,7 @@ const MOCK_SCHEDULE = [
   { id: 5, homeTeam: 'Norway', awayTeam: 'France', homeInit: 'NO', awayInit: 'FR', score1: null, score2: null, status: 'upcoming', kickoffUtc: new Date(Date.now() + 86400000).toISOString() },
 ];
 
-const CHANNELS = [
+const STATIC_CHANNELS = [
   { name: "SP - SD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OukERocFRoTLpNhopWhojWRopWkQVbmFk6nI0zf&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy SD Clean Feed", badge: "sd" },
   { name: "SP - HD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OuzERokijak4MYmoV9JdsHJokrJdkABFhNcE0zKLw&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy HD Clean Feed", badge: "fhd" },
   { name: "FAST 1", url: "https://pullsgp.yyzb456.top/live/stream-698168_lhd.m3u8", detail: "High Speed Routing 1", badge: "hd" },
@@ -41,11 +41,57 @@ const CHANNELS = [
 ];
 
 export default function SeamlessPlayer() {
-  const [currentChannelIndex, setCurrentChannelIndex] = useState(1);
-  const [streamUrl, setStreamUrl] = useState(CHANNELS[1].url);
+  const [dynamicChannels, setDynamicChannels] = useState(STATIC_CHANNELS);
+  const [currentChannel, setCurrentChannel] = useState(STATIC_CHANNELS[1]);
+  const [streamUrl, setStreamUrl] = useState(STATIC_CHANNELS[1].url);
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('feeds');
   const [messiIndex, setMessiIndex] = useState(0);
   const [messiFade, setMessiFade] = useState(false);
+
+  useEffect(() => {
+    async function loadM3u() {
+      try {
+        const res = await fetch('https://iptv-org.github.io/iptv/categories/sports.m3u');
+        if (!res.ok) throw new Error('Failed to load M3U');
+        const text = await res.text();
+        
+        const lines = text.split(/\r?\n/);
+        const parsed = [];
+        let currentChannel = null;
+
+        for (let line of lines) {
+          line = line.trim();
+          if (!line) continue;
+
+          if (line.startsWith('#EXTINF:')) {
+            let logo = '';
+            if (line.includes('tvg-logo="')) {
+              logo = line.split('tvg-logo="')[1].split('"')[0];
+            }
+
+            const nameParts = line.split(',');
+            let name = nameParts[nameParts.length - 1].trim();
+
+            currentChannel = {
+              name: name,
+              logo: logo,
+              badge: 'IPTV',
+              detail: 'IPTV Sports Channel'
+            };
+          } else if (line.startsWith('http') && currentChannel) {
+            currentChannel.url = line;
+            parsed.push(currentChannel);
+            currentChannel = null;
+          }
+        }
+        setDynamicChannels(prev => [...prev, ...parsed]);
+      } catch (e) {
+        console.error('Failed to load M3U playlist in React:', e);
+      }
+    }
+    loadM3u();
+  }, []);
   const handleSetMessiIndex = (idx) => {
     setMessiFade(true);
     setTimeout(() => {
@@ -524,7 +570,7 @@ export default function SeamlessPlayer() {
     }, 3000);
   };
 
-  const currentServer = CHANNELS[currentChannelIndex];
+  const currentServer = currentChannel;
   const backupServer = null;
 
   return (
@@ -534,11 +580,17 @@ export default function SeamlessPlayer() {
       <div className={styles.ambientGlow2} />
 
       {/* Main Header */}
-      <header className={styles.header}>
+      <header className={styles.header} style={{ position: 'relative', overflow: 'hidden' }}>
+        {/* Running border bottom highlight animation */}
+        <div className={styles.runningBorderBar}></div>
+
         <div className={styles.headerLeft}>
           <a href="#" className={styles.logoGroup}>
-            <span className={styles.liveIndicatorDot} />
-            <span className={styles.logoText}>ZID VAI ON AIR <span className={styles.logoAccent}>X WC 2026</span></span>
+            <div className={styles.doublePingContainer}>
+              <span className={styles.pingRing}></span>
+              <span className={styles.pingDot}></span>
+            </div>
+            <span className={`${styles.logoText} ${styles.logoTextGlow}`}>ZID VAI ON AIR <span className={styles.logoAccent}>X WC 2026</span></span>
             <span style={{
               fontSize: '8px',
               fontWeight: 700,
@@ -564,7 +616,12 @@ export default function SeamlessPlayer() {
         </div>
 
         <div className={styles.headerRight}>
-          <div className={styles.headerStats}>
+          {/* Facebook Developer Profile Badge */}
+          <a href="https://www.facebook.com/shahidulislam.bayzid.37" target="_blank" rel="noopener noreferrer" className={styles.devBadge}>
+            <i className="fa-brands fa-facebook text-blue-400 animate-pulse text-[11px] sm:text-xs"></i>
+            <span className={styles.devBadgeText} style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em', color: '#bfdbfe' }}>DEVELOPER</span>
+          </a>
+          <div className={styles.headerStats} style={{ display: 'none' /* hidden by default, shown on desktop override in CSS */ }}>
             <span className={styles.statsIcon}><i className="fa-solid fa-users"></i></span>
             <span className={styles.statsCount}>24.5K</span> online
           </div>
@@ -724,64 +781,96 @@ export default function SeamlessPlayer() {
             <div className={styles.tabContentPanel}>
               {/* Feeds Panel */}
               {activeTab === 'feeds' && (
-                <div className={styles.feedsPanel} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem', overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
-                  {CHANNELS.map((ch, idx) => {
-                    const isActive = currentChannelIndex === idx;
-                    return (
-                      <div 
-                        key={idx}
-                        onClick={() => {
-                          if (ch.url.includes('.mpd')) {
-                            setErrorMessage('DASH / Widevine DRM channels require a Germany VPN and specialized player components. Please select an HLS stream.');
-                          } else {
-                            setErrorMessage('');
-                            setStreamUrl(ch.url);
-                          }
-                          setCurrentChannelIndex(idx);
-                        }}
-                        className={`${styles.serverCard} ${isActive ? styles.activeServerCard : ''}`}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          background: isActive ? 'rgba(255, 122, 0, 0.12)' : 'rgba(255, 255, 255, 0.03)',
-                          border: isActive ? '1px solid #ff7a00' : '1px solid rgba(255, 255, 255, 0.08)',
-                          padding: '10px 12px',
-                          borderRadius: '14px',
-                          cursor: 'pointer',
-                          transition: 'all 0.25s ease'
-                        }}
-                      >
+                <div className={styles.feedsPanel} style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', width: '100%' }}>
+                  {/* Search Bar */}
+                  <div style={{ padding: '0.75rem', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: 'rgba(0, 0, 0, 0.1)', display: 'flex', alignItems: 'center', gap: '8px', boxSizing: 'border-box' }}>
+                    <i className="fa-solid fa-magnifying-glass" style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '11px' }}></i>
+                    <input 
+                      type="text" 
+                      placeholder="Search channels..." 
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', outline: 'none', color: '#ffffff', fontSize: '11px', width: '100%', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  
+                  {/* Scrollable Container */}
+                  <div className="scrollbar-style" style={{ flexGrow: 1, overflowY: 'auto', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.625rem', boxSizing: 'border-box' }}>
+                    {dynamicChannels.map((ch, idx) => {
+                      const query = searchQuery.trim().toLowerCase();
+                      if (query && !ch.name.toLowerCase().includes(query) && !(ch.detail || '').toLowerCase().includes(query)) {
+                        return null;
+                      }
+                      const isActive = currentChannel.url === ch.url;
+                      const qualityBadge = ch.badge ? ch.badge.toUpperCase() : 'HD';
+
+                      return (
                         <div 
-                          className={styles.serverThumb}
+                          key={idx}
+                          onClick={() => {
+                            if (ch.url.includes('.mpd')) {
+                              setErrorMessage('DASH / Widevine DRM channels require a Germany VPN and specialized player components. Please select an HLS stream.');
+                            } else {
+                              setErrorMessage('');
+                              setStreamUrl(ch.url);
+                            }
+                            setCurrentChannel(ch);
+                          }}
+                          className={`${styles.serverCard} ${isActive ? styles.activeServerCard : ''}`}
                           style={{
-                            width: '42px',
-                            height: '28px',
-                            background: 'linear-gradient(135deg, #ff7a00 0%, #ff3c00 100%)',
-                            borderRadius: '6px',
                             display: 'flex',
                             alignItems: 'center',
-                            justify-content: 'center',
-                            fontSize: '9px',
-                            fontWeight: 800,
-                            color: '#ffffff',
-                            flexShrink: 0,
-                            border: '1px solid rgba(255, 255, 255, 0.15)'
+                            gap: '12px',
+                            background: isActive ? 'rgba(255, 122, 0, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                            border: isActive ? '1px solid #ff7a00' : '1px solid rgba(255, 255, 255, 0.08)',
+                            padding: '10px 12px',
+                            borderRadius: '14px',
+                            cursor: 'pointer',
+                            transition: 'all 0.25s ease',
+                            flexShrink: 0
                           }}
                         >
-                          {ch.badge.toUpperCase()}
+                          <div 
+                            className={styles.serverThumb}
+                            style={{
+                              width: '42px',
+                              height: '28px',
+                              background: 'linear-gradient(135deg, #ff7a00 0%, #ff3c00 100%)',
+                              borderRadius: '6px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justify-content: 'center',
+                              fontSize: '9px',
+                              fontWeight: 800,
+                              color: '#ffffff',
+                              flexShrink: 0,
+                              border: '1px solid rgba(255, 255, 255, 0.15)',
+                              overflow: 'hidden'
+                            }}
+                          >
+                            {ch.logo && ch.logo.startsWith('http') ? (
+                              <img 
+                                src={ch.logo} 
+                                alt=""
+                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                              />
+                            ) : (
+                              qualityBadge
+                            )}
+                          </div>
+                          <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', textAlign: 'left' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>[{idx + 1}] {ch.name}</span>
+                            <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.detail}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontFamily: 'monospace' }}>
+                            <span>online</span>
+                            <span className={styles.statusDot} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#39ff14', boxShadow: '0 0 8px #39ff14' }} />
+                          </div>
                         </div>
-                        <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', textAlign: 'left' }}>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>[{idx + 1}] {ch.name}</span>
-                          <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.detail}</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontFamily: 'monospace' }}>
-                          <span>online</span>
-                          <span className={styles.statusDot} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#39ff14', boxShadow: '0 0 8px #39ff14' }} />
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 

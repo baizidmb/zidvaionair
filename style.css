@@ -455,3 +455,22 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 12px;
     }
 }
+
+/* Custom Header Glow and Border Animations */
+@keyframes runningBorder {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.animate-running-border {
+    background-size: 200% 100%;
+    animation: runningBorder 6s linear infinite;
+}
+
+@keyframes logoShift {
+    0% { filter: hue-rotate(0deg) drop-shadow(0 0 2px rgba(255, 122, 0, 0.4)); }
+    50% { filter: hue-rotate(15deg) drop-shadow(0 0 8px rgba(255, 122, 0, 0.7)); }
+    100% { filter: hue-rotate(0deg) drop-shadow(0 0 2px rgba(255, 122, 0, 0.4)); }
+}
+.header-title-glow {
+    animation: logoShift 5s ease-in-out infinite;
+}
