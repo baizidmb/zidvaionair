@@ -1098,17 +1098,7 @@ export default function SeamlessPlayer() {
       </div>
 
       {/* Fan Zone: Funny Portfolio Slider Section */}
-      <section style={{
-        backgroundColor: 'rgba(15, 15, 19, 0.85)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-        borderRadius: '1rem',
-        padding: '1.5rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-        marginTop: '1.5rem'
-      }}>
+      <section className={styles.trollZoneSection}>
         <h2 style={{
           fontSize: '0.875rem',
           fontWeight: 800,
