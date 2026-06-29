@@ -20,7 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentChannelIndex = 1; // Play SP - HD by default
     let searchQuery = '';
+    let hideOffline = true;
     let hls = null;
+
+    // Health Verification Queue
+    let healthQueue = [];
+    let activeChecks = 0;
+    const MAX_CONCURRENT_CHECKS = 6;
 
     // Player State
 
@@ -366,6 +372,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            if (hideOffline && channel.status === 'offline') {
+                return;
+            }
+
             const card = document.createElement('div');
             const isActive = currentChannelIndex === index;
             card.className = `server-card ${isActive ? 'active' : ''} glossy-shine`;
@@ -376,6 +386,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? `<img src="${channel.logo}" class="w-full h-full object-contain rounded-md" onerror="this.outerHTML='<span class=\\'text-[9px] font-bold\\'>${qualityBadge}</span>'">`
                 : `<span class="text-[9px] font-bold">${qualityBadge}</span>`;
 
+            const statusClass = channel.status === 'online' ? 'green' : (channel.status === 'checking' ? 'amber' : 'red');
+            const statusLabel = channel.status || 'checking';
+
             card.innerHTML = `
                 <div class="server-thumb flex items-center justify-center">${thumbContent}</div>
                 <div class="flex-grow flex flex-col overflow-hidden text-left">
@@ -383,8 +396,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="text-[10px] text-white/40 truncate">${channel.detail || 'Live Broadcast Feed'}</span>
                 </div>
                 <div class="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
-                    <span>online</span>
-                    <span class="status-dot status-green"></span>
+                    <span class="status-text">${statusLabel}</span>
+                    <span class="status-dot status-${statusClass}"></span>
                 </div>
             `;
 
@@ -419,7 +432,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: name,
                     logo: logo,
                     badge: 'IPTV',
-                    detail: 'IPTV Sports Channel'
+                    detail: 'IPTV Sports Channel',
+                    status: 'checking'
                 };
             } else if (line.startsWith('http') && currentChannel) {
                 currentChannel.url = line;
@@ -436,10 +450,88 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!res.ok) throw new Error('Failed to load M3U file');
             const text = await res.text();
             const parsed = parseM3u(text);
+            
+            const startIdx = CHANNELS.length;
             CHANNELS = [...CHANNELS, ...parsed];
             renderChannelsGrid();
+
+            // Enqueue all channels for verification (both Sportzfy and newly loaded ones)
+            for (let i = 0; i < CHANNELS.length; i++) {
+                if (i < startIdx) {
+                    if (!CHANNELS[i].status) {
+                        CHANNELS[i].status = 'online'; // Default Sportzfy to online initially
+                    }
+                }
+                enqueueHealthCheck(i);
+            }
         } catch (e) {
             console.error('Error fetching M3U channels:', e);
+        }
+    }
+
+    function enqueueHealthCheck(index) {
+        healthQueue.push(index);
+        processHealthQueue();
+    }
+
+    function processHealthQueue() {
+        while (activeChecks < MAX_CONCURRENT_CHECKS && healthQueue.length > 0) {
+            const idx = healthQueue.shift();
+            activeChecks++;
+            checkChannelHealth(idx);
+        }
+    }
+
+    async function checkChannelHealth(index) {
+        const channel = CHANNELS[index];
+        if (!channel) {
+            activeChecks--;
+            processHealthQueue();
+            return;
+        }
+
+        let isOnline = false;
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 6000);
+            
+            await fetch(channel.url, {
+                method: 'GET',
+                mode: 'no-cors',
+                signal: controller.signal,
+                credentials: 'omit'
+            });
+            clearTimeout(timeoutId);
+            isOnline = true;
+        } catch (e) {
+            isOnline = false;
+        }
+
+        channel.status = isOnline ? 'online' : 'offline';
+        updateChannelCardUI(index);
+
+        activeChecks--;
+        processHealthQueue();
+    }
+
+    function updateChannelCardUI(index) {
+        const channel = CHANNELS[index];
+        const card = document.querySelector(`.server-card[data-index="${index}"]`);
+        if (card) {
+            const dot = card.querySelector('.status-dot');
+            const statText = card.querySelector('.status-text');
+            if (dot) {
+                dot.className = `status-dot status-${channel.status === 'online' ? 'green' : (channel.status === 'checking' ? 'amber' : 'red')}`;
+            }
+            if (statText) {
+                statText.textContent = channel.status;
+            }
+
+            if (hideOffline && channel.status === 'offline') {
+                card.classList.add('hidden');
+            } else {
+                card.classList.remove('hidden');
+            }
         }
     }
 
@@ -1386,6 +1478,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (channelSearchInput) {
         channelSearchInput.addEventListener('input', (e) => {
             searchQuery = e.target.value;
+            renderChannelsGrid();
+        });
+    }
+
+    const hideOfflineToggle = document.getElementById('hide-offline-toggle');
+    if (hideOfflineToggle) {
+        hideOfflineToggle.addEventListener('change', (e) => {
+            hideOffline = e.target.checked;
             renderChannelsGrid();
         });
     }

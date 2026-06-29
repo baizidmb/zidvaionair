@@ -28,16 +28,16 @@ const MOCK_SCHEDULE = [
 ];
 
 const STATIC_CHANNELS = [
-  { name: "SP - SD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OukERocFRoTLpNhopWhojWRopWkQVbmFk6nI0zf&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy SD Clean Feed", badge: "sd" },
-  { name: "SP - HD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OuzERokijak4MYmoV9JdsHJokrJdkABFhNcE0zKLw&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy HD Clean Feed", badge: "fhd" },
-  { name: "FAST 1", url: "https://pullsgp.yyzb456.top/live/stream-698168_lhd.m3u8", detail: "High Speed Routing 1", badge: "hd" },
-  { name: "FAST 2", url: "https://pul-tenm.nbs3g.com/live/hd-en-1-4459717.m3u8?txSecret=cb546b67173ce18b5d6e9c15e9ec6b4b&txTime=6A42BDE0", detail: "High Speed Routing 2", badge: "hd" },
-  { name: "Arabic", url: "https://em.golatooa.site/Canads1.m3u8", detail: "Arabic Broadcast Feed", badge: "sd" },
-  { name: "CCTV 5", url: "https://live.666666.zip/cctv/5.m3u8", detail: "CCTV Sports Broadcast", badge: "hd" },
-  { name: "SP - 2", url: "https://live.666666.zip/migu/1.m3u8", detail: "Migu Live Broadcast", badge: "hd" },
-  { name: "SP - 3", url: "https://hqlive.yarncdn.live/live/hqtv_blv_phanma/playlist.m3u8", detail: "HQTV Live Feed", badge: "hd" },
-  { name: "FUSSBALL (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_hd/DASH/index.mpd", detail: "Fussball TV HD (DASH/DRM)", badge: "fhd" },
-  { name: "FUSSBALL 4K (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd", detail: "Fussball TV 4K (DASH/DRM)", badge: "4k" }
+  { name: "SP - SD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OukERocFRoTLpNhopWhojWRopWkQVbmFk6nI0zf&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy SD Clean Feed", badge: "sd", status: 'online' },
+  { name: "SP - HD", url: "https://rglzdwqlaqpzfoofnohk.supabase.co/functions/v1/go?url=Q09k4OuzERokijak4MYmoV9JdsHJokrJdkABFhNcE0zKLw&headers=3OvT47zfFAzydly_zKugdly_FOKXdly_HG_hI0oSrVwhv1P0dly_dVwhvGgTIGSh4KHmHRdJERI_4UgRHGHJIRIRFhNcE0zKLpycyCv_EU1Uq1yjin", detail: "Sportzfy HD Clean Feed", badge: "fhd", status: 'online' },
+  { name: "FAST 1", url: "https://pullsgp.yyzb456.top/live/stream-698168_lhd.m3u8", detail: "High Speed Routing 1", badge: "hd", status: 'online' },
+  { name: "FAST 2", url: "https://pul-tenm.nbs3g.com/live/hd-en-1-4459717.m3u8?txSecret=cb546b67173ce18b5d6e9c15e9ec6b4b&txTime=6A42BDE0", detail: "High Speed Routing 2", badge: "hd", status: 'online' },
+  { name: "Arabic", url: "https://em.golatooa.site/Canads1.m3u8", detail: "Arabic Broadcast Feed", badge: "sd", status: 'online' },
+  { name: "CCTV 5", url: "https://live.666666.zip/cctv/5.m3u8", detail: "CCTV Sports Broadcast", badge: "hd", status: 'online' },
+  { name: "SP - 2", url: "https://live.666666.zip/migu/1.m3u8", detail: "Migu Live Broadcast", badge: "hd", status: 'online' },
+  { name: "SP - 3", url: "https://hqlive.yarncdn.live/live/hqtv_blv_phanma/playlist.m3u8", detail: "HQTV Live Feed", badge: "hd", status: 'online' },
+  { name: "FUSSBALL (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_hd/DASH/index.mpd", detail: "Fussball TV HD (DASH/DRM)", badge: "fhd", status: 'online' },
+  { name: "FUSSBALL 4K (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd", detail: "Fussball TV 4K (DASH/DRM)", badge: "4k", status: 'online' }
 ];
 
 export default function SeamlessPlayer() {
@@ -45,6 +45,7 @@ export default function SeamlessPlayer() {
   const [currentChannel, setCurrentChannel] = useState(STATIC_CHANNELS[1]);
   const [streamUrl, setStreamUrl] = useState(STATIC_CHANNELS[1].url);
   const [searchQuery, setSearchQuery] = useState('');
+  const [hideOffline, setHideOffline] = useState(true);
   const [activeTab, setActiveTab] = useState('feeds');
   const [messiIndex, setMessiIndex] = useState(0);
   const [messiFade, setMessiFade] = useState(false);
@@ -77,7 +78,8 @@ export default function SeamlessPlayer() {
               name: name,
               logo: logo,
               badge: 'IPTV',
-              detail: 'IPTV Sports Channel'
+              detail: 'IPTV Sports Channel',
+              status: 'checking'
             };
           } else if (line.startsWith('http') && currentChannel) {
             currentChannel.url = line;
@@ -92,6 +94,72 @@ export default function SeamlessPlayer() {
     }
     loadM3u();
   }, []);
+
+  useEffect(() => {
+    if (dynamicChannels.length <= STATIC_CHANNELS.length) return;
+
+    let active = true;
+    const queue = Array.from({ length: dynamicChannels.length }, (_, i) => i);
+    const maxConcurrent = 6;
+    let running = 0;
+
+    const verifyChannelHealth = (url) => {
+      return new Promise((resolve) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        fetch(url, { method: 'GET', mode: 'no-cors', signal: controller.signal, credentials: 'omit' })
+          .then(() => {
+            clearTimeout(timeoutId);
+            resolve(true);
+          })
+          .catch(() => {
+            clearTimeout(timeoutId);
+            resolve(false);
+          });
+      });
+    };
+
+    const runNext = async () => {
+      if (!active || queue.length === 0) return;
+      const idx = queue.shift();
+      
+      if (idx < STATIC_CHANNELS.length) {
+        runNext();
+        return;
+      }
+
+      running++;
+      const channel = dynamicChannels[idx];
+      if (channel && channel.status !== 'checking') {
+        running--;
+        runNext();
+        return;
+      }
+
+      const isOnline = await verifyChannelHealth(channel.url);
+
+      if (active) {
+        setDynamicChannels(prev => {
+          const copy = [...prev];
+          if (copy[idx]) {
+            copy[idx] = { ...copy[idx], status: isOnline ? 'online' : 'offline' };
+          }
+          return copy;
+        });
+        running--;
+        runNext();
+      }
+    };
+
+    for (let i = 0; i < maxConcurrent; i++) {
+      runNext();
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [dynamicChannels.length]);
+  
   const handleSetMessiIndex = (idx) => {
     setMessiFade(true);
     setTimeout(() => {
@@ -782,16 +850,30 @@ export default function SeamlessPlayer() {
               {/* Feeds Panel */}
               {activeTab === 'feeds' && (
                 <div className={styles.feedsPanel} style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', width: '100%' }}>
-                  {/* Search Bar */}
-                  <div style={{ padding: '0.75rem', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: 'rgba(0, 0, 0, 0.1)', display: 'flex', alignItems: 'center', gap: '8px', boxSizing: 'border-box' }}>
-                    <i className="fa-solid fa-magnifying-glass" style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '11px' }}></i>
-                    <input 
-                      type="text" 
-                      placeholder="Search channels..." 
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      style={{ background: 'transparent', border: 'none', outline: 'none', color: '#ffffff', fontSize: '11px', width: '100%', boxSizing: 'border-box' }}
-                    />
+                  {/* Search Bar & Hide Toggle */}
+                  <div style={{ padding: '0.75rem', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: 'rgba(0, 0, 0, 0.1)', display: 'flex', flexDirection: 'column', gap: '6px', boxSizing: 'border-box' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <i className="fa-solid fa-magnifying-glass" style={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '11px' }}></i>
+                      <input 
+                        type="text" 
+                        placeholder="Search channels..." 
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        style={{ background: 'transparent', border: 'none', outline: 'none', color: '#ffffff', fontSize: '11px', width: '100%', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '9px', color: 'rgba(255, 255, 255, 0.4)', userSelect: 'none' }}>
+                      <span>Status Verification Queue</span>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={hideOffline} 
+                          onChange={e => setHideOffline(e.target.checked)} 
+                          style={{ cursor: 'pointer', accentColor: '#ff7a00' }} 
+                        />
+                        <span>Hide Dead Channels</span>
+                      </label>
+                    </div>
                   </div>
                   
                   {/* Scrollable Container */}
@@ -801,8 +883,17 @@ export default function SeamlessPlayer() {
                       if (query && !ch.name.toLowerCase().includes(query) && !(ch.detail || '').toLowerCase().includes(query)) {
                         return null;
                       }
+                      if (hideOffline && ch.status === 'offline') {
+                        return null;
+                      }
                       const isActive = currentChannel.url === ch.url;
                       const qualityBadge = ch.badge ? ch.badge.toUpperCase() : 'HD';
+
+                      const isChecking = ch.status === 'checking';
+                      const isOffline = ch.status === 'offline';
+                      const statusLabel = ch.status || 'checking';
+                      const dotColor = isOffline ? '#ef4444' : (isChecking ? '#f59e0b' : '#39ff14');
+                      const dotShadow = isOffline ? '0 0 8px #ef4444' : (isChecking ? '0 0 8px #f59e0b' : '0 0 8px #39ff14');
 
                       return (
                         <div 
@@ -864,8 +955,8 @@ export default function SeamlessPlayer() {
                             <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.detail}</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontFamily: 'monospace' }}>
-                            <span>online</span>
-                            <span className={styles.statusDot} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#39ff14', boxShadow: '0 0 8px #39ff14' }} />
+                            <span>{statusLabel}</span>
+                            <span className={styles.statusDot} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: dotColor, boxShadow: dotShadow }} />
                           </div>
                         </div>
                       );

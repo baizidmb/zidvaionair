@@ -169,10 +169,19 @@
                         
                         <!-- Panel: Channel Feed Selectors -->
                         <div id="sidebar-servers-panel" class="absolute inset-0 flex flex-col overflow-hidden">
-                            <!-- Search Bar -->
-                            <div class="p-3 border-b border-white/5 bg-black/10 flex items-center gap-2">
-                                <i class="fa-solid fa-magnifying-glass text-white/30 text-xs"></i>
-                                <input id="channel-search" type="text" placeholder="Search channels..." class="bg-transparent border-none outline-none text-white placeholder-white/30 text-xs w-full">
+                            <!-- Search Bar & Toggle -->
+                            <div class="p-3 border-b border-white/5 bg-black/10 flex flex-col gap-2">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-magnifying-glass text-white/30 text-xs"></i>
+                                    <input id="channel-search" type="text" placeholder="Search channels..." class="bg-transparent border-none outline-none text-white placeholder-white/30 text-xs w-full">
+                                </div>
+                                <div class="flex items-center justify-between text-[9px] text-white/40 select-none">
+                                    <span>Status Verification Queue</span>
+                                    <label class="flex items-center gap-1 cursor-pointer hover:text-white/60 transition-colors">
+                                        <input type="checkbox" id="hide-offline-toggle" checked class="accent-[#ff7a00] cursor-pointer">
+                                        <span>Hide Dead Channels</span>
+                                    </label>
+                                </div>
                             </div>
                             <!-- Scrollable Container -->
                             <div id="servers-container" class="flex-grow overflow-y-auto p-3 scrollbar-style flex flex-col gap-2.5">
