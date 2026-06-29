@@ -16,7 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "SP - 3", url: "https://hqlive.yarncdn.live/live/hqtv_blv_phanma/playlist.m3u8", detail: "HQTV Live Feed", badge: "hd" },
         { name: "FUSSBALL (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_hd/DASH/index.mpd", detail: "Fussball TV HD (DASH/DRM)", badge: "fhd" },
         { name: "FUSSBALL 4K (Germany VPN)", url: "https://svc45.main.sl.t-online.de/bpk-tv/KID01037_FUSSBALLTV1_uhd/DASH/index.mpd", detail: "Fussball TV 4K (DASH/DRM)", badge: "4k" },
-        { name: "Somoy TV", url: "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8", detail: "Somoy TV Live Broadcast", badge: "hd" }
+        { name: "Somoy TV", url: "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8", detail: "Somoy TV Live Broadcast", badge: "hd" },
+        { name: "Win Sports", url: "https://1nyaler.streamhostingcdn.top/stream/32/index.m3u8", detail: "Win Sports Broadcast", badge: "hd" },
+        { name: "beIN Sports 1", url: "https://ua102.online24.pm:8443/1101/video.m3u8?token=350B326FB34F4B8", detail: "beIN 1 Broadcast Feed", badge: "hd" },
+        { name: "Fox Sports", url: "http://84.17.50.102/fox/index.m3u8", detail: "Fox Sports Live Feed", badge: "hd" },
+        { name: "Peace TV English", url: "https://dzkyvlfyge.erbvr.com/PeaceTvEnglish/index.m3u8?sid=Z44HMm4XiUygzqBGwjL4gA", detail: "Peace TV English Broadcast", badge: "sd" },
+        { name: "BTV", url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1709/output/index.m3u8", detail: "BTV National Feed", badge: "hd" },
+        { name: "DAZN Directo", url: "https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8", detail: "DAZN Live Feed", badge: "hd" },
+        { name: "D Sports", url: "https://1nyaler.streamhostingcdn.top/stream/106/index.m3u8", detail: "D Sports Live Feed", badge: "hd" },
+        { name: "beIN Sports 2", url: "https://1nyaler.streamhostingcdn.top/stream/23/index.m3u8", detail: "beIN 2 Broadcast Feed", badge: "hd" }
     ];
 
     let currentChannelIndex = 1; // Play SP - HD by default
