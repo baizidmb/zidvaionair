@@ -966,48 +966,51 @@ header.liquid-glass-panel {
 
 main {
     height: auto !important;
-    display: grid !important;
-    grid-template-columns: 3fr 1fr !important;
-    gap: 16px !important;
     overflow: visible !important;
 }
 
-.lg\:col-span-3 {
-    height: auto !important;
-    overflow: visible !important;
-}
-
+.lg\:col-span-3,
 .lg\:col-span-1 {
     height: auto !important;
     overflow: visible !important;
 }
 
+/* ---------------------------------------------------------
+   DESKTOP MEDIA QUERIES (min-width: 1024px)
+   --------------------------------------------------------- */
 @media (min-width: 1024px) {
-    .lg\:col-span-1 {
-        height: 750px !important;
-        overflow: visible !important;
+    main {
+        display: grid !important;
+        grid-template-columns: 1fr 380px !important;
+        gap: 32px !important;
+        align-items: start !important;
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+        padding: 0 24px !important;
+    }
+
+    .sticky-player-container {
+        position: -webkit-sticky !important;
+        position: sticky !important;
+        top: 110px !important; /* Docks precisely below header on scroll */
+        z-index: 90 !important;
+        align-self: start !important;
+        height: fit-content !important;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6) !important;
+        border-radius: 24px !important;
     }
 }
 
-/* Perfect Sticky Video Player Container */
-.sticky-player-container {
-    position: -webkit-sticky !important;
-    position: sticky !important;
-    top: 104px !important; /* Docks precisely below the 20px top offset + ~64px header height */
-    z-index: 90 !important;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6) !important;
-    border-radius: 24px !important;
-    transition: box-shadow 0.3s ease !important;
-}
-
-/* Mobile Scroll-To-Stick & Anti-Blink Adjustments */
-@media (max-width: 768px) {
+/* ---------------------------------------------------------
+   MOBILE & TABLET MEDIA QUERIES (max-width: 1023px)
+   --------------------------------------------------------- */
+@media (max-width: 1023px) {
     /* Set static gradient background to prevent blinking on mobile */
     body {
         background: linear-gradient(135deg, #050508 0%, #0b0a10 50%, #020204 100%) !important;
     }
 
-    /* Completely hide morphing orbs rendering on mobile */
+    /* Completely hide morphing orbs rendering to prevent repaint blink */
     .background-orbs-container,
     .fluid-orb {
         display: none !important;
@@ -1031,7 +1034,7 @@ main {
     }
     
     .main-content-container {
-        padding-top: 96px !important; /* Clears the 12px top + 64px header height neatly */
+        padding-top: 96px !important; /* Clears the header height neatly */
         height: auto !important;
         overflow: visible !important;
         display: block !important;
@@ -1059,7 +1062,7 @@ main {
     .sticky-player-container {
         position: -webkit-sticky !important;
         position: sticky !important;
-        top: 84px !important; /* Docks precisely below the 12px top + 64px header height */
+        top: 84px !important; /* Docks precisely below the mobile header */
         width: calc(100% - 32px) !important;
         margin: 16px auto !important;
         border-radius: 24px !important;

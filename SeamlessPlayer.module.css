@@ -1806,10 +1806,6 @@
 .mainGrid {
   height: auto !important;
   overflow: visible !important;
-  display: grid !important;
-  grid-template-columns: 3fr 1fr !important;
-  gap: 16px !important;
-  padding: 1.5rem !important;
   box-sizing: border-box !important;
 }
 
@@ -1826,28 +1822,46 @@
   height: 100% !important;
 }
 
-.videoPlayerBox {
-  position: -webkit-sticky !important;
-  position: sticky !important;
-  top: 104px !important; /* Docks precisely below the 20px top + header height */
-  z-index: 90 !important;
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(40px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6) !important;
-  border-radius: 24px !important;
+/* ---------------------------------------------------------
+   DESKTOP MEDIA QUERIES (min-width: 1024px)
+   --------------------------------------------------------- */
+@media (min-width: 1024px) {
+  .mainGrid {
+    display: grid !important;
+    grid-template-columns: 1fr 380px !important;
+    gap: 32px !important;
+    align-items: start !important;
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    padding: 0 24px !important;
+  }
+
+  .videoPlayerBox {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 110px !important; /* Docks precisely below header on scroll */
+    z-index: 90 !important;
+    align-self: start !important;
+    height: fit-content !important;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6) !important;
+    border-radius: 24px !important;
+  }
+
+  .sidebarColumn {
+    height: auto !important;
+  }
 }
 
-/* Mobile Responsive Adjustments & Sticky Player Fallback */
-@media (max-width: 768px) {
+/* ---------------------------------------------------------
+   MOBILE & TABLET MEDIA QUERIES (max-width: 1023px)
+   --------------------------------------------------------- */
+@media (max-width: 1023px) {
   /* Set static gradient background to prevent blinking on mobile */
   .bodyWrapper {
     background: linear-gradient(135deg, #050508 0%, #0b0a10 50%, #020204 100%) !important;
   }
 
-  /* Completely hide morphing orbs rendering on mobile */
+  /* Completely hide morphing orbs rendering to prevent repaint blink */
   .backgroundOrbsContainer,
   .fluidOrb {
     display: none !important;
@@ -1895,7 +1909,7 @@
   .videoPlayerBox {
     position: -webkit-sticky !important;
     position: sticky !important;
-    top: 84px !important; /* Docks precisely below the 12px top + 64px header height */
+    top: 84px !important; /* Docks precisely below the mobile header */
     width: calc(100% - 32px) !important;
     margin: 16px auto !important;
     border-radius: 24px !important;
