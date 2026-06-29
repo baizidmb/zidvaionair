@@ -714,22 +714,15 @@ export default function SeamlessPlayer() {
               <span className={styles.pingRing}></span>
               <span className={styles.pingDot}></span>
             </div>
-            <span className={`${styles.logoText} ${styles.logoTextGlow}`}>ZID VAI ON AIR <span className={styles.logoAccent}>X WC 2026</span></span>
+            <span className={`${styles.logoText} ${styles.logoTextGlow}`}>
+              ZID VAI ON AIR <span className={styles.logoAccent}>X WC 2026</span>
+            </span>
           </a>
           <nav className={styles.navLinks}>
             <a href="#" className={`${styles.navLink} ${styles.navLinkActive}`}>LIVE MATCHES</a>
             <a href="#" className={styles.navLink}>FIXTURES</a>
             <a href="#" className={styles.navLink}>CHANNELS</a>
           </nav>
-          {/* Whistle Z button for mobile view */}
-          <button 
-            onClick={playRefereeWhistle}
-            className={`${styles.userProfile} ${styles.mobileWhistleBtn}`} 
-            style={{ textDecoration: 'none', border: 'none', cursor: 'pointer', outline: 'none' }}
-            title="Blow Referee Whistle!"
-          >
-            Z
-          </button>
         </div>
 
         <div className={styles.headerRight}>
@@ -771,18 +764,19 @@ export default function SeamlessPlayer() {
                 letterSpacing: '0.1em'
               }}
             >
-              EXPERIMENTAL
+              <span className="inline sm:hidden">EXP</span>
+              <span className="hidden sm:inline">EXPERIMENTAL</span>
             </span>
           </div>
           <div className={styles.headerStats} style={{ display: 'none' /* hidden by default, shown on desktop override in CSS */ }}>
             <span className={styles.statsIcon}><i className="fa-solid fa-users"></i></span>
             <span className={styles.statsCount}>24.5K</span> online
           </div>
-          {/* Whistle Z button for desktop view */}
+          {/* Whistle Z button */}
           <button 
             onClick={playRefereeWhistle}
-            className={`${styles.userProfile} ${styles.desktopWhistleBtn}`} 
-            style={{ textDecoration: 'none', border: 'none', cursor: 'pointer', outline: 'none' }}
+            className={styles.userProfile} 
+            style={{ textDecoration: 'none', border: 'none', cursor: 'pointer', outline: 'none', flexShrink: 0 }}
             title="Blow Referee Whistle!"
           >
             Z

@@ -1853,8 +1853,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initWhistleButton() {
         const whistleBtn = document.getElementById('whistle-btn');
-        const whistleBtnMobile = document.getElementById('whistle-btn-mobile');
-        if (!whistleBtn && !whistleBtnMobile) return;
+        if (!whistleBtn) return;
 
         const triggerWhistle = (btn) => {
             if (btn) {
@@ -1915,12 +1914,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        if (whistleBtn) {
-            whistleBtn.addEventListener('click', () => triggerWhistle(whistleBtn));
-        }
-        if (whistleBtnMobile) {
-            whistleBtnMobile.addEventListener('click', () => triggerWhistle(whistleBtnMobile));
-        }
+        whistleBtn.addEventListener('click', () => triggerWhistle(whistleBtn));
     }
 
     // Toast utility helper
