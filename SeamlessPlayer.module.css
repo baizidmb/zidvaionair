@@ -206,16 +206,11 @@
 
 .logoAccent {
   color: #ff7a00;
-  display: none;
-}
-@media (min-width: 370px) {
-  .logoAccent {
-    display: inline;
-  }
+  display: inline;
 }
 
 .experimentalBadge {
-  display: none;
+  display: inline-block;
   font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -232,11 +227,6 @@
 @keyframes pulse-badge {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }
-}
-@media (min-width: 430px) {
-  .experimentalBadge {
-    display: inline-block;
-  }
 }
 
 .navLinks {

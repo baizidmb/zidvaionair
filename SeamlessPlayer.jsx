@@ -715,9 +715,6 @@ export default function SeamlessPlayer() {
               <span className={styles.pingDot}></span>
             </div>
             <span className={`${styles.logoText} ${styles.logoTextGlow}`}>ZID VAI ON AIR <span className={styles.logoAccent}>X WC 2026</span></span>
-            <span className={styles.experimentalBadge}>
-              Experimental
-            </span>
           </a>
           <nav className={styles.navLinks}>
             <a href="#" className={`${styles.navLink} ${styles.navLinkActive}`}>LIVE MATCHES</a>
@@ -739,17 +736,18 @@ export default function SeamlessPlayer() {
                 alignItems: 'center',
                 gap: '4px',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                padding: '2px 8px',
+                padding: '2px 6px',
                 borderRadius: '9999px',
-                fontSize: '9px',
+                fontSize: '8px',
                 fontWeight: 700,
                 color: '#ffffff',
                 textDecoration: 'none',
                 transition: 'background-color 0.2s'
               }}
             >
-              <i className="fa-brands fa-facebook text-blue-400" style={{ fontSize: '11px' }}></i>
+              <i className="fa-brands fa-facebook text-blue-400" style={{ fontSize: '9px' }}></i>
               <span className="hidden sm:inline">DEVELOPER</span>
+              <span className="inline sm:hidden">DEV</span>
             </a>
             {/* Experimental Icon Label */}
             <span 
@@ -757,16 +755,16 @@ export default function SeamlessPlayer() {
               style={{
                 background: 'linear-gradient(to right, #ff5500, #ffaa00)',
                 color: '#ffffff',
-                padding: '2px 8px',
+                padding: '2px 6px',
                 borderRadius: '9999px',
-                fontSize: '8px',
+                fontSize: '7.5px',
                 fontWeight: 700,
                 fontFamily: 'monospace',
-                letterSpacing: '0.1em'
+                letterSpacing: '0.05em'
               }}
             >
-              <span className="inline min-[360px]:hidden">EXP</span>
-              <span className="hidden min-[360px]:inline">EXPERIMENTAL</span>
+              <span className="hidden sm:inline">EXPERIMENTAL</span>
+              <span className="inline sm:hidden">EXP</span>
             </span>
           </div>
           <div className={styles.headerStats} style={{ display: 'none' /* hidden by default, shown on desktop override in CSS */ }}>
