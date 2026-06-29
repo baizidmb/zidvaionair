@@ -132,6 +132,11 @@ export default function SeamlessPlayer() {
     const runNext = async () => {
       if (!active || queue.length === 0) return;
       const idx = queue.shift();
+      
+      if (idx < STATIC_CHANNELS.length) {
+        runNext();
+        return;
+      }
 
       running++;
       const channel = dynamicChannels[idx];
@@ -716,6 +721,15 @@ export default function SeamlessPlayer() {
             <a href="#" className={styles.navLink}>FIXTURES</a>
             <a href="#" className={styles.navLink}>CHANNELS</a>
           </nav>
+          {/* Whistle Z button for mobile view */}
+          <button 
+            onClick={playRefereeWhistle}
+            className={`${styles.userProfile} ${styles.mobileWhistleBtn}`} 
+            style={{ textDecoration: 'none', border: 'none', cursor: 'pointer', outline: 'none' }}
+            title="Blow Referee Whistle!"
+          >
+            Z
+          </button>
         </div>
 
         <div className={styles.headerRight}>
@@ -731,18 +745,17 @@ export default function SeamlessPlayer() {
                 alignItems: 'center',
                 gap: '4px',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                padding: '2px 6px',
+                padding: '2px 8px',
                 borderRadius: '9999px',
-                fontSize: '8px',
+                fontSize: '9px',
                 fontWeight: 700,
                 color: '#ffffff',
                 textDecoration: 'none',
                 transition: 'background-color 0.2s'
               }}
             >
-              <i className="fa-brands fa-facebook text-blue-400" style={{ fontSize: '9px' }}></i>
+              <i className="fa-brands fa-facebook text-blue-400" style={{ fontSize: '11px' }}></i>
               <span className="hidden sm:inline">DEVELOPER</span>
-              <span className="inline sm:hidden">DEV</span>
             </a>
             {/* Experimental Icon Label */}
             <span 
@@ -750,25 +763,25 @@ export default function SeamlessPlayer() {
               style={{
                 background: 'linear-gradient(to right, #ff5500, #ffaa00)',
                 color: '#ffffff',
-                padding: '2px 6px',
+                padding: '2px 8px',
                 borderRadius: '9999px',
-                fontSize: '7.5px',
+                fontSize: '8px',
                 fontWeight: 700,
                 fontFamily: 'monospace',
-                letterSpacing: '0.05em'
+                letterSpacing: '0.1em'
               }}
             >
-              <span className="hidden sm:inline">EXPERIMENTAL</span>
-              <span className="inline sm:hidden">EXP</span>
+              EXPERIMENTAL
             </span>
           </div>
           <div className={styles.headerStats} style={{ display: 'none' /* hidden by default, shown on desktop override in CSS */ }}>
             <span className={styles.statsIcon}><i className="fa-solid fa-users"></i></span>
             <span className={styles.statsCount}>24.5K</span> online
           </div>
+          {/* Whistle Z button for desktop view */}
           <button 
             onClick={playRefereeWhistle}
-            className={styles.userProfile} 
+            className={`${styles.userProfile} ${styles.desktopWhistleBtn}`} 
             style={{ textDecoration: 'none', border: 'none', cursor: 'pointer', outline: 'none' }}
             title="Blow Referee Whistle!"
           >
@@ -1005,7 +1018,7 @@ export default function SeamlessPlayer() {
                       if (query && !ch.name.toLowerCase().includes(query) && !(ch.detail || '').toLowerCase().includes(query)) {
                         return null;
                       }
-                      const isFifa = WC_KEYWORDS.some(kw => ch.name.toLowerCase().includes(kw));
+                      const isFifa = (idx < STATIC_CHANNELS.length) || WC_KEYWORDS.some(kw => ch.name.toLowerCase().includes(kw));
                       if (activeFolder === 'fifa' && !isFifa) {
                         return null;
                       }
@@ -1053,7 +1066,7 @@ export default function SeamlessPlayer() {
                             )}
                           </div>
                           <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', textAlign: 'left' }}>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.name}</span>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>[{idx + 1}] {ch.name}</span>
                             <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.detail}</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontFamily: 'monospace' }}>

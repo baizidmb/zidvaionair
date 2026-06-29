@@ -28,47 +28,53 @@
 
     <!-- Header Navigation Bar -->
     <!-- Header Navigation Bar -->
-    <header class="sticky top-0 z-50 backdrop-blur-xl bg-[#050508]/85 border-b border-white/10 py-3 sm:py-5 px-3 sm:px-6 md:px-8 flex justify-between items-center shadow-lg relative overflow-hidden min-h-[64px] sm:min-h-[80px]">
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-[#050508]/85 border-b border-white/10 py-2 sm:py-4 px-3 sm:px-6 md:px-8 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-6 shadow-lg relative min-h-[64px] sm:min-h-[80px]">
         <!-- Running border bottom highlight animation -->
         <div class="absolute bottom-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#ff7a00] to-transparent animate-running-border"></div>
         
-        <div class="flex items-center gap-6">
-            <!-- Brand Logo -->
-            <a href="#" class="flex items-center gap-2 group text-decoration-none">
-                <div class="relative flex items-center justify-center w-3.5 h-3.5 flex-shrink-0">
-                    <span class="absolute inline-flex h-full w-full rounded-full bg-[#ff7a00] opacity-75 animate-ping"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-[#ff5500] shadow-[0_0_8px_#ff5500]"></span>
+        <!-- Row 1: Brand & Nav Links -->
+        <div class="flex justify-between items-center w-full sm:w-auto gap-4">
+            <div class="flex items-center gap-6">
+                <!-- Brand Logo -->
+                <a href="#" class="flex items-center gap-2 group text-decoration-none">
+                    <div class="relative flex items-center justify-center w-3.5 h-3.5 flex-shrink-0">
+                        <span class="absolute inline-flex h-full w-full rounded-full bg-[#ff7a00] opacity-75 animate-ping"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-[#ff5500] shadow-[0_0_8px_#ff5500]"></span>
+                    </div>
+                    <span class="font-extrabold text-[12px] sm:text-sm md:text-base lg:text-lg tracking-wider text-white transition-colors group-hover:text-[#ff7a00] uppercase header-title-glow whitespace-nowrap">
+                        ZID VAI ON AIR <span class="text-[#ff7a00]">X WC 2026</span>
+                    </span>
+                </a>
+                <!-- Live Ticker -->
+                <div id="header-match-container" class="hidden xl:flex items-center gap-2 text-[10px] text-white/50 bg-white/5 border border-white/5 px-2.5 py-1 rounded-md">
+                    <span id="header-match-dot" class="w-1.5 h-1.5 bg-[#ef4444] rounded-full animate-pulse hidden"></span>
+                    <span id="header-match-text" class="font-medium text-white/60">No matches loaded</span>
                 </div>
-                <span class="font-extrabold text-[10px] min-[350px]:text-[11px] min-[380px]:text-xs sm:text-sm md:text-base lg:text-lg tracking-wider text-white transition-colors group-hover:text-[#ff7a00] uppercase header-title-glow whitespace-nowrap">
-                    ZID VAI ON AIR <span class="text-[#ff7a00]">X WC 2026</span>
-                </span>
-            </a>
-            <!-- Live Ticker -->
-            <div id="header-match-container" class="hidden xl:flex items-center gap-2 text-[10px] text-white/50 bg-white/5 border border-white/5 px-2.5 py-1 rounded-md">
-                <span id="header-match-dot" class="w-1.5 h-1.5 bg-[#ef4444] rounded-full animate-pulse hidden"></span>
-                <span id="header-match-text" class="font-medium text-white/60">No matches loaded</span>
+                <!-- Links -->
+                <nav class="hidden md:flex items-center gap-6 text-xs font-semibold tracking-wider text-white/60">
+                    <a href="#" class="hover:text-white transition-colors text-white">LIVE MATCHES</a>
+                    <a href="#" class="hover:text-white transition-colors">FIXTURES</a>
+                    <a href="#" class="hover:text-white transition-colors">CHANNELS</a>
+                </nav>
             </div>
-            <!-- Links -->
-            <nav class="hidden md:flex items-center gap-6 text-xs font-semibold tracking-wider text-white/60">
-                <a href="#" class="hover:text-white transition-colors text-white">LIVE MATCHES</a>
-                <a href="#" class="hover:text-white transition-colors">FIXTURES</a>
-                <a href="#" class="hover:text-white transition-colors">CHANNELS</a>
-            </nav>
+            <!-- Z Button for Mobile -->
+            <button id="whistle-btn-mobile" class="sm:hidden w-8 h-8 rounded-full bg-gradient-to-br from-[#ff7a00] to-[#ff3c00] border border-white/10 flex items-center justify-center text-xs font-black text-white shadow-md active:scale-90 border-none" title="Blow Referee Whistle!">
+                Z
+            </button>
         </div>
 
-        <div class="flex items-center gap-3 sm:gap-4 text-xs">
+        <!-- Row 2: Badges & Desktop Actions -->
+        <div class="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 text-xs w-full sm:w-auto mt-1 sm:mt-0 border-t border-white/5 sm:border-0 pt-1.5 sm:pt-0">
             <!-- Unified Badge Group -->
             <div class="unified-badge-wrap flex-shrink-0">
                 <!-- Developer Icon Link -->
-                <a href="https://www.facebook.com/shahidulislam.bayzid.37" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 bg-blue-500/10 hover:bg-blue-500/20 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-[9px] font-bold text-white text-decoration-none transition-colors">
-                    <i class="fa-brands fa-facebook text-blue-400 text-[9px] sm:text-xs"></i>
-                    <span class="hidden sm:inline">DEVELOPER</span>
-                    <span class="inline sm:hidden">DEV</span>
+                <a href="https://www.facebook.com/shahidulislam.bayzid.37" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 bg-blue-500/10 hover:bg-blue-500/20 px-2.5 py-0.5 sm:py-1 rounded-full text-[9px] font-bold text-white text-decoration-none transition-colors">
+                    <i class="fa-brands fa-facebook text-blue-400 text-[10px] sm:text-xs"></i>
+                    <span>DEVELOPER</span>
                 </a>
                 <!-- Experimental Icon Label -->
-                <span class="bg-gradient-to-r from-[#ff5500] to-[#ffaa00] text-white px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[7.5px] sm:text-[9px] font-bold font-mono tracking-widest">
-                    <span class="hidden sm:inline">EXPERIMENTAL</span>
-                    <span class="inline sm:hidden">EXP</span>
+                <span class="bg-gradient-to-r from-[#ff5500] to-[#ffaa00] text-white px-2.5 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-[9px] font-bold font-mono tracking-widest">
+                    EXPERIMENTAL
                 </span>
             </div>
             <!-- Global Stats -->
@@ -76,8 +82,8 @@
                 <i class="fa-solid fa-users text-[#ff7a00]"></i>
                 <span class="font-semibold text-white/70">24.5K</span> online
             </div>
-            <!-- User Profile Link (Blow Referee Whistle) -->
-            <button id="whistle-btn" class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff7a00] to-[#ff3c00] border border-white/10 flex items-center justify-center text-xs font-black text-white shadow-md hover:scale-110 hover:shadow-[#ff7a00]/50 transition-all duration-300 cursor-pointer active:scale-90 border-none" title="Blow Referee Whistle!">
+            <!-- User Profile Link (Blow Referee Whistle) for Desktop -->
+            <button id="whistle-btn" class="hidden sm:flex w-8 h-8 rounded-full bg-gradient-to-br from-[#ff7a00] to-[#ff3c00] border border-white/10 items-center justify-center text-xs font-black text-white shadow-md hover:scale-110 hover:shadow-[#ff7a00]/50 transition-all duration-300 cursor-pointer active:scale-90 border-none" title="Blow Referee Whistle!">
                 Z
             </button>
         </div>

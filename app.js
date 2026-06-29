@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const isFifa = WC_KEYWORDS.some(kw => channel.name.toLowerCase().includes(kw));
+            const isFifa = (index < 10) || WC_KEYWORDS.some(kw => channel.name.toLowerCase().includes(kw));
             if (activeFolder === 'fifa' && !isFifa) {
                 return;
             }
@@ -417,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div class="server-thumb flex items-center justify-center">${thumbContent}</div>
                 <div class="flex-grow flex flex-col overflow-hidden text-left">
-                    <span class="server-card-name font-bold text-xs truncate text-white" title="${channel.name}">${channel.name}</span>
+                    <span class="server-card-name font-bold text-xs truncate text-white" title="${channel.name}">[${index + 1}] ${channel.name}</span>
                     <span class="text-[10px] text-white/40 truncate">${channel.detail || 'Live Broadcast Feed'}</span>
                 </div>
                 <div class="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
@@ -1853,13 +1853,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initWhistleButton() {
         const whistleBtn = document.getElementById('whistle-btn');
-        if (!whistleBtn) return;
+        const whistleBtnMobile = document.getElementById('whistle-btn-mobile');
+        if (!whistleBtn && !whistleBtnMobile) return;
 
-        whistleBtn.addEventListener('click', () => {
-            // Visual scale animation feedback
-            whistleBtn.classList.add('scale-95');
-            setTimeout(() => whistleBtn.classList.remove('scale-95'), 100);
-
+        const triggerWhistle = (btn) => {
+            if (btn) {
+                btn.classList.add('scale-95');
+                setTimeout(() => btn.classList.remove('scale-95'), 100);
+            }
             // Synth Ref Whistle
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1912,7 +1913,14 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {
                 console.warn('Web Audio Whistle failed:', e);
             }
-        });
+        };
+
+        if (whistleBtn) {
+            whistleBtn.addEventListener('click', () => triggerWhistle(whistleBtn));
+        }
+        if (whistleBtnMobile) {
+            whistleBtnMobile.addEventListener('click', () => triggerWhistle(whistleBtnMobile));
+        }
     }
 
     // Toast utility helper
